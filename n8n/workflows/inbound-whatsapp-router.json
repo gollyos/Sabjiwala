@@ -1,0 +1,82 @@
+{
+  "name": "Sabjiwala - Workflow 6: Inbound WhatsApp Customer Router",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meta-whatsapp-inbound",
+        "options": {}
+      },
+      "name": "Webhook: Inbound Meta Message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/webhooks/whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}"
+      },
+      "name": "HTTP: Sabjiwala Inbound Webhook Router",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "INBOUND_ROUTED_SUCCESS"
+            }
+          ]
+        }
+      },
+      "name": "Set: Inbound Handled",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Inbound Meta Message": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Sabjiwala Inbound Webhook Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Sabjiwala Inbound Webhook Router": {
+      "main": [
+        [
+          {
+            "node": "Set: Inbound Handled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

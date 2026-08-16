@@ -1,0 +1,140 @@
+{
+  "name": "Sabjiwala - Workflow 1: Customer Order Confirmation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-order-confirmed",
+        "options": {}
+      },
+      "name": "Webhook: Order Confirmed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_id: $json.body.job_id || $json.body.record?.id }) }}"
+      },
+      "name": "HTTP: Process Notification Queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "IF: Notification Processed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "CONFIRMED_NOTIFICATION_SENT"
+            }
+          ]
+        }
+      },
+      "name": "Set: Success Status",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "CONFIRMED_NOTIFICATION_FAILED"
+            },
+            {
+              "name": "error",
+              "value": "={{ $json.error || 'Unknown dispatch failure' }}"
+            }
+          ]
+        }
+      },
+      "name": "Set: Failure Alert",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "Webhook: Order Confirmed": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Process Notification Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Process Notification Queue": {
+      "main": [
+        [
+          {
+            "node": "IF: Notification Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Notification Processed": {
+      "main": [
+        [
+          {
+            "node": "Set: Success Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

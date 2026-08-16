@@ -1,0 +1,144 @@
+{
+  "name": "Sabjiwala - Workflow 2: 8 PM Owner Procurement Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "5 20 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Cron: 8:00:05 PM IST Daily Cutoff",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-batch-locked",
+        "options": {}
+      },
+      "name": "Webhook: Batch Locked Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/procurement/lock-batch",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-procurement-secret",
+              "value": "={{ $env.SABJIWALA_PROCUREMENT_SECRET || 'sabjiwala_procurement_lock_token_halol_2026' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "name": "HTTP: Lock 8 PM Procurement Batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "name": "HTTP: Dispatch Owner 8 PM WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [600, 380]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "PROCUREMENT_REPORT_DISPATCHED"
+            }
+          ]
+        }
+      },
+      "name": "Set: Procurement Report Complete",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 380]
+    }
+  ],
+  "connections": {
+    "Cron: 8:00:05 PM IST Daily Cutoff": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Lock 8 PM Procurement Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Batch Locked Event": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Dispatch Owner 8 PM WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Lock 8 PM Procurement Batch": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Dispatch Owner 8 PM WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Dispatch Owner 8 PM WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Set: Procurement Report Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

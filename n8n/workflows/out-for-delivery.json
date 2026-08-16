@@ -1,0 +1,86 @@
+{
+  "name": "Sabjiwala - Workflow 3: Customer Out for Delivery",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-out-for-delivery",
+        "options": {}
+      },
+      "name": "Webhook: Out for Delivery Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_id: $json.body.job_id }) }}"
+      },
+      "name": "HTTP: Process Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "OUT_FOR_DELIVERY_SENT"
+            }
+          ]
+        }
+      },
+      "name": "Set: Success Status",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Out for Delivery Event": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Process Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Process Notification": {
+      "main": [
+        [
+          {
+            "node": "Set: Success Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

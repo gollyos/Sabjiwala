@@ -1,0 +1,86 @@
+{
+  "name": "Sabjiwala - Workflow 5: Owner Operational Exception Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-operational-alert",
+        "options": {}
+      },
+      "name": "Webhook: Operational Exception Alert",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_id: $json.body.job_id }) }}"
+      },
+      "name": "HTTP: Send Owner Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "OWNER_ALERT_DISPATCHED"
+            }
+          ]
+        }
+      },
+      "name": "Set: Alert Dispatched",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Operational Exception Alert": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Send Owner Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Send Owner Alert": {
+      "main": [
+        [
+          {
+            "node": "Set: Alert Dispatched",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
