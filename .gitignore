@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# AI Agent / Workspace files
+.agents/
+skills-lock.json
+.gemini/
+
+# Build & Cache
+dist/
+build/
+.next/
+out/
+.cache/
+
+# OS and Logs
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
