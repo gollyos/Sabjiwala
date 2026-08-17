@@ -11,6 +11,8 @@ node_modules/
 .agents/
 skills-lock.json
 .gemini/
+.claude/
+agent/
 
 # Build & Cache
 dist/
