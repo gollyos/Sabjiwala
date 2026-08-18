@@ -13,10 +13,11 @@ import {
   Clock, 
   CheckCircle2, 
   AlertCircle, 
-  Loader2, 
   RotateCcw,
-  Sparkles,
-  ArrowRight
+  Plus,
+  Minus,
+  Search,
+  Check
 } from 'lucide-react';
 
 interface PriceRow {
@@ -39,13 +40,13 @@ export default function DailyPricingPage() {
   const [reason, setReason] = useState('Daily Morning APMC Price Revision');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'daily_pricing' | 'history'>('daily_pricing');
 
   const loadData = async () => {
     try {
       setLoading(true);
-      // Fetch Products with variants
       const { data: prodData, error: prodErr } = await supabase
         .from('products')
         .select('*, product_variants(*)')
@@ -56,7 +57,6 @@ export default function DailyPricingPage() {
       const prods = (prodData || []) as Product[];
       setProducts(prods);
 
-      // Build initial price rows
       const rows: PriceRow[] = [];
       prods.forEach((p) => {
         (p.variants || []).forEach((v) => {
@@ -75,7 +75,6 @@ export default function DailyPricingPage() {
       });
       setPriceRows(rows);
 
-      // Fetch Recent Selling Price History
       const { data: histData } = await supabase
         .from('selling_price_history')
         .select('*')
@@ -156,7 +155,7 @@ export default function DailyPricingPage() {
         selling_price: r.newPrice,
       }));
 
-      const { data, error } = await supabase.rpc('bulk_update_variant_prices', {
+      const { error } = await supabase.rpc('bulk_update_variant_prices', {
         p_updates: payload,
         p_change_reason: reason.trim() || 'Daily Morning Price Revision',
       });
@@ -165,10 +164,9 @@ export default function DailyPricingPage() {
 
       setStatusMsg({
         type: 'success',
-        text: `Successfully updated ${modifiedRows.length} variant prices and logged atomic price history!`,
+        text: `Successfully updated ${modifiedRows.length} variant prices!`,
       });
 
-      // Reload fresh state
       await loadData();
     } catch (err: any) {
       console.error('Error saving prices:', err);
@@ -179,66 +177,68 @@ export default function DailyPricingPage() {
   };
 
   const modifiedCount = priceRows.filter((r) => r.isModified).length;
+  const filteredRows = priceRows.filter((r) => 
+    !search.trim() ||
+    r.productNameEn.toLowerCase().includes(search.toLowerCase()) ||
+    r.productNameGu.includes(search)
+  );
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
       <AdminNav />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Header */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
+            <div className="flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
               <Tag className="w-4 h-4" />
-              <span>Daily Halol APMC Price Controller</span>
+              <span>Daily Morning APMC Price Revision</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Daily Selling Prices (શાકભાજીના રોજના ભાવ)
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Review and adjust daily consumer rates for Halol. Changes automatically write to immutable price history.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Review and adjust daily consumer rates for Halol.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('daily_pricing')}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'daily_pricing'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
               }`}
             >
               Price Editor ({priceRows.length})
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'history'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
               }`}
             >
-              <History className="w-4 h-4" />
-              <span>Audit History ({priceHistory.length})</span>
+              <History className="w-3.5 h-3.5" />
+              <span>History</span>
             </button>
           </div>
         </div>
 
-        {/* Status Notification */}
         {statusMsg && (
-          <div
-            className={`mb-6 p-4 rounded-2xl text-xs font-semibold flex items-center gap-3 animate-fadeIn ${
-              statusMsg.type === 'success'
-                ? 'bg-emerald-50 text-emerald-900 border border-emerald-300'
-                : 'bg-red-50 text-red-900 border border-red-300'
-            }`}
-          >
+          <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center gap-3 border ${
+            statusMsg.type === 'success'
+              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800'
+              : 'bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-200 dark:border-rose-800'
+          }`}>
             {statusMsg.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
             )}
             <span>{statusMsg.text}</span>
           </div>
@@ -246,239 +246,152 @@ export default function DailyPricingPage() {
 
         {/* TAB 1: DAILY PRICING TABLE */}
         {activeTab === 'daily_pricing' && (
-          <form onSubmit={handleSaveBulkPrices} className="space-y-6">
+          <form onSubmit={handleSaveBulkPrices} className="space-y-4">
             
-            {/* Top Control Bar */}
-            <div className="bg-emerald-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex-1 max-w-md">
-                <label className="block text-xs font-bold text-emerald-200 mb-1">
-                  Revision Reason / APMC Lot Note
-                </label>
+            {/* Search & Bulk Actions Bar */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
                 <input
                   type="text"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="e.g. Halol APMC Morning Rate Adjustment"
-                  className="w-full px-3.5 py-2 bg-emerald-950/60 border border-emerald-700/80 rounded-xl text-xs text-white placeholder:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  placeholder="Search vegetable..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100"
                 />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               </div>
 
-              <div className="flex items-center space-x-3">
-                {modifiedCount > 0 && (
+              {modifiedCount > 0 && (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleResetAll}
-                    className="px-4 py-2.5 rounded-xl border border-white/20 text-white/80 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset Changes</span>
+                    Reset
                   </button>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={saving || modifiedCount === 0}
-                  className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 disabled:text-slate-500 text-slate-950 font-extrabold text-sm rounded-2xl shadow-lg flex items-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Saving to Supabase...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span>Publish {modifiedCount} Price Updates</span>
-                    </>
-                  )}
-                </button>
-              </div>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Publish {modifiedCount} Changed Prices</span>
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Pricing Grid */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                    <tr>
-                      <th className="py-4 px-6">Vegetable (શાકભાજી)</th>
-                      <th className="py-4 px-6">Pack Variant</th>
-                      <th className="py-4 px-6 text-right">Yesterday / Current</th>
-                      <th className="py-4 px-6 text-center">Quick Adjust</th>
-                      <th className="py-4 px-6 text-right">Today&apos;s New Rate (₹)</th>
-                      <th className="py-4 px-6 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
-                          <span>Loading active vegetable variants...</span>
-                        </td>
-                      </tr>
-                    ) : (
-                      priceRows.map((row) => {
-                        const diff = row.newPrice - row.currentPrice;
-                        return (
-                          <tr
-                            key={row.variantId}
-                            className={`hover:bg-slate-50/80 transition-colors ${
-                              row.isModified ? 'bg-amber-50/40' : ''
-                            }`}
+            {/* Pricing Rows Table */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredRows.map((row) => {
+                  const diff = row.newPrice - row.currentPrice;
+
+                  return (
+                    <div
+                      key={row.variantId}
+                      className={`p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors ${
+                        row.isModified ? 'bg-amber-50/40 dark:bg-amber-950/20' : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/40'
+                      }`}
+                    >
+                      <div>
+                        <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+                          {row.productNameGu} <span className="font-normal text-slate-500">({row.productNameEn})</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                          Pack: {row.variantNameGu || row.variantNameEn}
+                        </div>
+                      </div>
+
+                      {/* Current vs New Price Controls */}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Current</span>
+                          <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                            ₹{row.currentPrice.toFixed(0)}
+                          </span>
+                        </div>
+
+                        {/* +/- Buttons and Input */}
+                        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200 dark:border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustPrice(row.variantId, -1)}
+                            className="w-7 h-7 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100"
                           >
-                            <td className="py-4 px-6">
-                              <div className="font-extrabold text-sm text-slate-900 leading-tight">
-                                {row.productNameGu}
-                              </div>
-                              <div className="text-xs text-slate-500 font-medium">
-                                {row.productNameEn}
-                              </div>
-                            </td>
+                            <Minus className="w-3 h-3" />
+                          </button>
 
-                            <td className="py-4 px-6">
-                              <span className="font-bold text-slate-800">
-                                {row.variantNameGu || row.variantNameEn}
-                              </span>
-                            </td>
+                          <div className="flex items-center px-2">
+                            <span className="text-slate-400 mr-0.5">₹</span>
+                            <input
+                              type="number"
+                              value={row.newPrice}
+                              onChange={(e) => handlePriceChange(row.variantId, e.target.value)}
+                              className="w-14 text-center font-mono font-black text-slate-900 dark:text-white bg-transparent focus:outline-hidden"
+                            />
+                          </div>
 
-                            <td className="py-4 px-6 text-right font-mono font-bold text-slate-600">
-                              ₹{row.currentPrice.toFixed(2)}
-                            </td>
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustPrice(row.variantId, 1)}
+                            className="w-7 h-7 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
 
-                            <td className="py-4 px-6">
-                              <div className="flex items-center justify-center space-x-1">
-                                <button
-                                  type="button"
-                                  onClick={() => handleAdjustPrice(row.variantId, -2)}
-                                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[10px]"
-                                >
-                                  -₹2
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleAdjustPrice(row.variantId, -1)}
-                                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[10px]"
-                                >
-                                  -₹1
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleAdjustPrice(row.variantId, 1)}
-                                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[10px]"
-                                >
-                                  +₹1
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleAdjustPrice(row.variantId, 2)}
-                                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[10px]"
-                                >
-                                  +₹2
-                                </button>
-                              </div>
-                            </td>
+                        {/* Delta indicator */}
+                        <div className="w-14 text-right font-mono font-bold text-[11px]">
+                          {diff > 0 ? (
+                            <span className="text-emerald-600">+₹{diff}</span>
+                          ) : diff < 0 ? (
+                            <span className="text-rose-600">-₹{Math.abs(diff)}</span>
+                          ) : (
+                            <span className="text-slate-400">&mdash;</span>
+                          )}
+                        </div>
+                      </div>
 
-                            <td className="py-4 px-6 text-right">
-                              <div className="inline-flex items-center space-x-1.5">
-                                <span className="font-bold text-slate-400">₹</span>
-                                <input
-                                  type="number"
-                                  step="0.5"
-                                  min="0"
-                                  value={row.newPrice}
-                                  onChange={(e) => handlePriceChange(row.variantId, e.target.value)}
-                                  className={`w-24 px-3 py-2 text-right font-mono font-extrabold text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                                    row.isModified
-                                      ? 'border-amber-400 bg-amber-50 text-amber-950 font-black'
-                                      : 'border-slate-200 bg-white text-slate-900'
-                                  }`}
-                                />
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-6 text-center">
-                              {row.isModified ? (
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
-                                    diff > 0
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : 'bg-blue-100 text-blue-800'
-                                  }`}
-                                >
-                                  {diff > 0 ? (
-                                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                                  ) : (
-                                    <TrendingDown className="w-3 h-3 text-blue-600" />
-                                  )}
-                                  <span>
-                                    {diff > 0 ? `+₹${diff.toFixed(2)}` : `-₹${Math.abs(diff).toFixed(2)}`}
-                                  </span>
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-slate-400 font-semibold">
-                                  Current
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
           </form>
         )}
 
-        {/* TAB 2: PRICE HISTORY AUDIT TRAIL */}
+        {/* TAB 2: AUDIT HISTORY */}
         {activeTab === 'history' && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
-            <div>
-              <h3 className="font-extrabold text-lg text-slate-900">
-                Selling Price Mutation History (ઓડિટ લોગ)
-              </h3>
-              <p className="text-xs text-slate-500">
-                Append-only log of every price modification with exact timestamp and reason.
-              </p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+              Immutable Price Revision Ledger
             </div>
 
-            <div className="divide-y divide-slate-100">
-              {priceHistory.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-xs">
-                  No price history recorded yet.
-                </div>
-              ) : (
-                priceHistory.map((hist) => (
-                  <div key={hist.id} className="py-3.5 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="font-bold text-slate-900">
-                        Variant #{hist.product_variant_id.slice(0, 8)}
-                      </div>
-                      <div className="text-slate-500 text-[11px] mt-0.5">
-                        Reason: {hist.change_reason || 'Manual revision'}
-                      </div>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {priceHistory.map((h) => (
+                <div key={h.id} className="p-4 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white">
+                      ₹{h.selling_price} {h.old_price && <span className="text-slate-400 line-through ml-1">₹{h.old_price}</span>}
                     </div>
-
-                    <div className="text-right">
-                      <div className="font-mono font-extrabold text-emerald-700 text-sm">
-                        ₹{Number(hist.selling_price).toFixed(2)}
-                      </div>
-                      <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 justify-end">
-                        <Clock className="w-3 h-3" />
-                        <span>{new Date(hist.effective_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
-                      </div>
+                    <div className="text-[11px] text-slate-400">
+                      Reason: {h.change_reason || 'APMC Revision'}
                     </div>
                   </div>
-                ))
-              )}
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {new Date(h.effective_at).toLocaleString()}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-      </div>
+      </main>
     </div>
   );
 }

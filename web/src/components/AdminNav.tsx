@@ -4,251 +4,206 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Tag, 
-  Package, 
-  Truck, 
-  Layers, 
-  BarChart3, 
+  Home, 
+  ShoppingBag, 
   Boxes, 
+  Layers, 
+  Truck, 
+  BarChart3, 
+  ChevronDown, 
+  Settings, 
+  Tag, 
+  Users, 
+  Building2, 
+  Bell, 
   ArrowLeft,
-  ChevronDown,
-  Users,
-  FileText,
-  DollarSign,
-  TrendingUp,
-  Building2,
-  Bell,
-  Settings
+  Menu,
+  X,
+  Store
 } from 'lucide-react';
 
 export function AdminNav() {
   const pathname = usePathname();
-  const [reportsOpen, setReportsOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isReportActive = pathname.startsWith('/admin/reports');
+  const primaryNav = [
+    { name: 'Home', nameGu: 'હોમ', href: '/admin/dashboard', icon: Home },
+    { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag },
+    { name: 'Procurement', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes },
+    { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers },
+    { name: 'Delivery', nameGu: 'ડિલિવરી', href: '/admin/delivery', icon: Truck },
+    { name: 'Reports', nameGu: 'રિપોર્ટ્સ', href: '/admin/reports', icon: BarChart3 },
+  ];
+
+  const secondaryNav = [
+    { name: 'Pricing & APMC Rates', href: '/admin/pricing', icon: Tag },
+    { name: 'Products Catalog', href: '/admin/products', icon: ShoppingBag },
+    { name: 'Staff Management', href: '/admin/staff', icon: Users },
+    { name: 'Notifications & Alerts', href: '/admin/notifications', icon: Bell },
+    { name: 'System Settings', href: '/admin/settings', icon: Settings },
+  ];
+
+  const isSecondaryActive = secondaryNav.some((item) => pathname.startsWith(item.href));
 
   return (
-    <div className="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        
-        {/* Left: Brand & Storefront Link */}
-        <div className="flex items-center space-x-3">
-          <Link
-            href="/"
-            className="flex items-center space-x-1 text-xs text-slate-400 hover:text-white font-medium transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Storefront</span>
-          </Link>
-          <span className="text-slate-800">|</span>
-          <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-extrabold text-sm text-white tracking-wide">
-              Sabjiwala HQ <span className="text-slate-400 font-normal text-xs">• Halol</span>
-            </span>
-          </Link>
-        </div>
-
-        {/* Center / Right: Nav Navigation Links */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+    <header className="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-40 shadow-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
           
-          <Link
-            href="/admin/dashboard"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/dashboard'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </Link>
-
-          {/* Sub-Reports Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setReportsOpen(!reportsOpen)}
-              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                isReportActive
-                  ? 'bg-emerald-700 text-white shadow-md'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-              }`}
+          {/* Left: Brand / Storefront Link */}
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/"
+              className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-emerald-400 font-medium transition-colors"
+              title="Return to Customer Storefront"
             >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Detailed Reports</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
-            </button>
-
-            {reportsOpen && (
-              <div 
-                className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1"
-                onMouseLeave={() => setReportsOpen(false)}
-              >
-                <Link
-                  href="/admin/reports/orders"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/orders' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Orders Report (ઓર્ડર્સ)</span>
-                </Link>
-                <Link
-                  href="/admin/reports/sales"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/sales' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Sales & Financials</span>
-                </Link>
-                <Link
-                  href="/admin/reports/products"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/products' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Package className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Product Sales & Margins</span>
-                </Link>
-                <Link
-                  href="/admin/reports/customers"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/customers' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Users className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Customer & FIRST500</span>
-                </Link>
-                <Link
-                  href="/admin/reports/procurement"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/procurement' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Boxes className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Procurement & Wastage</span>
-                </Link>
-                <Link
-                  href="/admin/reports/suppliers"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/suppliers' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Building2 className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Suppliers & Mandi</span>
-                </Link>
-                <Link
-                  href="/admin/reports/delivery"
-                  onClick={() => setReportsOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
-                    pathname === '/admin/reports/delivery' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Truck className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Delivery & Driver COD</span>
-                </Link>
-              </div>
-            )}
+              <Store className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Storefront</span>
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/admin/dashboard" className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="font-extrabold text-sm text-white tracking-tight">
+                Sabjiwala HQ <span className="text-emerald-400 text-xs font-medium">• Halol</span>
+              </span>
+            </Link>
           </div>
 
-          <Link
-            href="/admin/procurement"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/procurement'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Boxes className="w-3.5 h-3.5" />
-            <span>8 PM Batches</span>
-          </Link>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-1 text-xs">
+            {primaryNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = 
+                item.href === '/admin/dashboard'
+                  ? pathname === '/admin/dashboard'
+                  : pathname.startsWith(item.href);
 
-          <Link
-            href="/admin/packing"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/packing'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Packing</span>
-          </Link>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                    isActive
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
 
-          <Link
-            href="/admin/delivery"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/delivery'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Truck className="w-3.5 h-3.5" />
-            <span>Delivery</span>
-          </Link>
+            {/* Manage / Settings Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setManageOpen(!manageOpen)}
+                className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isSecondaryActive
+                    ? 'bg-emerald-700 text-white'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                }`}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>More</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
 
-          <Link
-            href="/admin/pricing"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/pricing'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Tag className="w-3.5 h-3.5" />
-            <span>Pricing</span>
-          </Link>
+              {manageOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in zoom-in-95 duration-100"
+                  onMouseLeave={() => setManageOpen(false)}
+                >
+                  {secondaryNav.map((sec) => {
+                    const SecIcon = sec.icon;
+                    const isSecActive = pathname.startsWith(sec.href);
+                    return (
+                      <Link
+                        key={sec.href}
+                        href={sec.href}
+                        onClick={() => setManageOpen(false)}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                          isSecActive
+                            ? 'bg-emerald-600 text-white'
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        }`}
+                      >
+                        <SecIcon className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>{sec.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </nav>
 
-          <Link
-            href="/admin/notifications"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/notifications'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Bell className="w-3.5 h-3.5 text-amber-400" />
-            <span>Notifications</span>
-          </Link>
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+              aria-label="Toggle navigation"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
 
-          <Link
-            href="/admin/staff"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/staff'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Staff</span>
-          </Link>
-
-          <Link
-            href="/admin/settings"
-            className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-              pathname === '/admin/settings'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>Settings</span>
-          </Link>
-
-          <span className="px-2 py-0.5 rounded-md bg-slate-900 text-slate-500 border border-slate-800 text-[10px] font-mono">
-            v1.0.0
-          </span>
         </div>
-
       </div>
-    </div>
+
+      {/* Mobile Drawer / Dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
+          <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+            {primaryNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = 
+                item.href === '/admin/dashboard'
+                  ? pathname === '/admin/dashboard'
+                  : pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`p-3 rounded-2xl flex items-center gap-2 ${
+                    isActive ? 'bg-emerald-600 text-white' : 'bg-slate-950 text-slate-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Management & Tools
+            </div>
+            <div className="grid grid-cols-1 gap-1 text-xs">
+              {secondaryNav.map((sec) => {
+                const SecIcon = sec.icon;
+                return (
+                  <Link
+                    key={sec.href}
+                    href={sec.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2.5 rounded-xl flex items-center gap-2 text-slate-300 hover:bg-slate-800"
+                  >
+                    <SecIcon className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{sec.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
