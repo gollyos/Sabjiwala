@@ -34,14 +34,14 @@ const FAQS_DATA = [
   {
     qGu: 'ઓર્ડર આપવાનો છેલ્લો સમય (Cutoff Time) શું છે?',
     qEn: 'What is the daily order cutoff time for Halol delivery?',
-    aGu: 'તમે દરરોજ રાત્રે ૮:૦૦ વાગ્યા (8:00 PM) સુધી ઓર્ડર આપી શકો છો. રાત્રે ૮:૦૦ વાગ્યા પછી અમારી ટીમ APMC માર્કેટ અને સ્થાનિક ખેડૂતો પાસેથી સીધા જ તાજા શાકભાજી અને ફળો મેળવી સવારે તમારા ઘરે પહોંચાડે છે.',
-    aEn: 'Orders are accepted until 8:00 PM every night. Sourced fresh at midnight from APMC and delivered right to your doorstep next morning.',
+    aGu: 'આવતીકાલની તાજી ડિલિવરી માટે ઓર્ડર સાંજે ૭:૫૦ (7:50 PM IST) પહેલાં કરવાનો રહેશે. ૭:૫૦ પછીના ઓર્ડર પરમદિવસે સવારે ડિલિવર થશે.',
+    aEn: 'Orders placed before 7:50 PM IST are delivered the next morning. Orders placed after 7:50 PM are scheduled for day-after-tomorrow delivery.',
   },
   {
-    qGu: 'ડિલિવરી ક્યારે અને કેટલા વાગ્યે મળે છે?',
-    qEn: 'When will I receive my daily vegetable delivery in Halol?',
-    aGu: 'બધા જ ઓર્ડર સવારે ૧૦:૦૦ થી બપોરે ૧:૦૦ વાગ્યા (10:00 AM - 1:00 PM Slot) વચ્ચે તમારા ઘરે સુરક્ષિત કોટન/જૂટ બેગમાં ડિલિવર કરવામાં આવે છે.',
-    aEn: 'All deliveries arrive fresh at your doorstep between 10:00 AM - 1:00 PM every day in eco-friendly reusable cotton bags.',
+    qGu: 'ડિલિવરી ક્યારે મળે છે અને ટ્રેકિંગ કેવી રીતે થશે?',
+    qEn: 'When will I receive my daily delivery and how do I track it?',
+    aGu: 'બધા જ ઓર્ડર સવારના સ્લોટમાં તમારા ઘરે પહોંચાડવામાં આવે છે. ઓર્ડર નીકળતાં જ તમને લાઈવ GPS ટ્રેકિંગ લિંક સીધી WhatsApp પર મોકલવામાં આવે છે.',
+    aEn: 'All deliveries arrive fresh in the morning slot. Real-time GPS tracking and delivery updates are sent directly to your WhatsApp.',
   },
   {
     qGu: 'શું કેશ ઓન ડિલિવરી (COD) અને UPI ઉપલબ્ધ છે?',
