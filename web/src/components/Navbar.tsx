@@ -13,11 +13,13 @@ import {
 import { PromoCountdownBanner } from './PromoCountdownBanner';
 import { BrandLogo } from './ui/BrandLogo';
 import { usePathname } from 'next/navigation';
+import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, customer, isOnboarded, openAuthModal, openProfileModal, verifiedSequence } = useAuth();
   const { cart, openCartDrawer } = useCart();
+  const deliveryInfo = getDeliveryScheduleInfo();
 
   // Hide customer navbar on Admin, Driver, and Tracking routes
   if (
@@ -41,7 +43,7 @@ export function Navbar() {
       <div className="hidden sm:flex bg-emerald-950 text-emerald-100 text-xs px-4 py-1.5 font-medium items-center justify-between overflow-x-auto border-b border-emerald-800/40">
         <div className="flex items-center space-x-2 shrink-0">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>⚡ <strong>Halol Morning Delivery</strong>: Orders confirmed before <strong>8:00 PM</strong> delivered next day 10 AM – 1 PM.</span>
+          <span>{deliveryInfo.bannerNotice}</span>
         </div>
         <div className="flex items-center space-x-3 text-emerald-300 shrink-0">
           <span className="flex items-center gap-1 font-semibold">

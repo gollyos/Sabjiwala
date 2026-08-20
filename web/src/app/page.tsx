@@ -27,6 +27,7 @@ import {
   Truck,
   RotateCcw
 } from 'lucide-react';
+import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 
 // Frequently Asked Questions for Google SEO & Customer Guidance
 const FAQS_DATA = [
@@ -282,6 +283,8 @@ export default function HomePage() {
     return categories;
   }, [categories, activeModule]);
 
+  const deliverySchedule = getDeliveryScheduleInfo();
+
   return (
     <div className="pb-28 sm:pb-16 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100">
       
@@ -296,8 +299,8 @@ export default function HomePage() {
               Taaza Phal, Taazi Sabzi — Seedha Ghar Tak.
             </p>
           </div>
-          <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-xl bg-white/10 backdrop-blur-md text-[10px] text-amber-300 font-bold border border-white/10">
-            <span>⚡ 10 AM–1 PM</span>
+          <div className="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/10 backdrop-blur-md text-[10px] text-amber-300 font-bold border border-white/10">
+            <span>{deliverySchedule.badgeTextMobile}</span>
           </div>
         </div>
       </section>
@@ -308,7 +311,7 @@ export default function HomePage() {
           
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-emerald-200">
             <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-            <span>Halol Daily Morning 10 AM – 1 PM Delivery</span>
+            <span>{deliverySchedule.badgeTextDesktop}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">

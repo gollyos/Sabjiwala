@@ -19,8 +19,10 @@ import {
   CheckCircle2,
   ShieldCheck
 } from 'lucide-react';
+import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 
 export function CartDrawer() {
+  const deliveryInfo = getDeliveryScheduleInfo();
   const { 
     cart, 
     cartDrawerOpen, 
@@ -299,8 +301,8 @@ export function CartDrawer() {
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
-                    <span>Morning Delivery:</span>
+                  <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-xs">
+                    <span>ડિલિવરી ({deliveryInfo.labelShortGu}):</span>
                     <span className="text-emerald-600 font-bold shrink-0">FREE</span>
                   </div>
 
@@ -344,8 +346,9 @@ export function CartDrawer() {
                 )}
               </button>
 
-              <div className="text-[10px] text-center text-slate-400">
-                🔒 Safe & Free Delivery • Zero Plastic Cotton Bag
+              <div className="text-[10px] text-center text-slate-500 dark:text-slate-400 font-medium space-y-0.5">
+                <p>⚡ ડિલિવરી: <strong>{deliveryInfo.labelShortGu} ({deliveryInfo.labelShortEn})</strong></p>
+                <p className="text-emerald-700 dark:text-emerald-400">📲 ઓર્ડર કન્ફર્મેશન અને લાઈવ ટ્રેકિંગ WhatsApp પર મોકલવામાં આવશે.</p>
               </div>
             </div>
           )}

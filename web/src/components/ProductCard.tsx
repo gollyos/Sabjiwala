@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Product, ProductVariant } from '@/types/sabjiwala';
 import { useCart } from '@/context/CartContext';
 import { Plus, Minus, AlertCircle } from 'lucide-react';
+import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { cart, addToCart, updateQuantity } = useCart();
+  const deliveryInfo = getDeliveryScheduleInfo();
   const variants = (product.variants || []).filter((v) => v.is_active !== false);
 
   const defaultVar = variants.find((v) => v.is_default) || variants[0];
@@ -176,6 +178,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <Plus className="w-4 h-4" />
             <span>Add (ઉમેરો)</span>
           </button>
+        )}
+
+        {/* Dynamic Delivery Day Tag under every active product */}
+        {isAvailable && (
+          <div className="mt-2 text-center text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 flex items-center justify-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>ડિલિવરી: {deliveryInfo.labelShortGu} ({deliveryInfo.labelShortEn})</span>
+          </div>
         )}
       </div>
 
