@@ -47,14 +47,17 @@ export const metadata: Metadata = {
   publisher: 'TaazaTokra Halol',
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
       { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
     ],
+    shortcut: '/favicon.ico',
     apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
       { url: '/apple-icon', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: ['/icon.svg'],
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -156,6 +159,11 @@ export default function RootLayout({
   return (
     <html lang="gu" className="h-full bg-slate-50 text-slate-900 antialiased">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
