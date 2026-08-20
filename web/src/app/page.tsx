@@ -137,6 +137,8 @@ export default function HomePage() {
           description_gu,
           display_order,
           is_active,
+          is_in_stock,
+          is_seasonal,
           product_variants (
             id,
             product_id,
@@ -160,7 +162,8 @@ export default function HomePage() {
       if (prodData) {
         const mappedProds: Product[] = (prodData as any[]).map((p: any) => ({
           ...p,
-          variants: (p.product_variants || []).filter((v: any) => v.is_active),
+          is_in_stock: p.is_in_stock !== false,
+          variants: (p.product_variants || []).filter((v: any) => v.is_active !== false),
         }));
         setProducts(mappedProds);
       }
@@ -174,11 +177,25 @@ export default function HomePage() {
   useEffect(() => {
     loadCatalog();
 
-    // Auto-refresh when tab gains focus to show latest admin prices immediately
+    // ⚡ Realtime subscription: Auto-update catalog when Admin toggles stock or updates pricing
+    const channel = supabase
+      .channel('public:catalog_live_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        loadCatalog(true);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, () => {
+        loadCatalog(true);
+      })
+      .subscribe();
+
+    // Auto-refresh when tab gains focus to show latest admin changes immediately
     const onFocus = () => loadCatalog(true);
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, [loadCatalog]);
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadCatalog, supabase]);
 
   // Handle open_cart query parameter from repeat order or navigation
   useEffect(() => {
@@ -197,11 +214,11 @@ export default function HomePage() {
     return slug.includes('fruit') || p.slug.includes('apple') || p.slug.includes('banana') || p.slug.includes('dadam') || p.slug.includes('mosambi') || p.slug.includes('orange') || p.slug.includes('papaya') || p.slug.includes('guava') || p.slug.includes('watermelon') || p.slug.includes('dragon');
   };
 
-  // Filter Products with Smart Search & Modules
+  // Filter Products with Smart Search & Modules + Stock-First Sorting
   const filteredProducts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    return products.filter((p) => {
+    const filtered = products.filter((p) => {
       // 1. Module filter (All vs Vegetables vs Fruits)
       const isFruit = isFruitProduct(p);
       if (activeModule === 'fruits' && !isFruit) return false;
@@ -232,6 +249,23 @@ export default function HomePage() {
       }
 
       return false;
+    });
+
+    // ⚡ Sort: In-Stock items FIRST, Out-of-Stock items LAST at the bottom
+    return filtered.sort((a, b) => {
+      const aInStock = a.is_in_stock !== false && (a.variants && a.variants.length > 0);
+      const bInStock = b.is_in_stock !== false && (b.variants && b.variants.length > 0);
+
+      // If stock status differs, available items come first
+      if (aInStock && !bInStock) return -1;
+      if (!aInStock && bInStock) return 1;
+
+      // Secondary sort: display_order ascending, then name_en ascending
+      const aOrder = a.display_order ?? 999;
+      const bOrder = b.display_order ?? 999;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+      return (a.name_en || '').localeCompare(b.name_en || '');
     });
   }, [products, categories, activeModule, selectedCategory, searchQuery]);
 
