@@ -26,12 +26,17 @@ import {
   ShieldCheck,
   Share2,
   Boxes,
-  Download
+  Download,
+  PlusCircle,
+  DollarSign,
+  Tag,
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { createClient } from '@/lib/supabase/client';
 
 interface BatchSummary {
   id?: string;
@@ -59,14 +64,23 @@ interface BatchSummary {
 
 interface PurchaseLine {
   id: string;
-  supplier_id: string;
+  supplier_id?: string;
   supplier_name: string;
   purchased_qty: number;
   rate_per_unit: number;
   total_cost: number;
   mandi_lot_or_bill_no?: string;
-  purchased_at: string;
+  purchased_at?: string;
+  created_at?: string;
   notes?: string;
+  procurement_items?: {
+    product_id: string;
+    products?: {
+      name_en: string;
+      name_gu: string;
+      image_url?: string;
+    };
+  };
 }
 
 interface ProductRequirement {
@@ -97,46 +111,41 @@ interface ProductRequirement {
   purchase_lines: PurchaseLine[];
 }
 
-interface BatchOrder {
-  membership_id: string;
-  order_id: string;
-  order_number: string;
-  confirmed_at: string;
-  item_count: number;
-  final_payable_amount: number;
-  customer_name: string;
-  area_locality: string;
-  is_cancelled_post_lock: boolean;
-  order_status: string;
-  payment_status: string;
-}
-
 export default function ProcurementDashboard() {
+  const [supabase] = useState(() => createClient());
   const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [batchData, setBatchData] = useState<{
     summary: BatchSummary;
     products: ProductRequirement[];
-    orders: BatchOrder[];
+    orders: any[];
     packing_queue: any[];
-    exceptions: BatchOrder[];
+    exceptions: any[];
   } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'demand' | 'purchasing' | 'receiving' | 'orders'>('demand');
+  const [activeTab, setActiveTab] = useState<'demand' | 'purchasing' | 'purchases_log' | 'receiving'>('demand');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLocking, setIsLocking] = useState<boolean>(false);
   const [showLockModal, setShowLockModal] = useState<boolean>(false);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState<boolean>(false);
-  const [expandedProductIds, setExpandedProductIds] = useState<Record<string, boolean>>({});
 
-  // Purchase entry modal/inline state
-  const [activePurchaseItem, setActivePurchaseItem] = useState<ProductRequirement | null>(null);
+  // All catalog products for quick purchase entry
+  const [catalogProducts, setCatalogProducts] = useState<Array<{ id: string; name_en: string; name_gu: string; base_unit_code: string }>>([]);
+  const [showQuickPurchaseModal, setShowQuickPurchaseModal] = useState(false);
+  const [recentPurchases, setRecentPurchases] = useState<PurchaseLine[]>([]);
+  const [isSavingPurchase, setIsSavingPurchase] = useState(false);
+
+  // Quick Purchase Form State
   const [purchaseForm, setPurchaseForm] = useState({
-    supplier_name: 'Halol APMC Trader',
+    product_id: '',
+    product_name: '',
     purchased_qty: '',
+    unit_code: 'kg',
     rate_per_unit: '',
+    supplier_name: 'Halol APMC Mandi',
     bill_no: '',
+    purchase_date: new Date().toISOString().split('T')[0],
     notes: '',
   });
 
@@ -159,6 +168,42 @@ export default function ProcurementDashboard() {
     }
   }, [selectedBatchId]);
 
+  // Fetch catalog products
+  const loadCatalog = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from('products')
+        .select(`id, name_en, name_gu, product_units!products_base_unit_id_fkey(code)`)
+        .eq('is_active', true)
+        .order('name_en', { ascending: true });
+
+      if (data) {
+        const formatted = data.map((p: any) => ({
+          id: p.id,
+          name_en: p.name_en,
+          name_gu: p.name_gu,
+          base_unit_code: p.product_units?.code || 'kg',
+        }));
+        setCatalogProducts(formatted);
+      }
+    } catch (err) {
+      console.error('Error loading catalog products:', err);
+    }
+  }, [supabase]);
+
+  // Fetch recent purchases log
+  const loadRecentPurchases = useCallback(async () => {
+    try {
+      const res = await fetch('/api/procurement/purchase-entry?limit=50');
+      const json = await res.json();
+      if (json.success && json.data) {
+        setRecentPurchases(json.data);
+      }
+    } catch (err) {
+      console.error('Error loading purchases log:', err);
+    }
+  }, []);
+
   // Fetch specific batch details
   const loadBatchDetails = useCallback(async (batchId: string) => {
     try {
@@ -174,7 +219,9 @@ export default function ProcurementDashboard() {
 
   useEffect(() => {
     loadBatches();
-  }, [loadBatches]);
+    loadCatalog();
+    loadRecentPurchases();
+  }, [loadBatches, loadCatalog, loadRecentPurchases]);
 
   useEffect(() => {
     if (selectedBatchId) {
@@ -182,7 +229,7 @@ export default function ProcurementDashboard() {
     }
   }, [selectedBatchId, loadBatchDetails]);
 
-  // Lock Nightly Batch
+  // Lock Nightly Batch (7:50 PM Cutoff)
   const handleLockBatch = async () => {
     setIsLocking(true);
     setActionMessage(null);
@@ -205,7 +252,7 @@ export default function ProcurementDashboard() {
           setSelectedBatchId(json.data.lock_status.batch_id);
         }
       } else if (json.error_code === 'NO_ELIGIBLE_ORDERS') {
-        setActionMessage({ text: 'No eligible confirmed orders found for tomorrow before 8:00 PM cutoff.', type: 'info' });
+        setActionMessage({ text: 'No eligible confirmed orders found for tomorrow before 7:50 PM cutoff.', type: 'info' });
       } else {
         setActionMessage({ text: json.error || 'Failed to lock procurement batch.', type: 'error' });
       }
@@ -217,45 +264,65 @@ export default function ProcurementDashboard() {
     }
   };
 
-  const handleSavePurchaseLine = async (e: React.FormEvent) => {
+  // Submit Direct Purchase Entry
+  const handleSavePurchaseEntry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedBatchId || !activePurchaseItem) return;
+    if (!purchaseForm.product_id || !purchaseForm.purchased_qty || !purchaseForm.rate_per_unit) {
+      setActionMessage({ text: 'Please select product, quantity, and purchase rate.', type: 'error' });
+      return;
+    }
+
+    setIsSavingPurchase(true);
+    setActionMessage(null);
+
+    const qty = parseFloat(purchaseForm.purchased_qty);
+    const rate = parseFloat(purchaseForm.rate_per_unit);
+    const totalCost = qty * rate;
 
     try {
-      const payload = {
-        batch_id: selectedBatchId,
-        procurement_item_id: activePurchaseItem.procurement_item_id,
-        supplier_name: purchaseForm.supplier_name,
-        purchased_qty: parseFloat(purchaseForm.purchased_qty),
-        rate_per_unit: parseFloat(purchaseForm.rate_per_unit),
-        mandi_lot_or_bill_no: purchaseForm.bill_no,
-        notes: purchaseForm.notes,
-      };
-
-      const res = await fetch('/api/procurement/purchases', {
+      const res = await fetch('/api/procurement/purchase-entry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          product_id: purchaseForm.product_id,
+          product_name: purchaseForm.product_name,
+          purchased_qty: qty,
+          unit_code: purchaseForm.unit_code,
+          rate_per_unit: rate,
+          total_cost: totalCost,
+          supplier_name: purchaseForm.supplier_name,
+          mandi_lot_or_bill_no: purchaseForm.bill_no,
+          purchase_date: purchaseForm.purchase_date,
+          notes: purchaseForm.notes,
+        }),
       });
 
       const json = await res.json();
       if (json.success) {
-        setActionMessage({ text: `Recorded purchase for ${activePurchaseItem.product_name_gu || activePurchaseItem.product_name_en}`, type: 'success' });
-        setActivePurchaseItem(null);
+        setActionMessage({ text: `Recorded purchase: ${qty} ${purchaseForm.unit_code} of ${purchaseForm.product_name} at ₹${rate}/kg (Total: ₹${totalCost})`, type: 'success' });
+        setShowQuickPurchaseModal(false);
         setPurchaseForm({
-          supplier_name: 'Halol APMC Trader',
+          product_id: '',
+          product_name: '',
           purchased_qty: '',
+          unit_code: 'kg',
           rate_per_unit: '',
+          supplier_name: 'Halol APMC Mandi',
           bill_no: '',
+          purchase_date: new Date().toISOString().split('T')[0],
           notes: '',
         });
-        loadBatchDetails(selectedBatchId);
+        loadRecentPurchases();
+        if (selectedBatchId) {
+          loadBatchDetails(selectedBatchId);
+        }
       } else {
         setActionMessage({ text: json.error || 'Failed to save purchase entry.', type: 'error' });
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error saving purchase';
-      setActionMessage({ text: msg, type: 'error' });
+    } catch {
+      setActionMessage({ text: 'Error recording purchase.', type: 'error' });
+    } finally {
+      setIsSavingPurchase(false);
     }
   };
 
@@ -278,374 +345,478 @@ export default function ProcurementDashboard() {
     setTimeout(() => setCopiedWhatsApp(false), 2500);
   };
 
-  const toggleExpandProduct = (id: string) => {
-    setExpandedProductIds((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
   const summary = batchData?.summary;
   const products = batchData?.products || [];
 
+  // Calculate total spent today from recent purchases
+  const totalSpentToday = recentPurchases.reduce((sum, p) => sum + (p.total_cost || (p.purchased_qty * p.rate_per_unit) || 0), 0);
+  const totalQtyToday = recentPurchases.reduce((sum, p) => sum + (p.purchased_qty || 0), 0);
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         
-        {/* Top Summary Banner: Tomorrow's Delivery & Batch Lock */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Top Header Card */}
+        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Procurement & Mandi Buying (શાકભાજી ખરીદી)
+              <span className="text-xs font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                Procurement &amp; Mandi Buying (ખરીદી સંચાલન)
               </span>
-              {summary && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300">
-                  {summary.batch_number}
-                </span>
-              )}
             </div>
-
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
-              Tomorrow&apos;s Delivery &bull; <span className="text-emerald-600 dark:text-emerald-400">{summary?.total_orders_count || 0} Orders</span> &bull; <span className="font-normal text-slate-500">{products.length} Products</span>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 mt-2 tracking-tight">
+              Mandi Procurement &amp; Purchase Log
             </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Record APMC purchases, monitor live midnight customer demand, and calculate purchase margins.
+            </p>
           </div>
 
-          {/* Top Actions: WhatsApp Mandi Sheet & Lock Batch */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Direct Purchase Entry Button */}
             <button
-              onClick={handleCopyWhatsApp}
-              disabled={products.length === 0}
-              className="px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 shadow-2xs"
+              type="button"
+              onClick={() => setShowQuickPurchaseModal(true)}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-extrabold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              {copiedWhatsApp ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
-              <span>{copiedWhatsApp ? 'Copied WhatsApp Text!' : 'WhatsApp Sheet'}</span>
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Record Purchase (ખરીદી ઉમેરો)</span>
             </button>
 
-            <a
-              href={`/api/reports/export?type=procurement${selectedBatchId ? `&batch_id=${selectedBatchId}` : ''}`}
-              download
-              className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-200 shadow-2xs"
-              title="Download procurement list in Excel"
+            {/* Lock Batch Button */}
+            <button
+              type="button"
+              onClick={() => setShowLockModal(true)}
+              disabled={isLocking}
+              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             >
-              <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Excel Sheet (એક્સેલ)</span>
-            </a>
+              <Lock className="w-3.5 h-3.5" />
+              <span>{isLocking ? 'Locking...' : 'Lock Midnight Batch (7:50 PM)'}</span>
+            </button>
 
-            {summary?.status === 'locked' ? (
-              <div className="px-3.5 py-2 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center gap-1.5">
-                <Lock className="w-4 h-4" />
-                <span>Locked (8 PM Cutoff)</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowLockModal(true)}
-                disabled={isLocking}
-                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <Lock className="w-4 h-4" />
-                <span>{isLocking ? 'Locking Batch...' : 'Lock Tonight Batch'}</span>
-              </button>
-            )}
+            {/* WhatsApp Sheet Copy */}
+            <button
+              type="button"
+              onClick={handleCopyWhatsApp}
+              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200"
+              title="Copy Procurement Sheet for WhatsApp"
+            >
+              {copiedWhatsApp ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-emerald-700">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-slate-600" />
+                  <span>WhatsApp Sheet</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
+        {/* Action Message Alert */}
         {actionMessage && (
-          <div className={`p-4 rounded-2xl text-xs flex items-center gap-2 border ${
-            actionMessage.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-              : actionMessage.type === 'error'
-              ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
-              : 'bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
+          <div className={`p-4 rounded-2xl border text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-150 ${
+            actionMessage.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+            actionMessage.type === 'error' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+            'bg-blue-50 text-blue-800 border-blue-200'
           }`}>
-            <AlertCircle className="w-4 h-4 shrink-0" />
+            {actionMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
             <span>{actionMessage.text}</span>
           </div>
         )}
 
-        {/* Tab Selection */}
-        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl text-xs font-bold w-fit shadow-2xs">
+        {/* KPI Stats Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Today&apos;s Total Purchase</div>
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1 font-mono">
+              ₹{totalSpentToday.toLocaleString('en-IN')}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">Recorded mandi expense</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Weight Procured</div>
+            <div className="text-xl sm:text-2xl font-black text-emerald-700 mt-1 font-mono">
+              {totalQtyToday.toFixed(1)} <span className="text-sm font-semibold text-slate-500">kg/units</span>
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">Across all items</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active Batch Demand</div>
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1 font-mono">
+              {summary ? `${summary.total_weight_kg || 0} kg` : '0 kg'}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{summary?.total_orders_count || 0} customer orders</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Batch Status</div>
+            <div className="mt-1">
+              <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
+                {summary?.status || 'Open (Live)'}
+              </span>
+            </div>
+            <div className="text-[10px] text-slate-500 mt-1">7:50 PM IST Cutoff</div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-slate-200 gap-2 overflow-x-auto text-xs font-extrabold pb-1">
           <button
+            type="button"
             onClick={() => setActiveTab('demand')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl transition-all cursor-pointer ${
               activeTab === 'demand'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            Product Demand ({products.length})
+            📋 Customer Demand Sheet ({products.length} items)
           </button>
+
           <button
-            onClick={() => setActiveTab('purchasing')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'purchasing'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            type="button"
+            onClick={() => setActiveTab('purchases_log')}
+            className={`py-2.5 px-4 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'purchases_log'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            Log APMC Purchases
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'orders'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Batch Orders ({batchData?.orders?.length || 0})
+            💰 Direct Purchases Log ({recentPurchases.length} records)
           </button>
         </div>
 
-        {/* MAIN PRODUCT DEMAND VIEW */}
+        {/* TAB 1: Customer Demand Sheet */}
         {activeTab === 'demand' && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
-            
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-              <span className="font-bold text-slate-700 dark:text-slate-300">Mandatory Mandi Buy List</span>
-              <span>Click product to view purchase history & supplier breakdown</span>
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Required Produce for Tomorrow Morning Delivery
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Calculated automatically from confirmed customer orders before 7:50 PM cutoff.
+                </p>
+              </div>
             </div>
 
-            {products.length === 0 ? (
-              <div className="p-12 text-center text-xs text-slate-400">
-                <Boxes className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-slate-700" />
-                <div className="font-bold text-slate-700 dark:text-slate-300">No locked products for this batch</div>
-                <div className="text-[11px] text-slate-500">Lock the batch after 8 PM to freeze required demand.</div>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {products.map((p) => {
-                  const isExpanded = !!expandedProductIds[p.procurement_item_id];
-                  const need = Number(p.required_qty || 0);
-                  const suggested = Number(p.suggested_procurement_qty || need);
-                  const procured = Number(p.procured_qty || 0);
-                  const isFullyProcured = procured >= need && need > 0;
-
-                  return (
-                    <div key={p.procurement_item_id} className="p-4 sm:p-5 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                      
-                      {/* Main Clean Row */}
-                      <div
-                        onClick={() => toggleExpandProduct(p.procurement_item_id)}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer"
-                      >
-                        {/* Name & Unit */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-lg shrink-0">
-                            🥬
-                          </div>
-                          <div>
-                            <div className="font-black text-slate-900 dark:text-white text-sm">
-                              {p.product_name_gu} <span className="font-normal text-slate-500">({p.product_name_en})</span>
-                            </div>
-                            <div className="text-[11px] text-slate-400 font-mono">
-                              Unit: {p.base_unit_name_gu || p.base_unit_code}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Numbers: Need vs Suggested vs Procured */}
-                        <div className="flex items-center gap-4 text-xs">
-                          <div className="text-right">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold block">Need</span>
-                            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                              {need} {p.base_unit_code}
-                            </span>
-                          </div>
-
-                          <div className="text-right bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                            <span className="text-[10px] text-emerald-700 dark:text-emerald-400 uppercase font-bold block">Suggested (+Buffer)</span>
-                            <span className="font-mono font-black text-emerald-950 dark:text-emerald-200 text-sm">
-                              {suggested} {p.base_unit_code}
-                            </span>
-                          </div>
-
-                          <div className="text-right">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold block">Procured</span>
-                            <span className={`font-mono font-bold ${isFullyProcured ? 'text-emerald-600' : 'text-amber-600'}`}>
-                              {procured} {p.base_unit_code}
-                            </span>
-                          </div>
-
-                          <div className="p-1 rounded-full text-slate-400 hover:text-slate-600">
-                            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Progressive Disclosure Accordion: Supplier & Cost Details */}
-                      {isExpanded && (
-                        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/40 p-4 rounded-2xl space-y-3 text-xs animate-in fade-in duration-100">
-                          <div className="flex items-center justify-between font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider">
-                            <span>Supplier Purchase Lines & Mandi Rates</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActivePurchaseItem(p);
-                                setActiveTab('purchasing');
-                              }}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                            >
-                              <Plus className="w-3 h-3" />
-                              <span>Log Purchase for {p.product_name_gu}</span>
-                            </button>
-                          </div>
-
-                          {(p.purchase_lines || []).length === 0 ? (
-                            <div className="text-[11px] text-slate-400 italic">
-                              No purchase lines recorded yet. Click &quot;Log Purchase&quot; to enter mandi lot rate.
-                            </div>
-                          ) : (
-                            <div className="space-y-1.5">
-                              {p.purchase_lines.map((line) => (
-                                <div key={line.id} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs font-mono">
-                                  <div>
-                                    <span className="font-bold text-slate-900 dark:text-white">{line.supplier_name}</span>
-                                    {line.mandi_lot_or_bill_no && <span className="text-slate-400 ml-2">Bill: {line.mandi_lot_or_bill_no}</span>}
-                                  </div>
-                                  <div>
-                                    <span>{line.purchased_qty} {p.base_unit_code} @ ₹{line.rate_per_unit}/{p.base_unit_code} = </span>
-                                    <span className="font-black text-emerald-600">₹{line.total_cost}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="px-5 py-3.5">Product (વસ્તુ)</th>
+                    <th className="px-5 py-3.5">Category</th>
+                    <th className="px-5 py-3.5 text-right">Customer Demand</th>
+                    <th className="px-5 py-3.5 text-right">Suggested Purchase</th>
+                    <th className="px-5 py-3.5 text-right">Mandi Rate</th>
+                    <th className="px-5 py-3.5 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {products.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-10 text-center text-slate-500 font-medium">
+                        No customer demand recorded yet for tomorrow. Click &quot;Record Purchase&quot; to log ad-hoc purchases.
+                      </td>
+                    </tr>
+                  ) : (
+                    products.map((p) => (
+                      <tr key={p.procurement_item_id || p.product_id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-slate-900">
+                          <div>{p.product_name_gu || p.product_name_en}</div>
+                          <div className="text-[11px] text-slate-500 font-normal">{p.product_name_en}</div>
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-600">{p.category_name_en || 'Vegetables'}</td>
+                        <td className="px-5 py-3.5 text-right font-mono font-bold text-slate-900">
+                          {p.required_qty} {p.base_unit_code}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono font-bold text-emerald-700">
+                          {p.suggested_procurement_qty || p.required_qty} {p.base_unit_code}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono text-slate-700">
+                          ₹{p.latest_mandi_rate || 0}/{p.base_unit_code}
+                        </td>
+                        <td className="px-5 py-3.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPurchaseForm({
+                                product_id: p.product_id,
+                                product_name: `${p.product_name_gu} (${p.product_name_en})`,
+                                purchased_qty: String(p.suggested_procurement_qty || p.required_qty || ''),
+                                unit_code: p.base_unit_code || 'kg',
+                                rate_per_unit: String(p.latest_mandi_rate || ''),
+                                supplier_name: p.preferred_supplier_name || 'Halol APMC Mandi',
+                                bill_no: '',
+                                purchase_date: new Date().toISOString().split('T')[0],
+                                notes: '',
+                              });
+                              setShowQuickPurchaseModal(true);
+                            }}
+                            className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                          >
+                            + Record Entry
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
-        {/* LOG PURCHASES TAB */}
-        {activeTab === 'purchasing' && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs max-w-2xl space-y-4">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-              Record APMC Purchase Entry (મંડી ખરીદી એન્ટ્રી)
-            </h3>
-            
-            <form onSubmit={handleSavePurchaseLine} className="space-y-4 text-xs">
+        {/* TAB 2: Direct Purchases Log */}
+        {activeTab === 'purchases_log' && (
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
               <div>
-                <label className="block text-slate-500 font-bold mb-1">Select Product</label>
-                <select
-                  value={activePurchaseItem?.procurement_item_id || ''}
-                  onChange={(e) => {
-                    const sel = products.find((p) => p.procurement_item_id === e.target.value);
-                    setActivePurchaseItem(sel || null);
-                  }}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 font-bold"
-                  required
-                >
-                  <option value="">-- Choose Vegetable --</option>
-                  {products.map((p) => (
-                    <option key={p.procurement_item_id} value={p.procurement_item_id}>
-                      {p.product_name_gu} ({p.product_name_en}) - Need: {p.suggested_procurement_qty || p.required_qty} {p.base_unit_code}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Recorded Mandi Purchases &amp; Invoices
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Full log of quantities, rates, suppliers, and total costs entered by owner.
+                </p>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-500 font-bold mb-1">Purchased Qty</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="e.g. 35"
-                    value={purchaseForm.purchased_qty}
-                    onChange={(e) => setPurchaseForm({ ...purchaseForm, purchased_qty: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 font-mono"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-500 font-bold mb-1">Rate per Unit (₹)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    placeholder="e.g. 18"
-                    value={purchaseForm.rate_per_unit}
-                    onChange={(e) => setPurchaseForm({ ...purchaseForm, rate_per_unit: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-500 font-bold mb-1">Supplier / Mandi Trader</label>
-                <input
-                  type="text"
-                  value={purchaseForm.supplier_name}
-                  onChange={(e) => setPurchaseForm({ ...purchaseForm, supplier_name: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-500 font-bold mb-1">Bill / Lot Number (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. LOT-402"
-                  value={purchaseForm.bill_no}
-                  onChange={(e) => setPurchaseForm({ ...purchaseForm, bill_no: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5"
-                />
-              </div>
-
               <button
-                type="submit"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                type="button"
+                onClick={() => setShowQuickPurchaseModal(true)}
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs"
               >
-                Save Purchase Line &bull; ₹{(parseFloat(purchaseForm.purchased_qty || '0') * parseFloat(purchaseForm.rate_per_unit || '0')).toFixed(0)} Total
+                + New Purchase Entry
               </button>
-            </form>
-          </div>
-        )}
-
-        {/* ORDERS TAB */}
-        {activeTab === 'orders' && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
-              Orders Locked in this Batch ({batchData?.orders?.length || 0})
             </div>
 
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {(batchData?.orders || []).map((o) => (
-                <div key={o.order_id} className="p-4 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 mr-2">{o.order_number}</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{o.customer_name}</span>
-                    <span className="text-slate-400 ml-2">&bull; {o.area_locality}</span>
-                  </div>
-
-                  <div className="font-mono font-black text-slate-900 dark:text-white">
-                    ₹{Number(o.final_payable_amount || 0).toFixed(0)}
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="px-5 py-3.5">Product Name</th>
+                    <th className="px-5 py-3.5">Supplier / Mandi Trader</th>
+                    <th className="px-5 py-3.5 text-right">Quantity</th>
+                    <th className="px-5 py-3.5 text-right">Rate (₹/Unit)</th>
+                    <th className="px-5 py-3.5 text-right">Total Cost (₹)</th>
+                    <th className="px-5 py-3.5">Bill / Lot #</th>
+                    <th className="px-5 py-3.5">Recorded At</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentPurchases.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-10 text-center text-slate-500 font-medium">
+                        No purchases recorded yet. Click &quot;+ Record Purchase&quot; to log your mandi buying!
+                      </td>
+                    </tr>
+                  ) : (
+                    recentPurchases.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-slate-900">
+                          {item.procurement_items?.products?.name_gu ? (
+                            <>
+                              <div>{item.procurement_items.products.name_gu}</div>
+                              <div className="text-[11px] text-slate-500 font-normal">{item.procurement_items.products.name_en}</div>
+                            </>
+                          ) : (
+                            item.notes?.split('Direct entry for ')[1]?.split(' (')[0] || 'Produce Item'
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-700 font-medium">
+                          {item.supplier_name || 'Halol APMC Mandi'}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono font-bold text-slate-900">
+                          {item.purchased_qty} kg
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono font-semibold text-slate-700">
+                          ₹{item.rate_per_unit}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono font-black text-emerald-700 text-sm">
+                          ₹{(item.total_cost || (item.purchased_qty * item.rate_per_unit)).toLocaleString('en-IN')}
+                        </td>
+                        <td className="px-5 py-3.5 font-mono text-slate-500 text-[11px]">
+                          {item.mandi_lot_or_bill_no || '—'}
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-500 text-[11px]">
+                          {item.created_at ? new Date(item.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Today'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
       </main>
 
-      {/* Lock Batch Confirmation Modal */}
+      {/* QUICK MANDI PURCHASE ENTRY MODAL */}
+      {showQuickPurchaseModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <PlusCircle className="w-5 h-5 text-emerald-600" />
+                  <span>Record Mandi Purchase (ખરીદી એન્ટ્રી)</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Enter quantity, rate, and supplier details for today&apos;s produce.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickPurchaseModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePurchaseEntry} className="space-y-4">
+              
+              {/* Product Selection */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Select Item (શાકભાજી / ફળ) *
+                </label>
+                <select
+                  value={purchaseForm.product_id}
+                  onChange={(e) => {
+                    const selId = e.target.value;
+                    const prod = catalogProducts.find((p) => p.id === selId);
+                    setPurchaseForm({
+                      ...purchaseForm,
+                      product_id: selId,
+                      product_name: prod ? `${prod.name_gu} (${prod.name_en})` : '',
+                      unit_code: prod?.base_unit_code || 'kg',
+                    });
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  required
+                >
+                  <option value="">-- Choose Product from Catalog --</option>
+                  {catalogProducts.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name_gu} ({p.name_en}) - [{p.base_unit_code}]
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quantity and Rate Inputs */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Purchased Quantity ({purchaseForm.unit_code}) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    placeholder="e.g. 50"
+                    value={purchaseForm.purchased_qty}
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, purchased_qty: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold font-mono focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Purchase Rate (₹/{purchaseForm.unit_code}) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    placeholder="e.g. 22"
+                    value={purchaseForm.rate_per_unit}
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, rate_per_unit: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold font-mono focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Auto Total Calculation Display */}
+              {purchaseForm.purchased_qty && purchaseForm.rate_per_unit && (
+                <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900">Total Purchase Expense:</span>
+                  <span className="text-base font-black text-emerald-800 font-mono">
+                    ₹{(parseFloat(purchaseForm.purchased_qty || '0') * parseFloat(purchaseForm.rate_per_unit || '0')).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              )}
+
+              {/* Supplier & Bill Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Mandi Supplier / Trader
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Halol APMC Trader"
+                    value={purchaseForm.supplier_name}
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, supplier_name: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Bill / Lot No. (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. LOT-402"
+                    value={purchaseForm.bill_no}
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, bill_no: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickPurchaseModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingPurchase}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingPurchase ? 'Saving...' : 'Save Purchase Entry'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* LOCK BATCH CONFIRMATION MODAL */}
       <ConfirmationModal
         isOpen={showLockModal}
-        onClose={() => setShowLockModal(false)}
+        title="Lock Midnight Procurement Batch?"
+        message="Locking the batch will aggregate all orders placed before the 7:50 PM cutoff for tomorrow morning delivery and freeze purchase requirements."
+        confirmLabel="Yes, Lock Batch"
+        cancelLabel="Cancel"
         onConfirm={handleLockBatch}
-        title="Lock 8:00 PM Procurement Batch"
-        message="Locking the batch freezes customer order demand for tomorrow morning delivery so mandi buying can begin without quantities changing. Proceed?"
-        confirmLabel="Lock Batch Now"
-        isLoading={isLocking}
+        onClose={() => setShowLockModal(false)}
       />
 
     </div>

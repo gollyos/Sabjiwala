@@ -14,14 +14,14 @@ import {
   Settings, 
   Tag, 
   Users, 
-  Building2, 
   Bell, 
-  ArrowLeft,
-  Menu,
-  X,
-  Store,
-  LogOut
+  Menu, 
+  X, 
+  Store, 
+  LogOut,
+  PlusCircle
 } from 'lucide-react';
+import { BrandLogo } from './ui/BrandLogo';
 
 export function AdminNav() {
   const pathname = usePathname();
@@ -29,16 +29,16 @@ export function AdminNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const primaryNav = [
-    { name: 'Home', nameGu: 'હોમ', href: '/admin/dashboard', icon: Home },
+    { name: 'Dashboard', nameGu: 'ડેશબોર્ડ', href: '/admin/dashboard', icon: Home },
     { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag },
-    { name: 'Procurement', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes },
+    { name: 'Mandi Purchases', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes },
+    { name: 'Pricing', nameGu: 'ભાવ નક્કી', href: '/admin/pricing', icon: Tag },
     { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers },
     { name: 'Delivery', nameGu: 'ડિલિવરી', href: '/admin/delivery', icon: Truck },
     { name: 'Reports', nameGu: 'રિપોર્ટ્સ', href: '/admin/reports', icon: BarChart3 },
   ];
 
   const secondaryNav = [
-    { name: 'Pricing & APMC Rates', href: '/admin/pricing', icon: Tag },
     { name: 'Products Catalog', href: '/admin/products', icon: ShoppingBag },
     { name: 'Staff Management', href: '/admin/staff', icon: Users },
     { name: 'Notifications & Alerts', href: '/admin/notifications', icon: Bell },
@@ -47,27 +47,42 @@ export function AdminNav() {
 
   const isSecondaryActive = secondaryNav.some((item) => pathname.startsWith(item.href));
 
+  const handleLogout = async () => {
+    localStorage.removeItem('taazatokra_admin_user');
+    await fetch('/api/admin/login', { method: 'DELETE' });
+    window.location.reload();
+  };
+
   return (
-    <header className="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-40 shadow-xs">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
+        <div className="flex items-center justify-between h-16">
           
           {/* Left: Brand / Storefront Link */}
           <div className="flex items-center space-x-3">
+            <Link href="/admin/dashboard" className="flex items-center space-x-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-xs font-black text-sm">
+                TT
+              </div>
+              <div>
+                <span className="font-extrabold text-sm text-slate-900 tracking-tight block leading-tight">
+                  TaazaTokra <span className="text-emerald-600 font-bold">Admin HQ</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                  Halol Central Control
+                </span>
+              </div>
+            </Link>
+
+            <span className="text-slate-200">|</span>
+
             <Link
               href="/"
-              className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-emerald-400 font-medium transition-colors"
+              className="hidden lg:inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
               title="Return to Customer Storefront"
             >
-              <Store className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Storefront</span>
-            </Link>
-            <span className="text-slate-800">|</span>
-            <Link href="/admin/dashboard" className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="font-extrabold text-sm text-white tracking-tight">
-                TaazaTokra HQ <span className="text-emerald-400 text-xs font-medium">• Halol</span>
-              </span>
+              <Store className="w-3.5 h-3.5 text-slate-500" />
+              <span>Customer Store</span>
             </Link>
           </div>
 
@@ -84,37 +99,36 @@ export function AdminNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
                   <span>{item.name}</span>
                 </Link>
               );
             })}
 
-            {/* Manage / Settings Dropdown */}
+            {/* Dropdown: Management & Settings */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setManageOpen(!manageOpen)}
-                className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1 transition-all cursor-pointer ${
                   isSecondaryActive
-                    ? 'bg-emerald-700 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <Settings className="w-3.5 h-3.5" />
                 <span>More</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {manageOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
                   onMouseLeave={() => setManageOpen(false)}
                 >
                   {secondaryNav.map((sec) => {
@@ -125,13 +139,13 @@ export function AdminNav() {
                         key={sec.href}
                         href={sec.href}
                         onClick={() => setManageOpen(false)}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                        className={`px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors ${
                           isSecActive
-                            ? 'bg-emerald-600 text-white'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            ? 'bg-emerald-50 text-emerald-800 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50'
                         }`}
                       >
-                        <SecIcon className="w-3.5 h-3.5 text-emerald-400" />
+                        <SecIcon className="w-4 h-4 text-emerald-600" />
                         <span>{sec.name}</span>
                       </Link>
                     );
@@ -140,13 +154,10 @@ export function AdminNav() {
               )}
             </div>
 
+            {/* Logout Button */}
             <button
-              onClick={async () => {
-                localStorage.removeItem('taazatokra_admin_user');
-                await fetch('/api/admin/login', { method: 'DELETE' });
-                window.location.reload();
-              }}
-              className="ml-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              onClick={handleLogout}
+              className="ml-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               title="Logout from Admin HQ"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -158,7 +169,7 @@ export function AdminNav() {
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -168,9 +179,9 @@ export function AdminNav() {
         </div>
       </div>
 
-      {/* Mobile Drawer / Dropdown */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
           <div className="grid grid-cols-2 gap-2 text-xs font-bold">
             {primaryNav.map((item) => {
               const Icon = item.icon;
@@ -184,8 +195,10 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`p-3 rounded-2xl flex items-center gap-2 ${
-                    isActive ? 'bg-emerald-600 text-white' : 'bg-slate-950 text-slate-300'
+                  className={`p-3 rounded-xl flex items-center gap-2 transition-all ${
+                    isActive
+                      ? 'bg-emerald-600 text-white shadow-2xs font-extrabold'
+                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -195,9 +208,9 @@ export function AdminNav() {
             })}
           </div>
 
-          <div className="pt-2 border-t border-slate-800">
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Management & Tools
+          <div className="pt-2 border-t border-slate-100">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Management & Settings
             </div>
             <div className="grid grid-cols-1 gap-1 text-xs">
               {secondaryNav.map((sec) => {
@@ -207,24 +220,31 @@ export function AdminNav() {
                     key={sec.href}
                     href={sec.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="p-2.5 rounded-xl flex items-center gap-2 text-slate-300 hover:bg-slate-800"
+                    className="p-2.5 rounded-xl flex items-center gap-2.5 text-slate-700 hover:bg-slate-50 font-semibold"
                   >
-                    <SecIcon className="w-3.5 h-3.5 text-emerald-400" />
+                    <SecIcon className="w-4 h-4 text-emerald-600" />
                     <span>{sec.name}</span>
                   </Link>
                 );
               })}
 
-              <button
-                onClick={async () => {
-                  setMobileMenuOpen(false);
-                  localStorage.removeItem('taazatokra_admin_user');
-                  await fetch('/api/admin/login', { method: 'DELETE' });
-                  window.location.reload();
-                }}
-                className="w-full p-2.5 rounded-xl flex items-center gap-2 text-rose-400 hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer mt-1"
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl flex items-center gap-2.5 text-slate-700 hover:bg-slate-50 font-semibold"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <Store className="w-4 h-4 text-slate-500" />
+                <span>Return to Customer Store</span>
+              </Link>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full p-2.5 rounded-xl flex items-center gap-2 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer mt-1"
+              >
+                <LogOut className="w-4 h-4" />
                 <span>Logout from Admin HQ</span>
               </button>
             </div>

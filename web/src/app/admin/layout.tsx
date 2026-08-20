@@ -3,15 +3,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { 
-  KeyRound, 
   Phone, 
   ArrowRight, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
   ArrowLeft,
-  Sparkles,
-  Lock,
+  ShieldCheck,
   Leaf
 } from 'lucide-react';
 import Link from 'next/link';
@@ -26,20 +24,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [adminUser, setAdminUser] = useState<{ full_name: string; role: string; mobile: string } | null>(null);
 
-  // Login form state
-  const [authTab, setAuthTab] = useState<'pin' | 'mobile'>('pin');
-  const [pin, setPin] = useState('');
-  const [mobile, setMobile] = useState('9876543210');
+  // Strict Mobile + OTP login state
+  const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpSent, setOtpSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendTimer, setResendTimer] = useState(30);
 
   const verifyAdminAccess = useCallback(async () => {
     try {
       setCheckingAuth(true);
 
-      // 1. Check local admin session storage/cookie first
+      // 1. Check local admin session storage/cookie
       const storedSession = typeof window !== 'undefined' ? localStorage.getItem('taazatokra_admin_user') : null;
       if (storedSession) {
         try {
@@ -51,7 +48,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             return;
           }
         } catch {
-          // ignore corrupted json
+          // ignore error
         }
       }
 
@@ -65,7 +62,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         if (roleData && roleData.length > 0) {
           const roles = roleData.map(r => r.role);
-          const hasStaffAccess = roles.some(r => ['owner', 'manager', 'packing', 'procurement'].includes(r));
+          const hasStaffAccess = roles.some(r => ['owner', 'manager', 'packing', 'procurement', 'delivery'].includes(r));
           if (hasStaffAccess) {
             const userObj = {
               full_name: session.user.user_metadata?.full_name || 'Staff User',
@@ -96,54 +93,34 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     verifyAdminAccess();
   }, [verifyAdminAccess]);
 
-  // Handle PIN Login
-  const handlePinSubmit = async (e: React.FormEvent) => {
+  // Resend Timer countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (otpSent && resendTimer > 0) {
+      timer = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [otpSent, resendTimer]);
+
+  // Send OTP
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pin.trim()) {
-      setError('Please enter the 4-digit Owner PIN.');
+    const cleanNumber = mobile.replace(/\D/g, '');
+    if (cleanNumber.length !== 10) {
+      setError('Please enter a valid 10-digit registered mobile number.');
       return;
     }
 
     setSubmitting(true);
     setError(null);
-
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: 'pin', pin: pin.trim() }),
-      });
-      const data = await res.json();
-
-      if (data.success && data.user) {
-        setAdminUser(data.user);
-        setIsAuthorized(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('taazatokra_admin_user', JSON.stringify(data.user));
-        }
-      } else {
-        setError(data.error || 'Incorrect Owner PIN. Try default PIN: 7890');
-      }
-    } catch {
-      setError('Connection failed. Please check network.');
-    } finally {
-      setSubmitting(false);
-    }
+    setOtpSent(true);
+    setResendTimer(30);
+    setSubmitting(false);
   };
 
-  // Handle Mobile OTP Login
-  const handleMobileSubmit = async (e: React.FormEvent) => {
+  // Verify OTP
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otpSent) {
-      if (mobile.replace(/\D/g, '').length !== 10) {
-        setError('Please enter a valid 10-digit mobile number.');
-        return;
-      }
-      setError(null);
-      setOtpSent(true);
-      return;
-    }
-
     const otpCode = otp.join('');
     if (otpCode.length !== 6) {
       setError('Please enter all 6 digits of the OTP.');
@@ -168,202 +145,178 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           localStorage.setItem('taazatokra_admin_user', JSON.stringify(data.user));
         }
       } else {
-        setError(data.error || 'Invalid OTP. Try test OTP: 123456');
+        setError(data.error || 'Authentication failed. Please check OTP.');
       }
     } catch {
-      setError('Authentication failed.');
+      setError('Network connection error.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Loading indicator
+  // Loading state
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-4">
-        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center animate-pulse mb-3">
-          <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-4">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center shadow-sm mb-3">
+          <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
         </div>
-        <p className="text-sm font-bold text-slate-200">Loading TaazaTokra Admin HQ...</p>
+        <p className="text-sm font-bold text-slate-700">Verifying Admin Credentials...</p>
       </div>
     );
   }
 
-  // If Not Authorized -> Show Dedicated Sleek Admin Login Form
+  // If Not Authorized -> Show Clean White Security Card
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">
           
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 p-6 text-white text-center relative">
-            <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center mb-3 shadow-inner">
-              <Leaf className="w-6 h-6 text-emerald-200" />
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white text-center">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 mx-auto flex items-center justify-center mb-3 shadow-xs">
+              <Leaf className="w-6 h-6 text-emerald-100" />
             </div>
-            <h1 className="text-xl font-black tracking-tight">TaazaTokra Admin HQ</h1>
+            <h1 className="text-xl font-extrabold tracking-tight">TaazaTokra Admin HQ</h1>
             <p className="text-xs text-emerald-100 font-medium mt-1">
-              તાજાટોકરા એડમિન અને માલિક કંટ્રોલ પોર્ટલ (Halol)
+              સુરક્ષિત સ્ટાફ અને માલિક કંટ્રોલ પોર્ટલ
             </p>
           </div>
 
-          {/* Quick Tab Switcher */}
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => { setAuthTab('pin'); setError(null); }}
-                className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authTab === 'pin'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <KeyRound className="w-3.5 h-3.5" />
-                <span>Owner Master PIN</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setAuthTab('mobile'); setError(null); }}
-                className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authTab === 'mobile'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Staff Mobile OTP</span>
-              </button>
+          <div className="p-6 sm:p-8 space-y-6">
+            
+            <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs font-semibold text-emerald-900">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Two-Factor Mobile Authentication Required</span>
             </div>
 
-            {/* Error Notification */}
+            {/* Error Banner */}
             {error && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800 flex items-start gap-2 text-rose-300 text-xs">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* TAB 1: Master PIN Form */}
-            {authTab === 'pin' && (
-              <form onSubmit={handlePinSubmit} className="space-y-4">
+            {/* STEP 1: Enter Mobile Number */}
+            {!otpSent ? (
+              <form onSubmit={handleSendOtp} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Enter Owner Security PIN (માલિક પિન)
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                    Registered Mobile (નોંધાયેલ મોબાઇલ)
                   </label>
-                  <div className="relative">
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 flex items-center gap-1 text-slate-500 font-bold text-sm">
+                      <span>🇮🇳</span>
+                      <span>+91</span>
+                    </div>
                     <input
-                      type="password"
-                      maxLength={8}
-                      placeholder="Enter 4-digit PIN (e.g. 7890)"
-                      value={pin}
-                      onChange={(e) => setPin(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-slate-950 border border-slate-700 rounded-2xl text-white font-mono text-center text-xl tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-600"
+                      type="tel"
+                      maxLength={10}
+                      placeholder="98765 43210"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                      className="w-full pl-20 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-slate-900 font-extrabold text-base focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
                       autoFocus
+                      required
                     />
                   </div>
-                  <div className="mt-2.5 p-2.5 bg-emerald-950/30 rounded-xl border border-emerald-800/40 text-center text-xs text-emerald-300 font-medium">
-                    🔑 Owner Default PIN: <strong className="text-white font-mono font-bold">7890</strong>
-                  </div>
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    Enter the authorized mobile number of the Owner or Manager.
+                  </p>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submitting || !pin}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  disabled={submitting || mobile.replace(/\D/g, '').length !== 10}
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-sm rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
-                  {submitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <span>Unlock Admin Dashboard</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
+                  <span>Send Login OTP</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
-            )}
-
-            {/* TAB 2: Mobile OTP Form */}
-            {authTab === 'mobile' && (
-              <form onSubmit={handleMobileSubmit} className="space-y-4">
-                {!otpSent ? (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                      Registered Staff Mobile
+            ) : (
+              /* STEP 2: Enter 6-Digit OTP */
+              <form onSubmit={handleVerifyOtp} className="space-y-5">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                      Enter 6-Digit OTP
                     </label>
-                    <div className="relative flex items-center">
-                      <div className="absolute left-3.5 text-slate-400 font-bold text-sm">
-                        +91
-                      </div>
+                    <button
+                      type="button"
+                      onClick={() => { setOtpSent(false); setError(null); }}
+                      className="text-xs text-emerald-600 hover:text-emerald-700 font-bold"
+                    >
+                      Change Number
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-slate-500 mb-3">
+                    Verification code sent to <strong>+91 {mobile}</strong>
+                  </p>
+
+                  <div className="flex justify-center gap-2 sm:gap-2.5">
+                    {otp.map((d, idx) => (
                       <input
-                        type="tel"
-                        maxLength={10}
-                        placeholder="9876543210"
-                        value={mobile}
-                        onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                        className="w-full pl-14 pr-4 py-3 bg-slate-950 border border-slate-700 rounded-2xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-600"
-                        autoFocus
+                        key={idx}
+                        type="text"
+                        maxLength={1}
+                        inputMode="numeric"
+                        value={d}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          const newOtp = [...otp];
+                          newOtp[idx] = val;
+                          setOtp(newOtp);
+                          if (val && idx < 5) {
+                            const nextInput = document.getElementById(`admin-otp-${idx + 1}`);
+                            nextInput?.focus();
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+                            const prevInput = document.getElementById(`admin-otp-${idx - 1}`);
+                            prevInput?.focus();
+                          }
+                        }}
+                        id={`admin-otp-${idx}`}
+                        className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl font-black bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-2xs"
+                        autoFocus={idx === 0}
                       />
-                    </div>
-                    <div className="mt-2 text-[11px] text-slate-400">
-                      Sample Owner Phone: <strong className="text-slate-200">9876543210</strong>
-                    </div>
+                    ))}
                   </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                        Enter 6-Digit OTP
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setOtpSent(false)}
-                        className="text-[11px] text-emerald-400 hover:underline"
-                      >
-                        Change Number
-                      </button>
-                    </div>
-                    <div className="flex justify-center gap-2">
-                      {otp.map((d, idx) => (
-                        <input
-                          key={idx}
-                          type="text"
-                          maxLength={1}
-                          inputMode="numeric"
-                          value={d}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const newOtp = [...otp];
-                            newOtp[idx] = val;
-                            setOtp(newOtp);
-                            if (val && idx < 5) {
-                              const nextInput = document.getElementById(`otp-admin-${idx + 1}`);
-                              nextInput?.focus();
-                            }
-                          }}
-                          id={`otp-admin-${idx}`}
-                          className="w-10 h-12 text-center text-lg font-bold bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                          autoFocus={idx === 0}
-                        />
-                      ))}
-                    </div>
-                    <div className="mt-2.5 p-2 bg-emerald-950/30 rounded-xl border border-emerald-800/40 text-center text-xs text-emerald-300 font-medium">
-                      🔑 Test OTP: <strong className="text-white font-mono">123456</strong>
-                    </div>
+
+                  <div className="mt-3 p-2 bg-emerald-50 rounded-xl border border-emerald-200 text-center text-xs text-emerald-800 font-semibold">
+                    🔑 Test OTP: <strong>123456</strong>
                   </div>
-                )}
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span>Didn&apos;t receive code?</span>
+                  {resendTimer > 0 ? (
+                    <span className="font-mono text-slate-400">Resend in {resendTimer}s</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setResendTimer(30)}
+                      className="font-bold text-emerald-600 hover:underline"
+                    >
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
 
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  disabled={submitting || otp.join('').length !== 6}
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-sm rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      <span>{!otpSent ? 'Send OTP' : 'Verify & Enter HQ'}</span>
+                      <span>Verify &amp; Enter Admin HQ</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -372,10 +325,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             )}
 
             {/* Back to Customer Store Link */}
-            <div className="pt-2 border-t border-slate-800/80 text-center">
+            <div className="pt-3 border-t border-slate-100 text-center">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Return to Customer Storefront (ગ્રાહક સાઇટ)</span>
@@ -388,9 +341,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Authorized Admin/Staff -> Render Children
+  // Authorized Admin/Staff
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {children}
     </div>
   );
