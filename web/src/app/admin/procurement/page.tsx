@@ -262,7 +262,7 @@ export default function ProcurementDashboard() {
   const handleCopyWhatsApp = () => {
     if (!batchData) return;
     const prods = batchData.products || [];
-    let text = `*🌿 SABJIWALA - MANDI PROCUREMENT SHEET*\n`;
+    let text = `*🌿 TAAZATOKRA - MANDI PROCUREMENT SHEET*\n`;
     text += `*Batch:* ${batchData.summary.batch_number} (${batchData.summary.batch_date})\n`;
     text += `*Total Orders:* ${batchData.summary.total_orders_count} | *Products:* ${prods.length}\n`;
     text += `----------------------------------------\n`;

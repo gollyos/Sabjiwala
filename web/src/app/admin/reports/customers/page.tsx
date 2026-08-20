@@ -79,7 +79,7 @@ export default function CustomerReportingPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sabjiwala_customers_${startDate}_to_${endDate}.csv`;
+      a.download = `taazatokra_customers_${startDate}_to_${endDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

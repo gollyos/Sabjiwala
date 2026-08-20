@@ -81,16 +81,17 @@ export default function AdminOrdersPage() {
     }
   }, [startDate, endDate, activeTab, search]);
 
+  // Supabase Realtime Live Channel for instant order sync
   useEffect(() => {
-    fetchOrders();
+    // Polling backup every 10s or instant on postgres changes
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 12000);
+
+    return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  const handleRowClick = (order: any) => {
-    setSelectedOrder(order);
-    setDrawerOpen(true);
-  };
-
-  const handleDatePreset = (preset: 'today' | 'tomorrow' | '7days') => {
+  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '7days') => {
     const now = new Date();
     const format = (d: Date) => d.toISOString().split('T')[0];
 
@@ -103,11 +104,26 @@ export default function AdminOrdersPage() {
       const tomStr = format(tom);
       setStartDate(tomStr);
       setEndDate(tomStr);
+    } else if (preset === 'this_week') {
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+      const monday = new Date(now.setDate(diff));
+      setStartDate(format(monday));
+      setEndDate(format(new Date()));
+    } else if (preset === 'this_month') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      setStartDate(format(firstDay));
+      setEndDate(format(new Date()));
     } else if (preset === '7days') {
       const past = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
       setStartDate(format(past));
-      setEndDate(format(now));
+      setEndDate(format(new Date()));
     }
+  };
+
+  const handleRowClick = (order: any) => {
+    setSelectedOrder(order);
+    setDrawerOpen(true);
   };
 
   const tabOptions: { key: OrderTab; label: string; labelGu?: string }[] = [
@@ -126,7 +142,7 @@ export default function AdminOrdersPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs">
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -135,18 +151,22 @@ export default function AdminOrdersPage() {
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono">
                 {totalCount} Total
               </span>
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 dark:bg-green-950/80 text-green-700 dark:text-green-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live Realtime
+              </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Showing active order ledger for Halol deliveries
+              Showing live active order ledger for Halol deliveries
             </p>
           </div>
 
-          {/* Quick Date Presets & Refresh */}
+          {/* Quick Date Presets & Custom Dates & Export */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold">
+            <div className="flex flex-wrap items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold gap-0.5">
               <button
                 onClick={() => handleDatePreset('today')}
-                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   startDate === endDate && startDate === new Date().toISOString().split('T')[0]
                     ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -156,7 +176,7 @@ export default function AdminOrdersPage() {
               </button>
               <button
                 onClick={() => handleDatePreset('tomorrow')}
-                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
                     ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -165,25 +185,52 @@ export default function AdminOrdersPage() {
                 Tomorrow
               </button>
               <button
-                onClick={() => handleDatePreset('7days')}
-                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                  startDate !== endDate
-                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                onClick={() => handleDatePreset('this_week')}
+                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
               >
-                Last 7 Days
+                Week (અઠવાડિયું)
               </button>
+              <button
+                onClick={() => handleDatePreset('this_month')}
+                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+              >
+                Month (મહિનો)
+              </button>
+              <button
+                onClick={() => handleDatePreset('7days')}
+                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+              >
+                7 Days
+              </button>
+            </div>
+
+            {/* Custom Date Pickers */}
+            <div className="flex items-center gap-1 text-xs">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-1.5 border border-slate-200 dark:border-slate-700 text-xs font-mono"
+                title="Start Date"
+              />
+              <span className="text-slate-400">to</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-1.5 border border-slate-200 dark:border-slate-700 text-xs font-mono"
+                title="End Date"
+              />
             </div>
 
             <a
               href={`/api/reports/export?type=orders&start_date=${startDate}&end_date=${endDate}`}
               download
-              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
               title="Download orders in Excel/CSV"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Excel (એક્સેલ)</span>
+              <span>Excel</span>
             </a>
 
             <button

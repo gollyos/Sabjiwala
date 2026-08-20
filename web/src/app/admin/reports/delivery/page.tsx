@@ -72,7 +72,7 @@ export default function DeliveryReportingPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sabjiwala_delivery_${startDate}_to_${endDate}.csv`;
+      a.download = `taazatokra_delivery_${startDate}_to_${endDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

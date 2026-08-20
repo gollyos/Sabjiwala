@@ -14,6 +14,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { PromoCountdownBanner } from './PromoCountdownBanner';
+import { BrandLogo } from './ui/BrandLogo';
 import { usePathname } from 'next/navigation';
 
 export function Navbar() {
@@ -60,19 +61,10 @@ export function Navbar() {
         
         {/* Brand & Location */}
         <div className="flex items-center space-x-3 sm:space-x-4">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-extrabold text-xl shadow-md shadow-emerald-600/20">
-            🌱
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="font-extrabold text-lg sm:text-xl text-slate-900 leading-none">
-                સબ્જીવાલા <span className="text-emerald-600 font-bold text-base sm:text-lg">Sabjiwala</span>
-              </h1>
-            </div>
-            <div className="flex items-center space-x-1.5 text-xs text-slate-500 font-medium mt-0.5">
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Halol, Panchmahal (389350)</span>
-            </div>
+          <BrandLogo size="md" showGujarati={true} />
+          <div className="hidden lg:flex items-center space-x-1.5 text-xs text-slate-500 font-medium pl-3 border-l border-slate-200">
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Halol, Panchmahal (389350)</span>
           </div>
         </div>
 

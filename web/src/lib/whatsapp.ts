@@ -1,5 +1,5 @@
 /**
- * Sabjiwala WhatsApp Business & Message Rendering Service
+ * TaazaTokra WhatsApp Business & Message Rendering Service
  * Handles bilingual (English / Gujarati) formatting and Meta Cloud API integration.
  */
 
@@ -22,19 +22,19 @@ export function formatBilingualOrderConfirmed(payload: any, pwaBaseUrl: string):
     .join('\n');
 
   const moreText = payload.more_items_count > 0 
-    ? `\n+ ${payload.more_items_count} more items (અન્ય શાકભાજી)` 
+    ? `\n+ ${payload.more_items_count} more items (અન્ય વસ્તુઓ)` 
     : '';
 
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_id}`;
 
-  return `*Sabjiwala (શાકભાજીવાળા)* ✅
+  return `*TaazaTokra (તાજાટોકરા)* ✅
 *Order Confirmed / ઓર્ડર કન્ફર્મ થયેલ છે*
 
 *Order No:* ${payload.order_number}
 *Delivery Date:* ${payload.delivery_date} (${payload.delivery_slot || '10:00 AM - 1:00 PM'})
 *Area:* ${payload.delivery_area}
 
-*Items / શાકભાજી:*
+*Items / ફળ અને શાકભાજી:*
 ${itemsText}${moreText}
 
 *Subtotal:* ₹${payload.subtotal}
@@ -49,7 +49,7 @@ _Need help? Reply HELP or call ${payload.support_mobile || 'Support'}_`;
 export function formatBilingualOutForDelivery(payload: any, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*Sabjiwala 🚚 Out for Delivery*
+  return `*TaazaTokra 🚚 Out for Delivery*
 *તમારો ઓર્ડર ડિલિવરી માટે નીકળી ગયો છે*
 
 *Order No:* ${payload.order_number}
@@ -66,15 +66,15 @@ ${trackingLink}`;
 export function formatBilingualOrderDelivered(payload: any, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*Sabjiwala ✅ Order Delivered*
+  return `*TaazaTokra ✅ Order Delivered*
 *ઓર્ડર સફળતાપૂર્વક પહોંચાડવામાં આવ્યો છે*
 
 *Order No:* ${payload.order_number}
 *Amount Collected:* ₹${payload.amount_collected}
 ${payload.cash_paid > 0 ? `(Cash: ₹${payload.cash_paid}) ` : ''}${payload.upi_paid > 0 ? `(UPI: ₹${payload.upi_paid})` : ''}
 
-Thank you for choosing Sabjiwala for fresh vegetables!
-તાજા શાકભાજી માટે શાકભાજીવાળા પસંદ કરવા બદલ આભાર.
+Thank you for choosing TaazaTokra for fresh fruits & vegetables!
+તાજા ફળો અને શાકભાજી માટે તાજાટોકરા પસંદ કરવા બદલ આભાર.
 
 *Receipt & Repeat Order / બિલ અને ફરી ઓર્ડર:*
 ${trackingLink}
@@ -85,7 +85,7 @@ _Any quality issue? Reply HELP within 2 hours._`;
 export function formatBilingualDeliveryFailed(payload: any, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*Sabjiwala ⚠️ Delivery Update*
+  return `*TaazaTokra ⚠️ Delivery Update*
 *ડિલિવરી અપૂર્ણ રહી છે*
 
 *Order No:* ${payload.order_number}
@@ -108,7 +108,7 @@ export function formatOwnerProcurementReport(payload: any, pwaBaseUrl: string): 
     ? `\n+ ${payload.more_products_count} more products` 
     : '';
 
-  return `*SABJIWALA — 8 PM PROCUREMENT REQUIREMENT* 📋
+  return `*TAAZATOKRA — 8 PM PROCUREMENT REQUIREMENT* 📋
 *Halol Mandi Morning Purchase List*
 
 *Delivery Date:* ${payload.delivery_date}
@@ -116,7 +116,7 @@ export function formatOwnerProcurementReport(payload: any, pwaBaseUrl: string): 
 *Expected COD Collection:* ₹${Number(payload.expected_cod).toLocaleString('en-IN')}
 *Batch Number:* ${payload.batch_number}
 
-*VEGETABLE DEMAND (ખરીદી લિસ્ટ):*
+*FRUIT & VEGETABLE DEMAND (ખરીદી લિસ્ટ):*
 ${itemsText}${moreText}
 
 *Total Distinct Products:* ${payload.total_products_count}
@@ -127,7 +127,7 @@ ${pwaBaseUrl}/admin/procurement`;
 
 export function formatOwnerOperationalAlert(type: string, payload: any, pwaBaseUrl: string): string {
   if (type === 'PACKING_PROBLEM') {
-    return `*⚠️ SABJIWALA GODOWN ALERT: PACKING PROBLEM*
+    return `*⚠️ TAAZATOKRA GODOWN ALERT: PACKING PROBLEM*
 
 *Order:* ${payload.order_number}
 *Customer:* ${payload.customer_name} (${payload.customer_mobile})
@@ -139,7 +139,7 @@ ${pwaBaseUrl}/admin/packing`;
   }
 
   if (type === 'COD_DISCREPANCY') {
-    return `*🚨 SABJIWALA CASH ALERT: COD DISCREPANCY*
+    return `*🚨 TAAZATOKRA CASH ALERT: COD DISCREPANCY*
 
 *Driver:* ${payload.driver_name}
 *Date:* ${payload.delivery_date}
@@ -154,7 +154,7 @@ ${pwaBaseUrl}/admin/reports/delivery`;
   }
 
   if (type === 'DELIVERY_FAILED') {
-    return `*⚠️ SABJIWALA ALERT: DELIVERY FAILED*
+    return `*⚠️ TAAZATOKRA ALERT: DELIVERY FAILED*
 
 *Order:* ${payload.order_number}
 *Customer:* ${payload.customer_name} (${payload.customer_mobile})
@@ -165,7 +165,7 @@ ${pwaBaseUrl}/admin/reports/delivery`;
 ${pwaBaseUrl}/admin/reports/delivery`;
   }
 
-  return `*SABJIWALA OPERATIONAL ALERT:* ${JSON.stringify(payload)}`;
+  return `*TAAZATOKRA OPERATIONAL ALERT:* ${JSON.stringify(payload)}`;
 }
 
 /**

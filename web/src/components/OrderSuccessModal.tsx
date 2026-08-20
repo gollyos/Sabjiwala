@@ -36,7 +36,7 @@ export function OrderSuccessModal() {
     : 'Halol';
 
   const waText = encodeURIComponent(
-    `*Sabjiwala Halol - Order Confirmation (ઓર્ડર વિગતો)* 🥦🍅\n\n` +
+    `*TaazaTokra Halol - Order Confirmation (ઓર્ડર વિગતો)* 🍎🥦\n\n` +
     `*Order No:* ${orderSuccessData.order_number}\n` +
     `*Customer:* ${customer?.full_name || 'Customer'}\n` +
     `*Delivery Date:* ${deliveryDateStr}\n` +
@@ -44,7 +44,7 @@ export function OrderSuccessModal() {
     `*Delivery Address:* ${addressStr}\n` +
     `*Payment Mode:* ${isOnline ? 'Online Paid' : 'Cash on Delivery (COD)'}\n` +
     `*Amount to Pay:* ₹${orderSuccessData.final_payable_amount.toFixed(2)}\n\n` +
-    `_Please confirm my fresh vegetable delivery!_`
+    `_Please confirm my fresh fruits & vegetables delivery!_`
   );
 
   const whatsappShareUrl = `https://wa.me/${supportPhone}?text=${waText}`;
@@ -71,7 +71,7 @@ export function OrderSuccessModal() {
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
           {isOnline
             ? 'ઓનલાઇન ચુકવણી સફળ થઈ. આપનો ઓર્ડર કન્ફર્મ થઈ ગયો છે.'
-            : 'આપનો શાકભાજીનો ઓર્ડર સફળતાપૂર્વક નોંધાઈ ગયો છે.'}
+            : 'આપનો તાજા ફળો અને શાકભાજીનો ઓર્ડર સફળતાપૂર્વક નોંધાઈ ગયો છે.'}
         </p>
 
         {/* Order Details Card */}

@@ -9,6 +9,8 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { OrderSuccessModal } from '@/components/OrderSuccessModal';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -19,29 +21,42 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sabjiwala.com'),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'સબ્જીવાલા • Sabjiwala Halol | Fresh Daily Vegetables & Fruits Delivery',
-    template: '%s | Sabjiwala Halol',
+    default: 'TaazaTokra | Fresh Fruits & Vegetables Delivery in Halol (તાજાટોકરા)',
+    template: '%s | TaazaTokra Halol',
   },
-  description: 'Farm-fresh vegetables and fruits delivered daily to your doorstep in Halol & Baska GIDC, Panchmahal. Order before 8 PM for 6 AM - 9 AM morning delivery. 10% OFF on first 3 orders.',
+  description: 'Order fresh fruits and vegetables online in Halol from TaazaTokra (તાજાટોકરા). Taaza Phal, Taazi Sabzi — Seedha Ghar Tak. Convenient doorstep delivery with COD.',
   keywords: [
-    'sabjiwala halol',
-    'sabji delivery halol',
-    'fresh vegetables halol',
-    'fresh fruits halol',
-    'online sabji halol',
-    'baska gidc vegetables',
-    'halol panchmahal vegetable delivery',
-    'તાજા શાકભાજી હાલોલ',
-    'તાજા ફળો હાલોલ',
-    'રોજિંદી શાકભાજી ડિલિવરી',
-    'apmc mandi rate halol',
-    'online fruit delivery halol',
+    'TaazaTokra',
+    'TaazaTokra Halol',
+    'તાજાટોકરા',
+    'fresh fruits Halol',
+    'fresh vegetables Halol',
+    'fruit delivery Halol',
+    'vegetable delivery Halol',
+    'fruits and vegetables delivery Halol',
+    'online fruits Halol',
+    'online vegetables Halol',
+    'તાજા ફળ અને શાકભાજી હાલોલ',
+    'તાજા શાકભાજી ડિલિવરી હાલોલ',
+    'Panchmahal fruits and vegetables',
   ],
-  authors: [{ name: 'Sabjiwala Fresh Produce Team' }],
-  creator: 'Sabjiwala Halol',
-  publisher: 'Sabjiwala Halol',
+  authors: [{ name: 'TaazaTokra Fresh Produce Team' }],
+  creator: 'TaazaTokra',
+  publisher: 'TaazaTokra Halol',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/apple-icon', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: ['/icon.svg'],
+  },
+  manifest: '/manifest.webmanifest',
   formatDetection: {
     telephone: true,
     address: true,
@@ -49,24 +64,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'gu_IN',
-    url: 'https://sabjiwala.com',
-    title: 'સબ્જીવાલા • Sabjiwala Halol | તાજા ફળો અને શાકભાજી',
-    description: 'હાલોલ અને બાસ્કામાં રોજ સવારે ઘરબેઠા તાજા શાકભાજી અને ફળો મેળવો. ઓર્ડર કરો અને 10% ડિસ્કાઉન્ટ મેળવો.',
-    siteName: 'Sabjiwala Halol',
+    url: siteUrl,
+    title: 'TaazaTokra • તાજાટોકરા | Fresh Fruits & Vegetables Delivery in Halol',
+    description: 'Taaza Phal, Taazi Sabzi — Seedha Ghar Tak. Order fresh fruits & vegetables daily in Halol with Cash on Delivery.',
+    siteName: 'TaazaTokra',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=1200&auto=format&fit=crop&q=80',
+        url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: 'Sabjiwala Halol Fresh Fruits and Vegetables Delivery',
+        alt: 'TaazaTokra Fresh Fruits and Vegetables Delivery in Halol',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'સબ્જીવાલા • Sabjiwala Halol | Fresh Fruits & Vegetables',
-    description: 'Farm-fresh vegetables & fruits delivered daily in Halol & Baska GIDC. Order before 8 PM.',
-    images: ['https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=1200&auto=format&fit=crop&q=80'],
+    title: 'TaazaTokra • તાજાટોકરા | Fresh Fruits & Vegetables in Halol',
+    description: 'Taaza Phal, Taazi Sabzi — Seedha Ghar Tak. Fresh fruits & vegetables delivered daily in Halol.',
+    images: [`${siteUrl}/opengraph-image`],
   },
   robots: {
     index: true,
@@ -86,17 +101,20 @@ const jsonLdSchema = {
   '@graph': [
     {
       '@type': 'GroceryStore',
-      '@id': 'https://sabjiwala.com/#store',
-      name: 'Sabjiwala Halol (સબ્જીવાલા)',
-      description: 'Daily fresh fruits and vegetables procurement from APMC market with morning doorstep delivery in Halol and Baska GIDC, Panchmahal, Gujarat.',
-      url: 'https://sabjiwala.com',
+      '@id': `${siteUrl}/#store`,
+      name: 'TaazaTokra (તાજાટોકરા)',
+      alternateName: 'TaazaTokra Halol',
+      description: 'Fresh fruits and vegetables delivery in Halol, Panchmahal, Gujarat. Taaza Phal, Taazi Sabzi — Seedha Ghar Tak.',
+      url: siteUrl,
+      logo: `${siteUrl}/icon.svg`,
+      image: `${siteUrl}/opengraph-image`,
       telephone: '+919876543210',
       priceRange: '₹10 - ₹500',
-      paymentAccepted: 'Cash, UPI, Online',
+      paymentAccepted: 'Cash on Delivery (COD)',
       currenciesAccepted: 'INR',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Baska / Halol Highway Road',
+        streetAddress: 'Shop No. 4, APMC Market Road',
         addressLocality: 'Halol',
         addressRegion: 'Gujarat',
         postalCode: '389350',
@@ -117,6 +135,7 @@ const jsonLdSchema = {
       ],
       areaServed: [
         { '@type': 'City', name: 'Halol' },
+        { '@type': 'AdministrativeArea', name: 'Halol GIDC' },
         { '@type': 'AdministrativeArea', name: 'Baska GIDC' },
         { '@type': 'AdministrativeArea', name: 'Panchmahal' },
       ],

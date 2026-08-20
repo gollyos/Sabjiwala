@@ -50,13 +50,13 @@ export default async function BagLookupPage({
           </div>
           <h2 className="text-xl font-bold">Invalid or Expired Bag QR</h2>
           <p className="text-xs text-slate-400">
-            This QR code token was not recognized in the Sabjiwala warehouse system.
+            This QR code token was not recognized in the TaazaTokra warehouse system.
           </p>
           <Link
             href="/"
             className="inline-block px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl"
           >
-            Go to Sabjiwala Home
+            Go to TaazaTokra Home
           </Link>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default async function BagLookupPage({
             <Package className="w-6 h-6" />
           </div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-700/50">
-            Verified Sabjiwala Package
+            Verified TaazaTokra Package
           </span>
           <h1 className="text-2xl font-black font-mono tracking-tight mt-1">
             {bag.bag_barcode}
@@ -139,7 +139,7 @@ export default async function BagLookupPage({
         {/* Footer */}
         <div className="text-center pt-2">
           <p className="text-[10px] text-slate-500">
-            Halol APMC Mandi Direct • Fresh Vegetable Delivery
+            Halol APMC Mandi Direct • Fresh Fruits &amp; Vegetables Delivery
           </p>
         </div>
 

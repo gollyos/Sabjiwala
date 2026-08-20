@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     const supabase = getServiceSupabase();
     let csvHeader = '';
     let csvRows: string[] = [];
-    let filename = `sabjiwala_${type}_${startDate}_to_${endDate}.csv`;
+    let filename = `taazatokra_${type}_${startDate}_to_${endDate}.csv`;
 
     if (type === 'orders') {
       const { data } = await supabase.rpc('get_detailed_orders_report', {

@@ -254,28 +254,31 @@ export default function HomePage() {
       <section className="bg-gradient-to-b from-emerald-800 via-teal-900 to-emerald-950 text-white relative overflow-hidden py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-3">
           
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-emerald-200">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-emerald-200">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Farm Fresh in Halol • Daily Morning 10 AM – 1 PM Delivery</span>
+            <span>TaazaTokra (તાજાટોકરા) • Halol Daily Morning 10 AM – 1 PM Delivery</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-            તાજાં ફળો અને શાકભાજી, રોજ સવારે <span className="text-emerald-300">તમારા ઘરઆંગણે</span>
+            Fresh Fruits &amp; Vegetables Delivered in Halol
+            <span className="block text-emerald-300 text-lg sm:text-2xl font-medium mt-1">
+              તાજા ફળ, તાજું શાક — સીધું તમારા ઘર સુધી.
+            </span>
           </h1>
 
           <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl">
-            Sourced every night from APMC market & local orchards. Premium grade fruits, farm-fresh vegetables, zero plastic packing.
+            Taaza Phal, Taazi Sabzi — Seedha Ghar Tak. Handpicked daily from APMC market &amp; local orchards with transparent pricing and doorstep Cash on Delivery.
           </p>
 
           {/* Value Badges */}
           <div className="flex flex-wrap gap-2 pt-2 text-xs">
             <div className="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-1.5 font-bold text-amber-300">
               <Tag className="w-3.5 h-3.5" />
-              <span>FIRST500: 10% OFF on First 3 Orders</span>
+              <span>FIRST500: 10% OFF on First Order</span>
             </div>
             <div className="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-1.5 font-bold text-emerald-200">
               <Clock className="w-3.5 h-3.5" />
-              <span>Free Delivery on ₹200+</span>
+              <span>Free Delivery on ₹200+ (COD)</span>
             </div>
           </div>
 
@@ -485,10 +488,10 @@ export default function HomePage() {
                 <span>વારંવાર પૂછાતા પ્રશ્નો (FAQs)</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                સબ્જીવાલા હાલોલ વિશે વધુ જાણો
+                TaazaTokra Halol વિશે વધુ જાણો
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                હાલોલ અને બાસ્કામાં શાકભાજી અને ફળોના ઓર્ડર અને ડિલિવરી અંગે સામાન્ય પ્રશ્નોના જવાબો.
+                હાલોલમાં તાજા ફળો અને શાકભાજીના ઓર્ડર અને ડિલિવરી અંગે સામાન્ય પ્રશ્નોના જવાબો.
               </p>
             </div>
 
@@ -546,8 +549,13 @@ export default function HomePage() {
               </span>
             ))}
           </div>
+          <div className="pt-2 text-xs">
+            <a href="/delivery-areas/halol" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
+              View Detailed Halol Delivery Areas &amp; Timings &rarr;
+            </a>
+          </div>
           <p className="text-[11px] text-slate-400 pt-2">
-            © {new Date().getFullYear()} સબ્જીવાલા • Sabjiwala Halol. Farm Fresh Produce Delivered Daily.
+            © {new Date().getFullYear()} TaazaTokra (તાજાટોકરા) • Fresh Fruits &amp; Vegetables Delivered Daily in Halol.
           </p>
         </section>
 

@@ -65,7 +65,7 @@ export function AdminNav() {
             <Link href="/admin/dashboard" className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="font-extrabold text-sm text-white tracking-tight">
-                Sabjiwala HQ <span className="text-emerald-400 text-xs font-medium">• Halol</span>
+                TaazaTokra HQ <span className="text-emerald-400 text-xs font-medium">• Halol</span>
               </span>
             </Link>
           </div>

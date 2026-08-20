@@ -56,7 +56,7 @@ export function MobileBottomNav() {
               <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-600"></span>
             )}
           </div>
-          <span className="text-[10px] mt-1 tracking-tight">શાકભાજી</span>
+          <span className="text-[10px] mt-1 tracking-tight">ફળ-શાક</span>
         </Link>
 
         {/* 2. Search / Explore */}

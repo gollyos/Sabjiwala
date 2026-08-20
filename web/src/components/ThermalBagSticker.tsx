@@ -65,8 +65,8 @@ export default function ThermalBagSticker({
       <div>
         <div className="flex items-center justify-between border-b-2 border-black pb-1.5 mb-2">
           <div>
-            <div className="text-xl font-black tracking-wider uppercase font-mono">SABJIWALA</div>
-            <div className="text-[10px] font-bold text-gray-700">Halol Fresh Mandi Direct</div>
+            <div className="text-xl font-black tracking-wider uppercase font-mono">TAAZATOKRA</div>
+            <div className="text-[10px] font-bold text-gray-700">Halol Fresh Fruits &amp; Vegetables</div>
           </div>
           <div className="text-right">
             <div className="px-2 py-0.5 bg-black text-white text-xs font-black rounded font-mono">

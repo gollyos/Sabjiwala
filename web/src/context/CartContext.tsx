@@ -322,6 +322,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({}),
         }).catch((err) => console.error('Notification dispatch trigger:', err));
 
+        // Instantly trigger n8n automated webhook for Google Sheets & WhatsApp dispatch
+        fetch('/api/automation/n8n-trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderResult.order_id }),
+        }).catch((err) => console.error('n8n dispatch trigger:', err));
+
         return { success: true, data: orderResult };
       }
 
@@ -351,8 +358,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           key: rzpData.key_id,
           amount: rzpData.amount_paise,
           currency: 'INR',
-          name: 'Sabjiwala Halol',
-          description: `Order ${orderResult.order_number} • Fresh Farm Vegetables`,
+          name: 'TaazaTokra Halol',
+          description: `Order ${orderResult.order_number} • Fresh Fruits & Vegetables`,
           order_id: rzpData.razorpay_order_id,
           prefill: rzpData.customer_prefill,
           theme: {
@@ -386,6 +393,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 clearCart();
                 setCartDrawerOpen(false);
                 setOrderSuccessData(confirmedResult);
+
+                // Instantly trigger notifications & n8n webhook
+                fetch('/api/notifications/process', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).catch(() => {});
+                fetch('/api/automation/n8n-trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderResult.order_id }) }).catch(() => {});
+
                 resolve({ success: true, data: confirmedResult });
               } else {
                 setOrderError(verifyData.error || 'Payment signature verification delayed. We are checking status.');

@@ -87,9 +87,9 @@ export async function POST(req: NextRequest) {
             let replyText = '';
 
             if (textBody.includes('HELP') || textBody.includes('મદદ') || textBody.includes('SUPPORT')) {
-              replyText = `*Sabjiwala Support (શાકભાજીવાળા સહાયતા)* 🤝\n\nNeed help with your fresh vegetable order? Contact our Halol support desk:\n📞 Call/WhatsApp: ${supportMobile}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
+              replyText = `*TaazaTokra Support (તાજાટોકરા સહાયતા)* 🤝\n\nNeed help with your fresh fruits & vegetables order? Contact our Halol support desk:\n📞 Call/WhatsApp: ${supportMobile}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
             } else if (textBody.includes('ORDER') || textBody.includes('ઓર્ડર') || textBody.includes('BUY') || textBody.includes('SHOP')) {
-              replyText = `*Order Fresh Vegetables (તાજા શાકભાજી ઓર્ડર કરો)* 🥦🍅\n\nPlace your next-day morning delivery order on our web app:\n👉 ${pwaBaseUrl}\n\n• Farm-fresh mandi rates\n• 10% OFF for first 500 customers (FIRST500)\n• 2% Cash on Delivery discount`;
+              replyText = `*Order Fresh Fruits & Vegetables (તાજા ફળો અને શાકભાજી)* 🍎🥦\n\nPlace your next-day morning delivery order on our web app:\n👉 ${pwaBaseUrl}\n\n• Farm-fresh mandi rates\n• 10% OFF with FIRST500\n• 2% Cash on Delivery discount`;
             } else if (textBody.includes('STATUS') || textBody.includes('MY ORDER') || textBody.includes('TRACK') || textBody.includes('મારો ઓર્ડર')) {
               // Find latest active or recent order for this phone
               const cleanMobile = senderRaw.replace(/[^0-9]/g, '').slice(-10);
@@ -103,17 +103,17 @@ export async function POST(req: NextRequest) {
 
               if (latestOrder && latestOrder.tracking_token) {
                 const trackUrl = `${pwaBaseUrl}/track/${latestOrder.tracking_token}`;
-                replyText = `*Your Latest Sabjiwala Order (તમારો છેલ્લો ઓર્ડર)* 📦\n\n*Order No:* ${latestOrder.order_number}\n*Delivery Date:* ${latestOrder.delivery_date}\n*Status:* ${latestOrder.order_status.toUpperCase()}\n*Payable:* ₹${latestOrder.final_payable_amount}\n\n*Track Details / બિલ જુઓ:* \n${trackUrl}`;
+                replyText = `*Your Latest TaazaTokra Order (તમારો છેલ્લો ઓર્ડર)* 📦\n\n*Order No:* ${latestOrder.order_number}\n*Delivery Date:* ${latestOrder.delivery_date}\n*Status:* ${latestOrder.order_status.toUpperCase()}\n*Payable:* ₹${latestOrder.final_payable_amount}\n\n*Track Details / બિલ જુઓ:* \n${trackUrl}`;
               } else {
                 replyText = `*No Active Orders Found*\n\nWe could not find an order linked to ${senderE164}.\nPlace your order fresh at: ${pwaBaseUrl}`;
               }
             } else if (textBody.includes('REPEAT') || textBody.includes('REORDER') || textBody.includes('ફરી ઓર્ડર')) {
-              replyText = `*Repeat Previous Order (પાછલો ઓર્ડર ફરી કરો)* 🔄\n\nQuickly reload your favorite vegetables into cart at current live prices:\n👉 ${pwaBaseUrl}/profile?action=repeat\n\n_Note: Cart will automatically apply today's morning mandi prices._`;
+              replyText = `*Repeat Previous Order (પાછલો ઓર્ડર ફરી કરો)* 🔄\n\nQuickly reload your favorite fruits & vegetables into cart at current live prices:\n👉 ${pwaBaseUrl}/profile?action=repeat\n\n_Note: Cart will automatically apply today's morning mandi prices._`;
             } else if (textBody.includes('ADDRESS') || textBody.includes('સરનામું')) {
               replyText = `*Manage Delivery Address (સરનામું બદલો)* 📍\n\nUpdate your Halol delivery location and landmarks:\n👉 ${pwaBaseUrl}/profile`;
             } else {
               // Default friendly guidance
-              replyText = `*Sabjiwala (શાકભાજીવાળા)* 🥕\n\nWelcome! How can we assist you today?\n\nReply with one of these commands:\n• *ORDER* — Shop fresh vegetables\n• *STATUS* — Track your current order\n• *REPEAT* — Reorder previous items\n• *HELP* — Customer care support\n\n🌐 Visit: ${pwaBaseUrl}`;
+              replyText = `*TaazaTokra (તાજાટોકરા)* 🌿\n\nWelcome! How can we assist you today?\n\nReply with one of these commands:\n• *ORDER* — Shop fresh fruits & vegetables\n• *STATUS* — Track your current order\n• *REPEAT* — Reorder previous items\n• *HELP* — Customer care support\n\n🌐 Visit: ${pwaBaseUrl}`;
             }
 
             // Dispatch reply

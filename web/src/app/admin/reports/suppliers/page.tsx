@@ -72,7 +72,7 @@ export default function SupplierReportingPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sabjiwala_suppliers_${startDate}_to_${endDate}.csv`;
+      a.download = `taazatokra_suppliers_${startDate}_to_${endDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

@@ -615,7 +615,7 @@ export function CustomerProfileModal() {
         {/* Footer Logout */}
         <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="text-xs text-slate-400">
-            Halol Delivery System • Sabjiwala
+            Halol Delivery System • TaazaTokra (તાજાટોકરા)
           </div>
           <button
             onClick={signOut}

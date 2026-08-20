@@ -223,13 +223,13 @@ export function AuthModal() {
             </div>
             <div>
               <h3 className="font-bold text-lg leading-tight">
-                {step === 'phone' && 'Welcome to Sabjiwala'}
+                {step === 'phone' && 'Welcome to TaazaTokra (તાજાટોકરા)'}
                 {step === 'otp' && 'Verify Phone Number'}
                 {step === 'onboarding' && 'Complete Delivery Profile'}
                 {step === 'success' && 'Welcome Back!'}
               </h3>
               <p className="text-xs text-emerald-100">
-                {step === 'phone' && 'Fresh Vegetables Delivered Daily in Halol'}
+                {step === 'phone' && 'Fresh Fruits & Vegetables Delivered Daily in Halol'}
                 {step === 'otp' && `OTP sent to +91 ${mobile}`}
                 {step === 'onboarding' && 'One-time details for lightning-fast daily orders'}
                 {step === 'success' && 'Your profile is ready'}

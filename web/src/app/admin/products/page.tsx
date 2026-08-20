@@ -441,7 +441,7 @@ export default function AdminProductsPage() {
               <span>Catalog & Inventory Controller</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Vegetable Catalog & Pricing (શાકભાજી કેટલોગ)
+              Fruits &amp; Vegetables Catalog (ફળ અને શાકભાજી કેટલોગ)
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               1-click toggle product visibility, stock status, adjust daily pack prices, and add new items.

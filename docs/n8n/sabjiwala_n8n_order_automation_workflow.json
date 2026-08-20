@@ -1,0 +1,171 @@
+{
+  "name": "Sabjiwala - Direct WhatsApp Customer & Admin Order Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-new-order",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook Trigger (From Sabjiwala)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "sabjiwala-order-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.whatsapp.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_META_OR_WHATSAPP_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_product",
+              "value": "whatsapp"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.order.customer.mobile_e164 }}"
+            },
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={\n  \"preview_url\": true,\n  \"body\": \"*🌿 સાબજીવાલા હલોલ - ઓર્ડર કન્ફર્મ!* 🍅🥦\\n\\nનમસ્તે *\" + $json.order.customer.name + \"* જી! 🙏\\nતમારો શાકભાજીનો ઓર્ડર સફળતાપૂર્વક નોંધાઈ ગયો છે.\\n\\n*ઓર્ડર નંબર:* \" + $json.order.order_number + \"\\n*ડિલિવરી તારીખ:* \" + $json.order.delivery_date + \" (10:00 AM - 1:00 PM)\\n*સરનામું:* \" + $json.order.customer.area + \", Halol\\n\\n*શાકભાજી વિગતો:*\\n\" + $json.order.items_summary_text + \"\\n\\n*ચૂકવવાપાત્ર રોકડ (COD):* ₹\" + $json.order.financials.final_payable_amount + \"\\n\\n👉 *લાઈવ ટ્રેકિંગ લિંક:*\\n\" + $json.order.tracking_url + \"\\n\\n_ધન્યવાદ! સાબજીવાલા - તાજી શાકભાજી તમારા ઘરે._\"\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Send WhatsApp To Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.whatsapp.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_META_OR_WHATSAPP_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_product",
+              "value": "whatsapp"
+            },
+            {
+              "name": "to",
+              "value": "919876543210"
+            },
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={\n  \"body\": \"🔔 *NEW ORDER RECEIVED (નવો ઓર્ડર)!*\\n\\n*Order Number:* \" + $json.order.order_number + \"\\n*Customer:* \" + $json.order.customer.name + \" (\" + $json.order.customer.mobile + \")\\n*Area:* \" + $json.order.customer.area + \"\\n*COD Amount:* ₹\" + $json.order.financials.final_payable_amount + \"\\n*Items:* \" + $json.order.items_summary_text + \"\\n\\n*Admin Panel:* \" + $json.order.admin_order_url\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Notify Store Admin (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        500,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"WhatsApp notifications dispatched successfully via n8n.\",\n  \"order_number\": $json.order.order_number\n}",
+        "options": {}
+      },
+      "name": "Respond to Sabjiwala",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        750,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger (From Sabjiwala)": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp To Customer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Store Admin (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp To Customer": {
+      "main": [
+        [
+          {
+            "node": "Respond to Sabjiwala",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Store Admin (WhatsApp)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Sabjiwala",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

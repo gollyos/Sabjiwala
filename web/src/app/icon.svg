@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="tokraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Shield -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+
+  <!-- Subtle Inner Border -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="#34d399" stroke-width="6" stroke-opacity="0.3" />
+
+  <!-- Tokra Basket & Produce Icon Group -->
+  <g filter="url(#dropShadow)" transform="translate(4, -8)">
+    
+    <!-- Fresh Sprout Leaves -->
+    <!-- Left Leaf -->
+    <path d="M256 220 C220 140 140 130 130 200 C125 240 180 270 256 220 Z" fill="url(#leafGrad)" />
+    <!-- Right Leaf -->
+    <path d="M256 220 C292 140 372 130 382 200 C387 240 332 270 256 220 Z" fill="#6ee7b7" />
+    <!-- Center Sprout -->
+    <path d="M256 220 C256 120 280 90 290 80 C260 90 230 130 256 220 Z" fill="#a7f3d0" />
+
+    <!-- Red Apple / Tomato Accent -->
+    <circle cx="210" cy="250" r="42" fill="#ef4444" />
+    <path d="M210 215 C215 200 225 195 230 195" stroke="#78350f" stroke-width="5" stroke-linecap="round" fill="none" />
+
+    <!-- Orange Citrus / Fruit Accent -->
+    <circle cx="302" cy="252" r="38" fill="#f97316" />
+
+    <!-- Tokra / Basket Base (Curved woven basket bowl) -->
+    <path d="M120 270 Q256 250 392 270 L360 380 Q256 420 152 380 Z" fill="url(#tokraGrad)" />
+
+    <!-- Basket Rim -->
+    <path d="M108 265 Q256 245 404 265 Q256 280 108 265 Z" fill="#fbbf24" />
+
+    <!-- Woven Grid Lines on Basket -->
+    <path d="M180 270 L195 390 M256 265 L256 405 M332 270 L317 390" stroke="#b45309" stroke-width="6" stroke-linecap="round" opacity="0.6" />
+    <path d="M135 320 Q256 345 377 320 M145 360 Q256 385 367 360" fill="none" stroke="#b45309" stroke-width="5" opacity="0.6" />
+  </g>
+</svg>

@@ -101,7 +101,7 @@ export default function OrderTrackingPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>Go to Sabjiwala Store</span>
+              <span>Go to TaazaTokra Store</span>
             </Link>
           </div>
         </div>
@@ -137,11 +137,11 @@ export default function OrderTrackingPage() {
         <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-black bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
-              Sabjiwala 🥦
+              TaazaTokra 🌿
             </span>
           </Link>
           <a
-            href="https://wa.me/919876543210?text=Hi%20Sabjiwala%20Support,%20I%20need%20help%20with%20my%20order"
+            href="https://wa.me/919876543210?text=Hi%20TaazaTokra%20Support,%20I%20need%20help%20with%20my%20order"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/80 border border-emerald-700/60 rounded-full text-emerald-400 text-xs font-bold hover:bg-emerald-900 transition-all"

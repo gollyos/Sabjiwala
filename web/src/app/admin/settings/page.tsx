@@ -20,7 +20,8 @@ import {
   Clock,
   ShieldCheck,
   Smartphone,
-  Globe
+  Globe,
+  Zap
 } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
@@ -32,11 +33,23 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<any>({});
   const [promoStats, setPromoStats] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
+  const [n8nTestStatus, setN8nTestStatus] = useState<{ loading: boolean; message: string | null; error: string | null }>({
+    loading: false,
+    message: null,
+    error: null,
+  });
+
+  const [n8nConfig, setN8nConfig] = useState({
+    webhook_url: '',
+    is_active: true,
+    admin_alert_phone: '+919876543210',
+    admin_alert_email: 'orders@taazatokra.com',
+  });
 
   // Form states for different tabs
   const [businessProfile, setBusinessProfile] = useState({
-    business_name: 'Sabjiwala',
-    business_name_gu: 'શાકભાજીવાળા',
+    business_name: 'TaazaTokra',
+    business_name_gu: 'તાજાટોકરા',
     support_mobile: '+919876543210',
     whatsapp_number: '+919876543210',
     business_address: 'Shop No. 4, APMC Market Road, Halol, Panchmahal, Gujarat - 389350',
@@ -125,6 +138,7 @@ export default function AdminSettingsPage() {
       if (s.printer_settings) setPrinterSettings(s.printer_settings);
       if (s.whatsapp_notification_preferences) setNotificationPreferences(s.whatsapp_notification_preferences);
       if (s.feature_flags) setFeatureFlags(s.feature_flags);
+      if (s.n8n_config) setN8nConfig(s.n8n_config);
     } catch (err: any) {
       setError(err.message || 'Error loading settings');
     } finally {
@@ -160,8 +174,35 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleTestN8nWebhook = async () => {
+    if (!n8nConfig.webhook_url) {
+      alert('Please enter your n8n Webhook URL first.');
+      return;
+    }
+    setN8nTestStatus({ loading: true, message: null, error: null });
+    try {
+      const res = await fetch('/api/automation/n8n-trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          is_test: true,
+          test_webhook_url: n8nConfig.webhook_url,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setN8nTestStatus({ loading: false, message: '✅ Connection Successful! n8n received the test order event.', error: null });
+      } else {
+        setN8nTestStatus({ loading: false, message: null, error: json.error || 'Failed to connect to n8n webhook.' });
+      }
+    } catch (err: any) {
+      setN8nTestStatus({ loading: false, message: null, error: err.message || 'Error connecting to n8n' });
+    }
+  };
+
   const tabs = [
     { id: 'business', label: 'Business Profile', icon: Building2 },
+    { id: 'n8n', label: 'n8n Automation (ઓટોમેશન)', icon: Zap },
     { id: 'ordering', label: 'Ordering & COD', icon: ShoppingBag },
     { id: 'first500', label: 'Offers & Campaigns', icon: Gift },
     { id: 'delivery', label: 'Delivery & Cutoff', icon: Truck },
@@ -332,7 +373,131 @@ export default function AdminSettingsPage() {
           </div>
         )}
 
-        {/* TAB 2: Ordering & COD Settings */}
+        {/* TAB 2: n8n Automation */}
+        {activeTab === 'n8n' && (
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span>n8n Workflow Automation (ઓટોમેશન સેટિંગ્સ)</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Instant Google Sheets / Excel auto-entry, automated WhatsApp customer receipts, and admin alerts upon order confirmation.
+                </p>
+              </div>
+              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                n8nConfig.is_active
+                  ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                  : 'bg-slate-800 text-slate-400 border-slate-700'
+              }`}>
+                {n8nConfig.is_active ? 'Automation Active' : 'Disabled'}
+              </span>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
+                <label className="text-slate-400 font-bold uppercase text-[10px] flex items-center justify-between">
+                  <span>n8n Webhook Production URL</span>
+                  <span className="text-amber-400 font-mono text-[10px]">POST /webhook/taazatokra-orders</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://your-n8n-domain.com/webhook/taazatokra-new-order"
+                  value={n8nConfig.webhook_url}
+                  onChange={(e) => setN8nConfig({ ...n8nConfig, webhook_url: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono placeholder:text-slate-600 focus:border-emerald-500 focus:outline-hidden"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Paste the Webhook URL from your n8n workflow. Whenever an order is confirmed, TaazaTokra immediately posts the full structured order payload to this URL.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
+                  <label className="text-slate-400 font-bold uppercase text-[10px]">Admin WhatsApp for Instant Alerts</label>
+                  <input
+                    type="text"
+                    value={n8nConfig.admin_alert_phone}
+                    onChange={(e) => setN8nConfig({ ...n8nConfig, admin_alert_phone: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                  <p className="text-[10px] text-slate-500">n8n will notify this number immediately on new order receipts.</p>
+                </div>
+
+                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
+                  <label className="text-slate-400 font-bold uppercase text-[10px]">Admin Alert Email</label>
+                  <input
+                    type="email"
+                    value={n8nConfig.admin_alert_email}
+                    onChange={(e) => setN8nConfig({ ...n8nConfig, admin_alert_email: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                  <p className="text-[10px] text-slate-500">n8n can optionally dispatch HTML order summary emails.</p>
+                </div>
+              </div>
+
+              {/* Automation Feature Guide Box */}
+              <div className="p-4 bg-amber-950/30 border border-amber-900/60 rounded-2xl text-amber-200/90 text-xs space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-amber-300">
+                  <Zap className="w-4 h-4" />
+                  <span>How the Automated Flow Works (ઓટોમેશન કેવી રીતે કામ કરે છે)</span>
+                </div>
+                <ol className="list-decimal list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
+                  <li><strong className="text-white">Customer Books Order:</strong> TaazaTokra records the order securely in Supabase and prepares customer, date, month, week #, and COD details.</li>
+                  <li><strong className="text-white">n8n Webhook Triggers:</strong> n8n receives the JSON payload instantaneously.</li>
+                  <li><strong className="text-white">WhatsApp to Customer:</strong> n8n automatically sends a rich order confirmation message with items breakdown and bill link to the customer&apos;s WhatsApp.</li>
+                  <li><strong className="text-white">Admin Alert:</strong> n8n sends a quick alert notification to the store owner&apos;s WhatsApp/Email.</li>
+                  <li><strong className="text-white">Dashboard Live Refresh:</strong> Admin orders page updates in Realtime.</li>
+                </ol>
+              </div>
+
+              {/* Test Webhook Connection */}
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white">Test Connection to n8n</span>
+                  <button
+                    type="button"
+                    onClick={handleTestN8nWebhook}
+                    disabled={n8nTestStatus.loading || !n8nConfig.webhook_url}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    {n8nTestStatus.loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                    <span>Test Webhook (ટેસ્ટ કરો)</span>
+                  </button>
+                </div>
+
+                {n8nTestStatus.message && (
+                  <div className="p-3 bg-emerald-950 border border-emerald-800 rounded-xl text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{n8nTestStatus.message}</span>
+                  </div>
+                )}
+
+                {n8nTestStatus.error && (
+                  <div className="p-3 bg-rose-950 border border-rose-800 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{n8nTestStatus.error}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => handleSaveSetting('n8n_config', n8nConfig)}
+                disabled={saving}
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save n8n Automation Settings</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: Ordering & COD Settings */}
         {activeTab === 'ordering' && (
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
             <div className="border-b border-slate-800 pb-3">
