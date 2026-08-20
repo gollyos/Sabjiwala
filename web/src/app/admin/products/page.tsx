@@ -417,6 +417,32 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleDeleteVariant = async (variantId: string, variantName: string) => {
+    const confirmed = window.confirm(`Are you sure you want to remove the pack size "${variantName}"?`);
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.from('product_variants').delete().eq('id', variantId);
+      if (error) {
+        // If referenced in historical orders, mark inactive
+        const { error: updateErr } = await supabase
+          .from('product_variants')
+          .update({ is_active: false })
+          .eq('id', variantId);
+        if (updateErr) throw updateErr;
+      }
+      setIsVariantModalOpen(false);
+      setStatusMsg({ type: 'success', text: `Pack size "${variantName}" removed successfully!` });
+      await loadData();
+    } catch (err: any) {
+      console.error('Error deleting variant:', err);
+      alert(err.message || 'Failed to remove pack size.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filter products
   const filteredProducts = products.filter((p) => {
     const matchesCat = selectedCategoryFilter === 'all' || p.category_id === selectedCategoryFilter;
@@ -654,12 +680,22 @@ export default function AdminProductsPage() {
                               <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">
                                 ₹{Number(v.selling_price).toFixed(0)}
                               </span>
-                              <button
-                                onClick={() => openEditVariantModal(prod, v)}
-                                className="text-slate-400 hover:text-slate-600 p-1"
-                              >
-                                <Edit2 className="w-3 h-3" />
-                              </button>
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  onClick={() => openEditVariantModal(prod, v)}
+                                  className="text-slate-400 hover:text-emerald-600 p-1 cursor-pointer"
+                                  title="Edit Pack Size & Rate"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteVariant(v.id, v.variant_name_en || v.variant_name_gu)}
+                                  className="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
+                                  title="Remove Pack Size"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -682,9 +718,9 @@ export default function AdminProductsPage() {
             
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
-                {editingProductId ? 'Edit Vegetable (શાકભાજી વિગત)' : 'Add New Vegetable (+ નવી શાકભાજી)'}
+                {editingProductId ? 'Edit Product (ઉત્પાદન વિગત)' : 'Add New Product (+ નવું ઉત્પાદન)'}
               </h3>
-              <button onClick={() => setIsProductModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsProductModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -697,7 +733,7 @@ export default function AdminProductsPage() {
                   <label className="block text-slate-500 font-bold mb-1">Gujarati Name (ગુજરાતી નામ) *</label>
                   <input
                     type="text"
-                    placeholder="દા.ત. ટામેટાં, બટાટા"
+                    placeholder="દા.ત. ટામેટાં, સફરજન"
                     value={prodNameGu}
                     onChange={(e) => setProdNameGu(e.target.value)}
                     required
@@ -709,7 +745,7 @@ export default function AdminProductsPage() {
                   <label className="block text-slate-500 font-bold mb-1">English Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Tomato, Potato"
+                    placeholder="e.g. Tomato, Apple"
                     value={prodNameEn}
                     onChange={(e) => setProdNameEn(e.target.value)}
                     required
@@ -721,62 +757,76 @@ export default function AdminProductsPage() {
               {/* Category & Unit */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Category (કેટેગરી)</label>
+                  <label className="block text-slate-500 font-bold mb-1">Category (શ્રેણી) *</label>
                   <select
                     value={prodCategoryId}
                     onChange={(e) => setProdCategoryId(e.target.value)}
+                    required
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name_gu} ({c.name_en})</option>
+                      <option key={c.id} value={c.id}>
+                        {c.name_gu} ({c.name_en})
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Base Unit</label>
+                  <label className="block text-slate-500 font-bold mb-1">Base Measuring Unit *</label>
                   <select
                     value={prodBaseUnitId}
                     onChange={(e) => setProdBaseUnitId(e.target.value)}
+                    required
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
                   >
                     {units.map((u) => (
-                      <option key={u.id} value={u.id}>{u.name_gu || u.name_en} ({u.code})</option>
+                      <option key={u.id} value={u.id}>
+                        {u.name_gu} ({u.name_en}) - {u.code}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              {/* Fast Add 1kg Rate for automatic 250g, 500g, 1kg generation */}
+              {/* Fast Add Packs Option (Only for new products) */}
               {!editingProductId && (
-                <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200 font-bold">
-                    <Zap className="w-4 h-4 text-amber-500" />
-                    <span>Auto-Create Standard Pack Sizes (250g, 500g, 1kg)</span>
+                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-extrabold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isFastAdd}
+                        onChange={(e) => setIsFastAdd(e.target.checked)}
+                        className="rounded-md w-4 h-4 text-emerald-600"
+                      />
+                      <span>Auto-create standard packs (250g, 500g, 1kg)</span>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
-                    Enter the standard 1kg rate. We will automatically create the 250g, 500g, and 1kg pack sizes.
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="font-bold text-slate-700 dark:text-slate-200">1kg Rate (₹):</span>
-                    <input
-                      type="number"
-                      value={fastAddPrice1kg}
-                      onChange={(e) => setFastAddPrice1kg(Number(e.target.value))}
-                      className="w-24 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 font-mono font-black text-slate-900 dark:text-white"
-                    />
-                  </div>
+                  {isFastAdd && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="text-emerald-800 dark:text-emerald-300 font-medium">1 kg Price (₹):</span>
+                      <input
+                        type="number"
+                        value={fastAddPrice1kg}
+                        onChange={(e) => setFastAddPrice1kg(Number(e.target.value))}
+                        className="w-24 bg-white dark:bg-slate-900 border border-emerald-300 rounded-xl p-1.5 font-mono font-bold text-emerald-700 dark:text-emerald-300"
+                      />
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                        (500g = ₹{Math.round(fastAddPrice1kg * 0.52)}, 250g = ₹{Math.round(fastAddPrice1kg * 0.28)})
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Photo Upload & URL */}
-              <div className="space-y-2">
-                <label className="block text-slate-500 font-bold">Vegetable Photo (ફોટો)</label>
-                
+              {/* Image Upload */}
+              <div className="space-y-1.5">
+                <label className="block text-slate-500 font-bold">Product Image (ફોટો)</label>
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                     {prodImageUrl ? (
-                      <img src={prodImageUrl} alt="preview" className="w-full h-full object-cover" />
+                      <img src={prodImageUrl} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xl">🥬</div>
                     )}
@@ -785,7 +835,7 @@ export default function AdminProductsPage() {
                   <div className="flex-1 space-y-1">
                     <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold cursor-pointer transition-all">
                       <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload from Phone/Device'}</span>
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload from Device'}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -812,9 +862,9 @@ export default function AdminProductsPage() {
                   id="seasonal_checkbox"
                   checked={prodIsSeasonal}
                   onChange={(e) => setProdIsSeasonal(e.target.checked)}
-                  className="rounded-md w-4 h-4 text-emerald-600"
+                  className="rounded-md w-4 h-4 text-emerald-600 cursor-pointer"
                 />
-                <label htmlFor="seasonal_checkbox" className="font-bold text-slate-700 dark:text-slate-300">
+                <label htmlFor="seasonal_checkbox" className="font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Mark as Seasonal Special (સીઝનલ સ્પેશિયલ)
                 </label>
               </div>
@@ -823,17 +873,17 @@ export default function AdminProductsPage() {
                 <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
-                  className="px-4 py-2.5 text-slate-500 font-bold"
+                  className="px-4 py-2.5 text-slate-500 font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingProduct}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-xs flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   {savingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  <span>{editingProductId ? 'Save Changes' : 'Create Vegetable'}</span>
+                  <span>{editingProductId ? 'Save Changes' : 'Create Product'}</span>
                 </button>
               </div>
 
@@ -845,75 +895,131 @@ export default function AdminProductsPage() {
       {/* ADD / EDIT VARIANT MODAL */}
       {isVariantModalOpen && targetProduct && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
+            
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <span className="text-[10px] font-bold text-emerald-600 uppercase">{targetProduct.name_gu}</span>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">Pack Size & Rate</h3>
+                <span className="text-[10px] font-bold text-emerald-600 uppercase">{targetProduct.name_gu} ({targetProduct.name_en})</span>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                  {editingVariantId ? 'Edit Pack Size & Rate (પેક અને ભાવ)' : '+ Add Custom Pack Size (નવો પેક)'}
+                </h3>
               </div>
-              <button onClick={() => setIsVariantModalOpen(false)} className="text-slate-400">
+              <button onClick={() => setIsVariantModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
+            {/* Quick 1-Click Weight Presets */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Quick Preset Packs:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: '250g (૨૫૦ ગ્રામ)', en: '250g', gu: '૨૫૦ ગ્રામ', mult: 0.25 },
+                  { label: '500g (૫૦૦ ગ્રામ)', en: '500g', gu: '૫૦૦ ગ્રામ', mult: 0.5 },
+                  { label: '1 kg (૧ કિલો)', en: '1 kg', gu: '૧ કિલોગ્રામ', mult: 1.0 },
+                  { label: '2 kg (૨ કિલો)', en: '2 kg', gu: '૨ કિલોગ્રામ', mult: 2.0 },
+                  { label: '5 kg (૫ કિલો)', en: '5 kg', gu: '૫ કિલોગ્રામ', mult: 5.0 },
+                  { label: '1 Pc (૧ નંગ)', en: '1 Piece', gu: '૧ નંગ', mult: 1.0 },
+                  { label: '1 Dozen (૧ ડઝન)', en: '1 Dozen', gu: '૧ ડઝન', mult: 1.0 },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setVarNameEn(preset.en);
+                      setVarNameGu(preset.gu);
+                      setVarMultiplier(preset.mult);
+                    }}
+                    className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/80 hover:text-emerald-600 text-slate-700 dark:text-slate-300 font-bold text-[10px] border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <form onSubmit={handleSaveVariant} className="space-y-3 text-xs">
+              
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Gujarati Pack Name</label>
+                  <label className="block text-slate-500 font-bold mb-1">Gujarati Pack Name *</label>
                   <input
                     type="text"
-                    placeholder="દા.ત. ૫૦૦ ગ્રામ"
+                    placeholder="દા.ત. ૫૦૦ ગ્રામ / ૧ કિલો"
                     value={varNameGu}
                     onChange={(e) => setVarNameGu(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">English Pack Name</label>
+                  <label className="block text-slate-500 font-bold mb-1">English Pack Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. 500g"
+                    placeholder="e.g. 500g / 1 kg"
                     value={varNameEn}
                     onChange={(e) => setVarNameEn(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Selling Price (₹)</label>
+                  <label className="block text-slate-500 font-bold mb-1">Selling Price (વેચાણ ભાવ ₹) *</label>
                   <input
                     type="number"
                     value={varSellingPrice}
                     onChange={(e) => setVarSellingPrice(Number(e.target.value))}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono font-black text-emerald-600"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono font-black text-emerald-600 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Base Multiplier (kg)</label>
+                  <label className="block text-slate-500 font-bold mb-1">Base Multiplier (kg/unit) *</label>
                   <input
                     type="number"
-                    step="0.05"
+                    step="0.01"
                     value={varMultiplier}
                     onChange={(e) => setVarMultiplier(Number(e.target.value))}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono text-slate-900 dark:text-white"
                   />
+                  <span className="text-[10px] text-slate-400">250g=0.25, 500g=0.5, 1kg=1</span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsVariantModalOpen(false)} className="px-3 py-2 text-slate-500 font-bold">
-                  Cancel
-                </button>
-                <button type="submit" disabled={savingVariant} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl">
-                  {savingVariant ? 'Saving...' : 'Save Pack'}
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+                {editingVariantId ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteVariant(editingVariantId, varNameEn || varNameGu)}
+                    className="px-3 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-bold rounded-xl text-xs flex items-center gap-1 cursor-pointer transition-all"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Pack (હટાવો)</span>
+                  </button>
+                ) : <div />}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsVariantModalOpen(false)}
+                    className="px-3.5 py-2 text-slate-500 font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingVariant}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs cursor-pointer"
+                  >
+                    {savingVariant ? 'Saving...' : 'Save Pack'}
+                  </button>
+                </div>
               </div>
+
             </form>
           </div>
         </div>
