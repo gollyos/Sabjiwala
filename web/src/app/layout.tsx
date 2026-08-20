@@ -57,6 +57,11 @@ export const metadata: Metadata = {
     shortcut: ['/icon.svg'],
   },
   manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'TaazaTokra',
+  },
   formatDetection: {
     telephone: true,
     address: true,

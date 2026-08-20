@@ -14,21 +14,33 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: 'gu-IN',
     icons: [
       {
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
         src: '/icon.svg',
         sizes: '512x512',
         type: 'image/svg+xml',
         purpose: 'any',
       },
       {
+        src: '/apple-icon',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+      {
         src: '/favicon.svg',
         sizes: '512x512',
         type: 'image/svg+xml',
         purpose: 'maskable',
-      },
-      {
-        src: '/apple-icon',
-        sizes: '180x180',
-        type: 'image/png',
       },
       {
         src: '/favicon.ico',
