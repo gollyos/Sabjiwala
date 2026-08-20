@@ -13,9 +13,9 @@ import {
   MessageCircle, 
   RefreshCw, 
   AlertCircle,
-  Sparkles,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  RotateCcw
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -309,7 +309,7 @@ export default function OrderTrackingPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-black text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <RotateCcw className="w-4 h-4 text-emerald-400" />
                 <span>Repeat This Order (ફરી ઓર્ડર કરો)</span>
               </h3>
               <p className="text-xs text-slate-400 mt-1">

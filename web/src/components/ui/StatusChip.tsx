@@ -8,7 +8,6 @@ import {
   XCircle, 
   Lock, 
   ShieldAlert,
-  Sparkles,
   PackageCheck
 } from 'lucide-react';
 

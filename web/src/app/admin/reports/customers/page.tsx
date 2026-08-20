@@ -14,7 +14,6 @@ import {
   Clock, 
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
   ChevronRight,
   ExternalLink
 } from 'lucide-react';

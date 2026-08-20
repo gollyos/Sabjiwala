@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
-  Sparkles,
   Package,
   Calendar,
   Clock,

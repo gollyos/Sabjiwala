@@ -13,7 +13,6 @@ import {
   Image as ImageIcon, 
   Upload, 
   Layers, 
-  Sparkles, 
   AlertCircle, 
   CheckCircle2, 
   Loader2, 

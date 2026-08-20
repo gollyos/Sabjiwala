@@ -11,7 +11,7 @@ import {
   DollarSign, 
   Percent, 
   ChevronRight,
-  Sparkles,
+  TrendingUp as TrendingUpIcon,
   ArrowRight
 } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
@@ -201,7 +201,7 @@ export default function ProductReportingPage() {
           <div className="bg-slate-900 border border-purple-800/60 rounded-3xl p-5 shadow-2xl space-y-3">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-extrabold text-white tracking-wider uppercase flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400" />
+                <TrendingUp className="w-4 h-4 text-purple-400" />
                 <span>Price & Margin History Trend (Selected Product)</span>
               </h3>
               <button

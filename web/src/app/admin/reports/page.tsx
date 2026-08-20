@@ -13,8 +13,7 @@ import {
   Building2, 
   ArrowRight,
   BarChart3,
-  Scale,
-  Sparkles
+  Scale
 } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
