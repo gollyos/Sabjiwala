@@ -1,25 +1,38 @@
 /**
- * Helper to calculate dynamic delivery day based on 10:00 PM cutoff rule (IST)
+ * Helper to calculate dynamic delivery day based on 10:00 PM cutoff rule (IST - Asia/Kolkata)
  * - Before 10:00 PM: Delivery Tomorrow (આવતીકાલે)
  * - After 10:00 PM: Delivery Day After Tomorrow (પરમદિવસે)
  */
 export function getDeliveryScheduleInfo() {
   const now = new Date();
   
-  // Calculate current hour in Indian Standard Time (UTC + 5:30)
-  const istOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-  const currentHour = istTime.getHours();
+  // Explicitly calculate hour in Indian Standard Time (Asia/Kolkata)
+  const istFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    hour12: false,
+  });
+  
+  const currentHour = parseInt(istFormatter.format(now), 10);
 
   // 10:00 PM is 22:00
   const isAfter10PM = currentHour >= 22;
 
   // Calculate target delivery date
-  const deliveryDate = new Date(istTime);
-  deliveryDate.setDate(deliveryDate.getDate() + (isAfter10PM ? 2 : 1));
+  const targetDate = new Date(now.getTime());
+  // Add 1 day if before 10 PM, add 2 days if after 10 PM
+  targetDate.setDate(targetDate.getDate() + (isAfter10PM ? 2 : 1));
 
-  const dayNameEn = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short' });
-  const dateFormatted = deliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  const dayNameEn = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+  }).format(targetDate);
+
+  const dateFormatted = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric',
+    month: 'short',
+  }).format(targetDate);
 
   if (isAfter10PM) {
     return {

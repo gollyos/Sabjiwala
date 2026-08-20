@@ -116,9 +116,9 @@ export default async function BagLookupPage({
             </div>
 
             <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
-              <span className="text-slate-400">Delivery Slot</span>
+              <span className="text-slate-400">Delivery Schedule</span>
               <span className="font-semibold text-slate-200">
-                {new Date(order.delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • 10 AM–1 PM
+                {new Date(order.delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • Morning Slot
               </span>
             </div>
 

@@ -111,9 +111,9 @@ export default function OrderTrackingPage() {
 
   const steps = [
     { key: 'confirmed', label: 'Order Confirmed', labelGu: 'કન્ફર્મ થયેલ', desc: 'Received & verified' },
-    { key: 'procurement', label: 'Mandi Procurement', labelGu: 'મંડી ખરીદી', desc: '8 PM fresh batch' },
+    { key: 'procurement', label: 'Mandi Procurement', labelGu: 'મંડી ખરીદી', desc: 'APMC fresh batch' },
     { key: 'packed', label: 'Godown Quality Pack', labelGu: 'પેકિંગ પૂર્ણ', desc: 'Cleaned & bagged' },
-    { key: 'out_for_delivery', label: 'Out for Delivery', labelGu: 'ડિલિવરી માટે નીકળ્યો', desc: '10 AM - 1 PM' },
+    { key: 'out_for_delivery', label: 'Out for Delivery', labelGu: 'ડિલિવરી માટે નીકળ્યો', desc: 'Driver on the way' },
     { key: 'delivered', label: 'Delivered', labelGu: 'પહોંચાડ્યો', desc: 'Payment completed' },
   ];
 

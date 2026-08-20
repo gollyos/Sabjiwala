@@ -65,7 +65,7 @@ export default function OpenGraphImage() {
               color: '#fef08a',
             }}
           >
-            ⚡ Daily Morning 10 AM – 1 PM
+            ⚡ Daily Morning Delivery
           </div>
         </div>
 

@@ -16,7 +16,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 
 export const metadata: Metadata = {
   title: 'Fresh Fruits & Vegetables Delivery in Halol | TaazaTokra (તાજાટોકરા)',
-  description: 'TaazaTokra delivers farm-fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies. Order today for morning 10 AM – 1 PM delivery.',
+  description: 'TaazaTokra delivers farm-fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies. Order today for guaranteed next-day morning delivery.',
   keywords: [
     'fresh fruits Halol',
     'fresh vegetables Halol',
@@ -128,7 +128,7 @@ export default function HalolDeliveryAreaPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div className="space-y-1">
               <div className="text-amber-300 font-mono font-black text-sm">Step 1</div>
-              <div className="font-bold text-white">Shop Online Before 8 PM</div>
+              <div className="font-bold text-white">Shop Online (ઓર્ડર કરો)</div>
               <p className="text-emerald-200/80 text-[11px]">Select your fruits and vegetables on TaazaTokra and confirm via OTP.</p>
             </div>
             <div className="space-y-1">
@@ -138,8 +138,8 @@ export default function HalolDeliveryAreaPage() {
             </div>
             <div className="space-y-1">
               <div className="text-amber-300 font-mono font-black text-sm">Step 3</div>
-              <div className="font-bold text-white">Doorstep Morning Delivery</div>
-              <p className="text-emerald-200/80 text-[11px]">Delivered fresh between 10 AM – 1 PM with Cash on Delivery payment.</p>
+              <div className="font-bold text-white">Doorstep Delivery</div>
+              <p className="text-emerald-200/80 text-[11px]">Delivered fresh with Cash on Delivery and WhatsApp live status updates.</p>
             </div>
           </div>
         </div>
