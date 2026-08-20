@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 export interface DonutSegment {
   id: string;
@@ -45,12 +45,13 @@ export default function DonutBreakdownChart({
   const circumference = 2 * Math.PI * radius;
 
   const renderedSegments = useMemo(() => {
-    let currentOffset = 0;
     return validSegments.map((seg, idx) => {
       const percent = total > 0 ? (Number(seg.value) / total) * 100 : 0;
+      const currentOffset = validSegments
+        .slice(0, idx)
+        .reduce((sum, previous) => sum + (total > 0 ? (Number(previous.value) / total) * 100 : 0), 0);
       const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
       const strokeDashoffset = -((currentOffset / 100) * circumference);
-      currentOffset += percent;
       return {
         ...seg,
         idx,

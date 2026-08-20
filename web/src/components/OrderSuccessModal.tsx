@@ -1,23 +1,9 @@
 'use client';
 
-import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  CheckCircle2, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  X, 
-  ArrowRight, 
-  Tag, 
-  Banknote,
-  CreditCard,
-  ShieldCheck,
-  MessageCircle
-} from 'lucide-react';
+import { CheckCircle2, Calendar, Clock, MapPin, X, ArrowRight, Tag, Banknote, CreditCard, ShieldCheck, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
-
 export function OrderSuccessModal() {
   const { orderSuccessData, closeOrderSuccessModal } = useCart();
   const { defaultAddress, customer } = useAuth();
@@ -27,7 +13,7 @@ export function OrderSuccessModal() {
   const isOnline = orderSuccessData.payment_method?.includes('online');
 
   // Construct direct WhatsApp message link
-  const supportPhone = '919876543210';
+  const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
   const deliveryDateStr = orderSuccessData.delivery_date
     ? new Date(orderSuccessData.delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
     : 'Tomorrow';
@@ -40,14 +26,14 @@ export function OrderSuccessModal() {
     `*Order No:* ${orderSuccessData.order_number}\n` +
     `*Customer:* ${customer?.full_name || 'Customer'}\n` +
     `*Delivery Date:* ${deliveryDateStr}\n` +
-    `*Delivery Slot:* 10:00 AM – 01:00 PM\n` +
+    `*Delivery Slot:* 10:00 AM – 1:00 PM\n` +
     `*Delivery Address:* ${addressStr}\n` +
     `*Payment Mode:* ${isOnline ? 'Online Paid' : 'Cash on Delivery (COD)'}\n` +
     `*Amount to Pay:* ₹${orderSuccessData.final_payable_amount.toFixed(2)}\n\n` +
     `_Please confirm my fresh fruits & vegetables delivery!_`
   );
 
-  const whatsappShareUrl = `https://wa.me/${supportPhone}?text=${waText}`;
+  const whatsappShareUrl = supportPhone ? `https://wa.me/${supportPhone}?text=${waText}` : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 dark:bg-black/80 backdrop-blur-xs animate-fade-in">
@@ -95,7 +81,7 @@ export function OrderSuccessModal() {
           <div className="flex items-center space-x-2.5 text-xs text-slate-700 dark:text-slate-300">
             <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             <span>
-              Delivery Slot: <strong>10:00 AM – 01:00 PM (Halol)</strong>
+              Delivery Slot: <strong>10:00 AM – 1:00 PM (Halol)</strong>
             </span>
           </div>
 
@@ -145,15 +131,17 @@ export function OrderSuccessModal() {
         {/* Action Buttons */}
         <div className="space-y-2.5">
           {/* WhatsApp Direct Share Button */}
-          <a
-            href={whatsappShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-2xl shadow-md flex items-center justify-center space-x-2 transition-all cursor-pointer text-xs min-h-[44px]"
-          >
-            <MessageCircle className="w-4 h-4 fill-white" />
-            <span>Receive Bill on WhatsApp (વૉટ્સએપ બિલ)</span>
-          </a>
+          {whatsappShareUrl && (
+            <a
+              href={whatsappShareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-2xl shadow-md flex items-center justify-center space-x-2 transition-all cursor-pointer text-xs min-h-[44px]"
+            >
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Receive Bill on WhatsApp (વૉટ્સએપ બિલ)</span>
+            </a>
+          )}
 
           <Link
             href="/profile"

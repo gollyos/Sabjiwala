@@ -1,9 +1,14 @@
 'use client';
 
+import { getErrorMessage } from '@/lib/errors';
+
+
+
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Customer, CustomerAddress, CustomerProfileState } from '@/types/sabjiwala';
 import type { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
 export interface AddressInput {
   id?: string;
@@ -187,51 +192,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        // If Supabase returns 'Unsupported phone provider' (e.g. SMS provider not configured yet in Supabase Dashboard),
-        // fallback to dev verification mode with test OTP (123456) so user/client can test and onboard smoothly!
-        if (
-          error.message.toLowerCase().includes('provider') || 
-          error.message.toLowerCase().includes('unsupported') || 
-          error.message.toLowerCase().includes('sms')
-        ) {
-          console.warn('SMS gateway not configured in Supabase. Using test OTP mode (OTP: 123456).');
-          return { success: true, isDevMode: true };
-        }
         return { success: false, error: error.message };
       }
       return { success: true };
-    } catch (err: any) {
-      return { success: true, isDevMode: true };
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? getErrorMessage(err) : 'Unable to send OTP. Please try again.' };
     }
   };
 
   const verifyOtp = async (mobile: string, token: string): Promise<{ success: boolean; isOnboarded: boolean; error?: string }> => {
     try {
       const formattedPhone = normalizePhone(mobile);
-      let verifiedUser = null;
-
-      // 1. Try real Supabase OTP verification
       const { data, error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: token.trim(),
         type: 'sms',
       });
 
-      if (data?.user) {
-        verifiedUser = data.user;
-      } else {
-        // 2. If SMS provider is not active or testing with 6-digit OTP (e.g. 123456)
-        if (token.trim() === '123456' || token.trim().length === 6) {
-          const { data: anonData } = await supabase.auth.signInAnonymously();
-          verifiedUser = anonData?.user || null;
-        } else {
-          return { success: false, isOnboarded: false, error: error?.message || 'Invalid OTP. Please check and try again.' };
-        }
+      if (error || !data?.user) {
+        return { success: false, isOnboarded: false, error: error?.message || 'Invalid OTP. Request a new code and try again.' };
       }
 
-      if (verifiedUser) {
-        setUser(verifiedUser);
-      }
+      setUser(data.user);
       
       const { data: profileData, error: profileErr } = await supabase.rpc('get_current_customer_profile');
       if (profileErr) {
@@ -257,8 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: true, isOnboarded: onboarded };
-    } catch (err: any) {
-      return { success: false, isOnboarded: false, error: err.message || 'Verification failed' };
+    } catch (err: unknown) {
+      return { success: false, isOnboarded: false, error: err instanceof Error ? getErrorMessage(err) : 'Verification failed' };
     }
   };
 
@@ -300,8 +282,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         success: true,
         sequence: res?.customer?.verified_sequence ?? undefined,
       };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to complete profile' };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) || 'Failed to complete profile' };
     }
   };
 
@@ -334,8 +316,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to save address' };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) || 'Failed to save address' };
     }
   };
 
@@ -356,8 +338,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to delete address' };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) || 'Failed to delete address' };
     }
   };
 
@@ -378,8 +360,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to update default address' };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) || 'Failed to update default address' };
     }
   };
 
@@ -401,8 +383,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Failed to update profile' };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) || 'Failed to update profile' };
     }
   };
 

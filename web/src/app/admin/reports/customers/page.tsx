@@ -1,22 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Users, 
-  Search, 
-  Calendar, 
-  Download, 
-  RefreshCw, 
-  Gift, 
-  TrendingUp, 
-  Phone, 
-  CheckCircle2, 
-  Clock, 
-  ShieldCheck,
-  ShoppingBag,
-  ChevronRight,
-  ExternalLink
-} from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
+import { useState, useCallback, useEffect } from 'react';
+import { Users, Search, Download, RefreshCw, Gift, Phone, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { AdminNav } from '@/components/AdminNav';
 
@@ -52,8 +38,8 @@ export default function CustomerReportingPage() {
       }
 
       setData(json.data);
-    } catch (err: any) {
-      setError(err.message || 'Error loading customer reports');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading customer reports');
     } finally {
       setLoading(false);
     }
@@ -83,8 +69,8 @@ export default function CustomerReportingPage() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      alert(`Export error: ${err.message}`);
+    } catch (err) {
+      alert(`Export error: ${getErrorMessage(err)}`);
     } finally {
       setExporting(false);
     }
@@ -105,6 +91,11 @@ export default function CustomerReportingPage() {
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {error && (
+          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+            {error}
+          </div>
+        )}
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">

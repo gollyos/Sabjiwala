@@ -3,53 +3,47 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Home, 
-  ShoppingBag, 
-  Boxes, 
-  Layers, 
-  Truck, 
-  BarChart3, 
-  ChevronDown, 
-  Settings, 
-  Tag, 
-  Users, 
-  Bell, 
-  Menu, 
-  X, 
-  Store, 
-  LogOut,
-  PlusCircle
-} from 'lucide-react';
-import { BrandLogo } from './ui/BrandLogo';
+import { Home, ShoppingBag, Boxes, Layers, Truck, BarChart3, Settings, Tag, Users, Bell, Store, ChevronDown, Menu, X, LogOut } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { useAdminRole, type StaffRole } from '@/context/AdminRoleContext';
+interface NavItem {
+  name: string;
+  nameGu?: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: StaffRole[];
+}
 
 export function AdminNav() {
+  const role = useAdminRole();
+  const [supabase] = useState(() => createClient());
   const pathname = usePathname();
   const [manageOpen, setManageOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const primaryNav = [
-    { name: 'Dashboard', nameGu: 'ડેશબોર્ડ', href: '/admin/dashboard', icon: Home },
-    { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag },
-    { name: 'Mandi Purchases', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes },
-    { name: 'Pricing', nameGu: 'ભાવ નક્કી', href: '/admin/pricing', icon: Tag },
-    { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers },
-    { name: 'Delivery', nameGu: 'ડિલિવરી', href: '/admin/delivery', icon: Truck },
-    { name: 'Reports', nameGu: 'રિપોર્ટ્સ', href: '/admin/reports', icon: BarChart3 },
+  const primaryItems: NavItem[] = [
+    { name: 'Dashboard', nameGu: 'ડેશબોર્ડ', href: '/admin/dashboard', icon: Home, roles: ['owner', 'manager'] },
+    { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag, roles: ['owner', 'manager'] },
+    { name: 'Mandi Purchases', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes, roles: ['owner', 'manager'] },
+    { name: 'Pricing', nameGu: 'ભાવ નક્કી', href: '/admin/pricing', icon: Tag, roles: ['owner', 'manager'] },
+    { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers, roles: ['owner', 'manager', 'packing'] },
+    { name: 'Delivery', nameGu: 'ડિલિવરી', href: '/admin/delivery', icon: Truck, roles: ['owner', 'manager'] },
+    { name: 'Reports', nameGu: 'રિપોર્ટ્સ', href: '/admin/reports', icon: BarChart3, roles: ['owner', 'manager'] },
   ];
+  const primaryNav = primaryItems.filter((item) => role && item.roles.includes(role));
 
-  const secondaryNav = [
-    { name: 'Products Catalog', href: '/admin/products', icon: ShoppingBag },
-    { name: 'Staff Management', href: '/admin/staff', icon: Users },
-    { name: 'Notifications & Alerts', href: '/admin/notifications', icon: Bell },
-    { name: 'System Settings', href: '/admin/settings', icon: Settings },
+  const secondaryItems: NavItem[] = [
+    { name: 'Products Catalog', href: '/admin/products', icon: ShoppingBag, roles: ['owner', 'manager'] },
+    { name: 'Staff Management', href: '/admin/staff', icon: Users, roles: ['owner'] },
+    { name: 'Notifications & Alerts', href: '/admin/notifications', icon: Bell, roles: ['owner', 'manager'] },
+    { name: 'System Settings', href: '/admin/settings', icon: Settings, roles: ['owner', 'manager'] },
   ];
+  const secondaryNav = secondaryItems.filter((item) => role && item.roles.includes(role));
 
   const isSecondaryActive = secondaryNav.some((item) => pathname.startsWith(item.href));
 
   const handleLogout = async () => {
-    localStorage.removeItem('taazatokra_admin_user');
-    await fetch('/api/admin/login', { method: 'DELETE' });
+    await supabase.auth.signOut();
     window.location.reload();
   };
 

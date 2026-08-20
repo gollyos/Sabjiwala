@@ -1,19 +1,8 @@
 'use client';
 
+import { getErrorMessage } from '@/lib/errors';
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  Shield, 
-  CheckCircle2, 
-  XCircle, 
-  RefreshCw, 
-  Edit3, 
-  Phone, 
-  Calendar,
-  AlertCircle,
-  X
-} from 'lucide-react';
+import { Users, UserPlus, RefreshCw, Shield, CheckCircle2, XCircle, Edit3, AlertCircle, X } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
 interface StaffUser {
@@ -55,8 +44,8 @@ export default function AdminStaffPage() {
       }
 
       setStaffList(json.staff || []);
-    } catch (err: any) {
-      setError(err.message || 'Error loading staff');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading staff');
     } finally {
       setLoading(false);
     }
@@ -115,8 +104,8 @@ export default function AdminStaffPage() {
       setTimeout(() => setSuccessMsg(null), 3000);
       setShowAddModal(false);
       await fetchStaff();
-    } catch (err: any) {
-      setError(err.message || 'Error saving staff');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error saving staff');
     } finally {
       setSubmitting(false);
     }

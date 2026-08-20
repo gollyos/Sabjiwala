@@ -1,9 +1,11 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 
@@ -13,7 +15,7 @@ export async function GET() {
     const supabase = getServiceSupabase();
 
     // 1. Check Database Connectivity
-    const { data: dbCheck, error: dbErr } = await supabase
+    const { error: dbErr } = await supabase
       .from('app_settings')
       .select('key')
       .limit(1);
@@ -62,12 +64,12 @@ export async function GET() {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
       {
         status: 'unhealthy',
         release_version: 'v1.0.0',
-        error: err.message || 'Health check exception',
+        error: getErrorMessage(err) || 'Health check exception',
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

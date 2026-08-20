@@ -3,23 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth, AddressInput } from '@/context/AuthContext';
 import { CustomerAddress } from '@/types/sabjiwala';
-import { 
-  X, 
-  Phone, 
-  MapPin, 
-  ShieldCheck, 
-  Award, 
-  LogOut, 
-  Plus, 
-  Home, 
-  Briefcase, 
-  Building,
-  Loader2,
-  Trash2,
-  Edit2,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+import { X, Phone, ShieldCheck, MapPin, Award, LogOut, Plus, Home, Briefcase, Building, Loader2, Trash2, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function CustomerProfileModal() {
   const { 

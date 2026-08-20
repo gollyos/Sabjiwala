@@ -88,7 +88,7 @@ async function runRazorpayTestSuite() {
 
   // Step 3: Test Unauthenticated Order Placement Rejection
   console.log('\n[TEST 2] Verifying unauthenticated order placement rejection...');
-  const { data: unauthRes, error: unauthErr } = await supabase.rpc('create_customer_order', {
+  const { error: unauthErr } = await supabase.rpc('create_customer_order', {
     p_customer_address_id: '00000000-0000-0000-0000-000000000000',
     p_payment_method: 'online',
     p_items: cartItems,

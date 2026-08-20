@@ -55,7 +55,7 @@ async function testOrderFlow() {
 
   // 3. Test Anonymous Direct Order Placement Prevention
   console.log('\n[STEP 3] Verifying that direct unauthenticated order creation is blocked...');
-  const { data: unauthOrder, error: unauthErr } = await supabase.rpc('create_customer_order', {
+  const { error: unauthErr } = await supabase.rpc('create_customer_order', {
     p_customer_address_id: '00000000-0000-0000-0000-000000000000',
     p_payment_method: 'cod',
     p_items: [{ variant_id: v1.id, quantity: qty }],

@@ -1,42 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Package, 
-  Truck, 
-  Calendar, 
-  Clock, 
-  Lock, 
-  CheckCircle2, 
-  AlertCircle, 
-  Users, 
-  TrendingUp, 
-  Scale, 
-  Layers, 
-  FileText, 
-  RefreshCw, 
-  ChevronRight, 
-  ChevronDown,
-  Plus, 
-  Copy, 
-  Check, 
-  Building2,
-  AlertTriangle,
-  ArrowRight,
-  ShieldCheck,
-  Share2,
-  Boxes,
-  Download,
-  PlusCircle,
-  DollarSign,
-  Tag,
-  Search
-} from 'lucide-react';
-import Link from 'next/link';
-import { AdminNav } from '@/components/AdminNav';
-import { StatusChip } from '@/components/ui/StatusChip';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { getErrorMessage } from '@/lib/errors';
+import React, { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { Lock, CheckCircle2, AlertCircle, Check, Share2, PlusCircle } from 'lucide-react';
+import { AdminNav } from '@/components/AdminNav';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 interface BatchSummary {
   id?: string;
@@ -113,7 +82,6 @@ interface ProductRequirement {
 
 export default function ProcurementDashboard() {
   const [supabase] = useState(() => createClient());
-  const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [batchData, setBatchData] = useState<{
     summary: BatchSummary;
@@ -124,7 +92,6 @@ export default function ProcurementDashboard() {
   } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'demand' | 'purchasing' | 'purchases_log' | 'receiving'>('demand');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLocking, setIsLocking] = useState<boolean>(false);
   const [showLockModal, setShowLockModal] = useState<boolean>(false);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -151,20 +118,16 @@ export default function ProcurementDashboard() {
 
   // Fetch batches list
   const loadBatches = useCallback(async () => {
-    setIsLoading(true);
     try {
       const res = await fetch('/api/procurement/batches');
       const json = await res.json();
       if (json.success && json.data) {
-        setBatches(json.data);
         if (json.data.length > 0 && !selectedBatchId) {
           setSelectedBatchId(json.data[0].id || json.data[0].batch_id);
         }
       }
     } catch (err) {
       console.error('Error fetching batches:', err);
-    } finally {
-      setIsLoading(false);
     }
   }, [selectedBatchId]);
 
@@ -257,7 +220,7 @@ export default function ProcurementDashboard() {
         setActionMessage({ text: json.error || 'Failed to lock procurement batch.', type: 'error' });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error locking batch';
+      const msg = err instanceof Error ? getErrorMessage(err) : 'Error locking batch';
       setActionMessage({ text: msg, type: 'error' });
     } finally {
       setIsLocking(false);

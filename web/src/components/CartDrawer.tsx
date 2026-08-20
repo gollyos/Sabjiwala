@@ -1,26 +1,9 @@
 'use client';
 
-import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  X, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  ShoppingBag, 
-  ArrowRight, 
-  Tag, 
-  Clock, 
-  MapPin, 
-  AlertTriangle,
-  Loader2,
-  Banknote,
-  CheckCircle2,
-  ShieldCheck
-} from 'lucide-react';
+import { X, ShoppingBag, Clock, CheckCircle2, Plus, Minus, ArrowRight, MapPin, AlertTriangle, Loader2 } from 'lucide-react';
 import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
-
 export function CartDrawer() {
   const deliveryInfo = getDeliveryScheduleInfo();
   const { 
@@ -98,13 +81,24 @@ export function CartDrawer() {
               </div>
             </div>
 
-            <button 
-              onClick={closeCartDrawer}
-              aria-label="Close basket"
-              className="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1">
+              {cart.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearCart}
+                  className="px-2.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+              <button 
+                onClick={closeCartDrawer}
+                aria-label="Close basket"
+                className="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Body Content */}
@@ -277,6 +271,43 @@ export function CartDrawer() {
                 </div>
 
                 {/* Bill Breakdown (Guaranteed Full Width & Non-clipping) */}
+                <fieldset className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <legend className="px-1 font-extrabold text-slate-800 dark:text-slate-200">
+                    Payment method (ચુકવણી)
+                  </legend>
+                  <label className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 dark:bg-emerald-950/30 dark:border-emerald-800 cursor-pointer">
+                    <span>
+                      <span className="block font-bold text-slate-900 dark:text-white">Cash on Delivery</span>
+                      <span className="block text-[10px] text-emerald-700 dark:text-emerald-300">Get 2% cash discount</span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                      className="h-4 w-4 accent-emerald-600"
+                    />
+                  </label>
+                  {isOnlinePaymentEnabled && (
+                    <label className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-emerald-300">
+                      <span>
+                        <span className="block font-bold text-slate-900 dark:text-white">Pay online securely</span>
+                        <span className="block text-[10px] text-slate-500">UPI, cards or netbanking via Razorpay</span>
+                      </span>
+                      <input
+                        type="radio"
+                        name="payment-method"
+                        value="online"
+                        checked={paymentMethod === 'online'}
+                        onChange={() => setPaymentMethod('online')}
+                        className="h-4 w-4 accent-emerald-600"
+                      />
+                    </label>
+                  )}
+                </fieldset>
+
+                {/* Bill Breakdown (Guaranteed Full Width & Non-clipping) */}
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 font-mono text-xs">
                   <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
                     <span>Item Subtotal:</span>
@@ -303,7 +334,9 @@ export function CartDrawer() {
 
                   <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-xs">
                     <span>ડિલિવરી ({deliveryInfo.labelShortGu}):</span>
-                    <span className="text-emerald-600 font-bold shrink-0">FREE</span>
+                    <span className="text-emerald-600 font-bold shrink-0">
+                      {deliveryCharge > 0 ? `₹${deliveryCharge.toFixed(0)}` : 'FREE'}
+                    </span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center font-black text-sm text-slate-900 dark:text-white">
@@ -329,17 +362,19 @@ export function CartDrawer() {
               <button
                 type="button"
                 onClick={handleCheckoutClick}
-                disabled={!minimumOrderMet || isPlacingOrder || hasUnavailableItems}
+                disabled={!minimumOrderMet || isPlacingOrder || isLoadingQuote || hasUnavailableItems}
                 className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-sm rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-between transition-all cursor-pointer"
               >
                 <span className="truncate pr-2">
                   {isPlacingOrder 
                     ? 'Placing Order...' 
+                    : isLoadingQuote
+                    ? 'Checking latest prices...'
                     : !user || !isOnboarded 
                     ? 'Enter Mobile to Continue' 
-                    : `Place Order • ₹${finalPayable.toFixed(0)} COD`}
+                    : `Place Order • ₹${finalPayable.toFixed(0)} ${paymentMethod === 'cod' ? 'COD' : 'Online'}`}
                 </span>
-                {isPlacingOrder ? (
+                {isPlacingOrder || isLoadingQuote ? (
                   <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                 ) : (
                   <ArrowRight className="w-4 h-4 shrink-0" />

@@ -1,28 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Settings, 
-  Building2, 
-  ShoppingBag, 
-  DollarSign, 
-  Gift, 
-  Truck, 
-  Boxes, 
-  Printer, 
-  Bell, 
-  Flag, 
-  Activity, 
-  Save, 
-  RefreshCw, 
-  CheckCircle2, 
-  AlertCircle,
-  Clock,
-  ShieldCheck,
-  Smartphone,
-  Globe,
-  Zap
-} from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
+import { useState, useEffect, useCallback } from 'react';
+import { Save, Settings, Building2, ShoppingBag, Gift, Truck, Boxes, Printer, Bell, Flag, Activity, RefreshCw, CheckCircle2, AlertCircle, Clock, ShieldCheck, Zap } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
 export default function AdminSettingsPage() {
@@ -30,7 +10,6 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-  const [settings, setSettings] = useState<any>({});
   const [promoStats, setPromoStats] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
   const [n8nTestStatus, setN8nTestStatus] = useState<{ loading: boolean; message: string | null; error: string | null }>({
@@ -42,7 +21,7 @@ export default function AdminSettingsPage() {
   const [n8nConfig, setN8nConfig] = useState({
     webhook_url: '',
     is_active: true,
-    admin_alert_phone: '+919876543210',
+    admin_alert_phone: '',
     admin_alert_email: 'orders@taazatokra.com',
   });
 
@@ -50,8 +29,8 @@ export default function AdminSettingsPage() {
   const [businessProfile, setBusinessProfile] = useState({
     business_name: 'TaazaTokra',
     business_name_gu: 'તાજાટોકરા',
-    support_mobile: '+919876543210',
-    whatsapp_number: '+919876543210',
+    support_mobile: '',
+    whatsapp_number: '',
     business_address: 'Shop No. 4, APMC Market Road, Halol, Panchmahal, Gujarat - 389350',
     default_language: 'gu_IN',
     default_currency: 'INR',
@@ -118,7 +97,6 @@ export default function AdminSettingsPage() {
       }
 
       const s = json.settings || {};
-      setSettings(s);
       setPromoStats(json.promotion_stats || {});
 
       if (s.business_profile) setBusinessProfile(s.business_profile);
@@ -139,8 +117,8 @@ export default function AdminSettingsPage() {
       if (s.whatsapp_notification_preferences) setNotificationPreferences(s.whatsapp_notification_preferences);
       if (s.feature_flags) setFeatureFlags(s.feature_flags);
       if (s.n8n_config) setN8nConfig(s.n8n_config);
-    } catch (err: any) {
-      setError(err.message || 'Error loading settings');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading settings');
     } finally {
       setLoading(false);
     }
@@ -167,8 +145,8 @@ export default function AdminSettingsPage() {
       setSaveSuccess(`Updated ${key.replace(/_/g, ' ')} successfully!`);
       setTimeout(() => setSaveSuccess(null), 3000);
       await fetchSettings();
-    } catch (err: any) {
-      alert(`Save error: ${err.message}`);
+    } catch (err) {
+      alert(`Save error: ${getErrorMessage(err)}`);
     } finally {
       setSaving(false);
     }
@@ -195,8 +173,8 @@ export default function AdminSettingsPage() {
       } else {
         setN8nTestStatus({ loading: false, message: null, error: json.error || 'Failed to connect to n8n webhook.' });
       }
-    } catch (err: any) {
-      setN8nTestStatus({ loading: false, message: null, error: err.message || 'Error connecting to n8n' });
+    } catch (err) {
+      setN8nTestStatus({ loading: false, message: null, error: getErrorMessage(err) || 'Error connecting to n8n' });
     }
   };
 
@@ -218,6 +196,11 @@ export default function AdminSettingsPage() {
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {error && (
+          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+            {error}
+          </div>
+        )}
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">

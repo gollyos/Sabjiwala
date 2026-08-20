@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
+import { Manrope, Noto_Sans_Gujarati } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
@@ -10,6 +12,19 @@ import { OrderSuccessModal } from '@/components/OrderSuccessModal';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+const storePhone = process.env.NEXT_PUBLIC_STORE_PHONE;
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
+const notoGujarati = Noto_Sans_Gujarati({
+  subsets: ['gujarati'],
+  variable: '--font-gujarati',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -116,13 +131,12 @@ const jsonLdSchema = {
       url: siteUrl,
       logo: `${siteUrl}/icon.svg`,
       image: `${siteUrl}/opengraph-image`,
-      telephone: '+919876543210',
-      priceRange: '₹10 - ₹500',
-      paymentAccepted: 'Cash on Delivery (COD)',
+      ...(storePhone ? { telephone: storePhone } : {}),
+      priceRange: '₹10–₹500',
+      paymentAccepted: 'Cash on Delivery (COD), UPI, Cards, Netbanking',
       currenciesAccepted: 'INR',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Shop No. 4, APMC Market Road',
         addressLocality: 'Halol',
         addressRegion: 'Gujarat',
         postalCode: '389350',
@@ -157,7 +171,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="gu" className="h-full bg-slate-50 text-slate-900 antialiased">
+    <html lang="en-IN" className={`h-full bg-stone-50 text-slate-900 antialiased ${manrope.variable} ${notoGujarati.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -170,10 +184,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+        <a href="#main-content" className="skip-link">Skip to Main Content</a>
         <AuthProvider>
           <CartProvider>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" className="flex-1">{children}</main>
             <MobileBottomNav />
             <AuthModal />
             <CustomerProfileModal />

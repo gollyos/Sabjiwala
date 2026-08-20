@@ -2,27 +2,35 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { 
-  Phone, 
-  ArrowRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Loader2, 
-  ArrowLeft,
-  ShieldCheck,
-  Leaf
-} from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { AdminRoleProvider, type StaffRole } from '@/context/AdminRoleContext';
+import { ArrowRight, AlertCircle, Loader2, ArrowLeft, ShieldCheck, Leaf } from 'lucide-react';
 import Link from 'next/link';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+function roleCanAccessPath(role: StaffRole, pathname: string) {
+  if (role === 'owner') return true;
+  if (role === 'manager') return !pathname.startsWith('/admin/staff');
+  if (role === 'packing') return pathname.startsWith('/admin/packing');
+  return false;
+}
+
+function roleHome(role: StaffRole) {
+  if (role === 'packing') return '/admin/packing';
+  if (role === 'delivery') return '/driver';
+  return '/admin/dashboard';
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [adminUser, setAdminUser] = useState<{ full_name: string; role: string; mobile: string } | null>(null);
+  const [currentRole, setCurrentRole] = useState<StaffRole | null>(null);
 
   // Strict Mobile + OTP login state
   const [mobile, setMobile] = useState('');
@@ -30,51 +38,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [otpSent, setOtpSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resendTimer, setResendTimer] = useState(30);
+  const [resendTimer, setResendTimer] = useState(60);
 
   const verifyAdminAccess = useCallback(async () => {
     try {
-      setCheckingAuth(true);
-
-      // 1. Check local admin session storage/cookie
-      const storedSession = typeof window !== 'undefined' ? localStorage.getItem('taazatokra_admin_user') : null;
-      if (storedSession) {
-        try {
-          const parsed = JSON.parse(storedSession);
-          if (parsed && parsed.role && ['owner', 'manager', 'packing', 'procurement', 'delivery'].includes(parsed.role)) {
-            setAdminUser(parsed);
-            setIsAuthorized(true);
-            setCheckingAuth(false);
-            return;
-          }
-        } catch {
-          // ignore error
-        }
-      }
-
-      // 2. Check Supabase Auth session
+      // Only a server-issued Supabase session can authorize the operations portal.
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data: roleData } = await supabase
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', session.user.id);
+        if (roleError) throw roleError;
 
         if (roleData && roleData.length > 0) {
-          const roles = roleData.map(r => r.role);
-          const hasStaffAccess = roles.some(r => ['owner', 'manager', 'packing', 'procurement', 'delivery'].includes(r));
-          if (hasStaffAccess) {
-            const userObj = {
-              full_name: session.user.user_metadata?.full_name || 'Staff User',
-              role: roles[0],
-              mobile: session.user.phone || '+919876543210',
-            };
-            setAdminUser(userObj);
+          const role = roleData
+            .map(({ role: assignedRole }) => assignedRole)
+            .find((assignedRole): assignedRole is StaffRole =>
+              ['owner', 'manager', 'packing', 'delivery'].includes(assignedRole)
+            );
+          if (role && roleCanAccessPath(role, pathname)) {
+            setCurrentRole(role);
             setIsAuthorized(true);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('taazatokra_admin_user', JSON.stringify(userObj));
-            }
-            setCheckingAuth(false);
+            return;
+          }
+          if (role) {
+            router.replace(roleHome(role));
             return;
           }
         }
@@ -87,7 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     } finally {
       setCheckingAuth(false);
     }
-  }, [supabase]);
+  }, [pathname, router, supabase]);
 
   useEffect(() => {
     verifyAdminAccess();
@@ -113,9 +102,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     setSubmitting(true);
     setError(null);
-    setOtpSent(true);
-    setResendTimer(30);
-    setSubmitting(false);
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        phone: `+91${cleanNumber}`,
+        options: { shouldCreateUser: false },
+      });
+      if (otpError) throw otpError;
+      setOtpSent(true);
+      setResendTimer(60);
+    } catch (otpError) {
+      setError(otpError instanceof Error ? otpError.message : 'Unable to send OTP. Confirm that this number is registered for staff access.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Verify OTP
@@ -131,24 +130,60 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: 'mobile', mobile, otp: otpCode }),
+      const cleanNumber = mobile.replace(/\D/g, '');
+      const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
+        phone: `+91${cleanNumber}`,
+        token: otpCode,
+        type: 'sms',
       });
-      const data = await res.json();
-
-      if (data.success && data.user) {
-        setAdminUser(data.user);
-        setIsAuthorized(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('taazatokra_admin_user', JSON.stringify(data.user));
-        }
-      } else {
-        setError(data.error || 'Authentication failed. Please check OTP.');
+      if (verifyError || !authData.user) {
+        throw verifyError || new Error('The OTP could not be verified. Request a new code and try again.');
       }
-    } catch {
-      setError('Network connection error.');
+
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authData.user.id);
+      if (roleError) throw roleError;
+
+      const role = roleData
+        ?.map(({ role: assignedRole }) => assignedRole)
+        .find((assignedRole): assignedRole is StaffRole =>
+          ['owner', 'manager', 'packing', 'delivery'].includes(assignedRole)
+        );
+      if (!role) {
+        await supabase.auth.signOut();
+        throw new Error('This account does not have staff access. Ask the owner to assign an operational role.');
+      }
+
+      const destination = roleHome(role);
+      if (roleCanAccessPath(role, pathname)) {
+        setCurrentRole(role);
+        setIsAuthorized(true);
+      } else {
+        router.replace(destination);
+      }
+    } catch (verifyError) {
+      setError(verifyError instanceof Error ? verifyError.message : 'Authentication failed. Request a new OTP and try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const cleanNumber = mobile.replace(/\D/g, '');
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        phone: `+91${cleanNumber}`,
+        options: { shouldCreateUser: false },
+      });
+      if (otpError) throw otpError;
+      setOtp(['', '', '', '', '', '']);
+      setResendTimer(60);
+    } catch (otpError) {
+      setError(otpError instanceof Error ? otpError.message : 'Unable to resend OTP. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -202,7 +237,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {!otpSent ? (
               <form onSubmit={handleSendOtp} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                  <label htmlFor="admin-mobile" className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
                     Registered Mobile (નોંધાયેલ મોબાઇલ)
                   </label>
                   <div className="relative flex items-center">
@@ -211,9 +246,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       <span>+91</span>
                     </div>
                     <input
+                      id="admin-mobile"
+                      name="mobile"
                       type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
                       maxLength={10}
-                      placeholder="98765 43210"
+                      placeholder="Enter 10-digit number…"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
                       className="w-full pl-20 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-slate-900 font-extrabold text-base focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
@@ -281,15 +320,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           }
                         }}
                         id={`admin-otp-${idx}`}
+                        name={`otp-${idx + 1}`}
+                        aria-label={`OTP digit ${idx + 1}`}
+                        autoComplete={idx === 0 ? 'one-time-code' : 'off'}
                         className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl font-black bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-2xs"
                         autoFocus={idx === 0}
                       />
                     ))}
                   </div>
 
-                  <div className="mt-3 p-2 bg-emerald-50 rounded-xl border border-emerald-200 text-center text-xs text-emerald-800 font-semibold">
-                    🔑 Test OTP: <strong>123456</strong>
-                  </div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-slate-500">
@@ -299,8 +338,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setResendTimer(30)}
-                      className="font-bold text-emerald-600 hover:underline"
+                      onClick={handleResendOtp}
+                      disabled={submitting}
+                      className="font-bold text-emerald-600 hover:underline disabled:text-slate-400"
                     >
                       Resend OTP
                     </button>
@@ -342,9 +382,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   // Authorized Admin/Staff
+  if (!currentRole) return null;
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      {children}
+      <AdminRoleProvider role={currentRole}>{children}</AdminRoleProvider>
     </div>
   );
 }

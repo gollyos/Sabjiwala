@@ -1,8 +1,10 @@
+import { getErrorMessage } from '@/lib/errors';
 import { createClient } from '@supabase/supabase-js';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createClient(url, key);
 }
 
@@ -63,6 +65,29 @@ export interface N8nOrderPayload {
     }>;
     special_instructions: string | null;
   };
+}
+
+interface OrderItemRow {
+  product_id: string;
+  variant_id: string;
+  product_name_en_snapshot: string;
+  product_name_gu_snapshot: string;
+  variant_name_en_snapshot: string;
+  variant_name_gu_snapshot: string;
+  quantity: number | string;
+  unit_code_snapshot: string;
+  selling_price_snapshot: number | string;
+  line_total: number | string;
+}
+
+function isPublicHttpsWebhook(value: string) {
+  try {
+    const url = new URL(value);
+    const blockedHost = /^(localhost|metadata\.google\.internal|\[::1\]|127\.|0\.|10\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(url.hostname);
+    return url.protocol === 'https:' && !blockedHost && !url.hostname.endsWith('.local');
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -150,7 +175,7 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
       ? `+91${rawMobile}` 
       : `+${rawMobile}`;
 
-    const items = (order.order_items || []).map((it: any) => ({
+    const items = (order.order_items as OrderItemRow[] || []).map((it) => ({
       product_id: it.product_id,
       variant_id: it.variant_id,
       name_en: it.product_name_en_snapshot,
@@ -164,7 +189,7 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
     }));
 
     const itemsSummaryText = items
-      .map((i: any) => `${i.quantity}x ${i.name_gu} (${i.variant_gu || i.variant_en})`)
+      .map((item) => `${item.quantity}x ${item.name_gu} (${item.variant_gu || item.variant_en})`)
       .join(', ');
 
     const fullAddress = [
@@ -233,6 +258,10 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
       return { success: true, dispatched: false, reason: 'n8n_webhook_url_not_set', payload };
     }
 
+    if (!isPublicHttpsWebhook(webhookUrl)) {
+      return { success: false, error: 'Configured n8n webhook must use a public HTTPS URL.', payload };
+    }
+
     // 3. Dispatch to n8n Webhook Endpoint
     const res = await fetch(webhookUrl, {
       method: 'POST',
@@ -253,7 +282,7 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
     console.log(`[n8n] Successfully dispatched order ${payload.order.order_number} to n8n webhook.`);
     return { success: true, dispatched: true, status: res.status, payload };
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown n8n dispatch error';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Unknown n8n dispatch error';
     console.error('[n8n] Webhook dispatch exception:', errorMsg);
     return { success: false, error: errorMsg };
   }

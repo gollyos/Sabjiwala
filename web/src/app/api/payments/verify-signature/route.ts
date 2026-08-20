@@ -1,6 +1,8 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { RazorpayService } from '@/lib/razorpay';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,22 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Verify Browser HMAC-SHA256 Signature using Razorpay Key Secret
-    const isValidSignature = RazorpayService.verifyPaymentSignature({
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    });
-
-    if (!isValidSignature) {
-      console.warn(`[SECURITY] Invalid Razorpay browser signature detected for order ${order_id}`);
-      return NextResponse.json(
-        { success: false, error: 'Payment signature verification failed. Untrusted response.' },
-        { status: 400 }
-      );
-    }
-
-    // 2. Fetch internal order to verify ownership and amount
+    // 1. Fetch internal order to verify ownership and amount.
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .select('id, order_number, final_payable_amount, order_status, payment_status, customers!inner(auth_user_id)')
@@ -61,20 +48,73 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Confirm captured payment via atomic RPC
-    const { data: confirmation, error: confirmErr } = await supabase.rpc('confirm_online_payment_capture', {
+    const admin = createAdminClient();
+    const { data: attempt, error: attemptError } = await admin
+      .from('payment_gateway_attempts')
+      .select('id, gateway_order_id, amount_paise, currency, status, expires_at')
+      .eq('order_id', order.id)
+      .eq('gateway_order_id', razorpay_order_id)
+      .maybeSingle();
+
+    if (attemptError || !attempt) {
+      return NextResponse.json(
+        { success: false, error: 'Payment attempt was not created by this server.' },
+        { status: 400 }
+      );
+    }
+
+    // 2. Verify HMAC using the gateway order ID stored by our server.
+    const isValidSignature = RazorpayService.verifyPaymentSignature({
+      razorpay_order_id: attempt.gateway_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    });
+
+    if (!isValidSignature) {
+      console.warn(`[SECURITY] Invalid Razorpay browser signature detected for order ${order_id}`);
+      return NextResponse.json(
+        { success: false, error: 'Payment signature verification failed. Untrusted response.' },
+        { status: 400 }
+      );
+    }
+
+    // 3. Reconcile the signed callback against Razorpay's server API before fulfilment.
+    const gatewayPayment = await RazorpayService.getPayment(razorpay_payment_id);
+    const expectedPaise = Math.round(Number(order.final_payable_amount) * 100);
+    const isMockPayment = process.env.NODE_ENV !== 'production' && razorpay_payment_id.includes('mock');
+    const gatewayMatches = isMockPayment || (
+      gatewayPayment?.status === 'captured'
+      && gatewayPayment.order_id === attempt.gateway_order_id
+      && gatewayPayment.amount === expectedPaise
+      && gatewayPayment.amount === Number(attempt.amount_paise)
+      && gatewayPayment.currency === attempt.currency
+    );
+
+    if (!gatewayMatches || !gatewayPayment) {
+      return NextResponse.json(
+        { success: false, error: 'Payment is not captured or does not match this order.' },
+        { status: 409 }
+      );
+    }
+
+    // 4. Confirm captured payment via service-only atomic RPC.
+    const { data: confirmation, error: confirmErr } = await admin.rpc('confirm_online_payment_capture', {
       p_order_id: order.id,
       p_razorpay_order_id: razorpay_order_id,
       p_razorpay_payment_id: razorpay_payment_id,
-      p_payment_amount: order.final_payable_amount,
+      p_payment_amount: expectedPaise / 100,
       p_gateway_event_id: `callback_${razorpay_payment_id}`,
-      p_gateway_event_created_at: new Date().toISOString(),
+      p_gateway_event_created_at: new Date(gatewayPayment.created_at * 1000).toISOString(),
       p_webhook_event_id: null,
       p_gateway_payload: {
         source: 'browser_checkout_callback',
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
+        status: gatewayPayment.status,
+        amount: gatewayPayment.amount,
+        currency: gatewayPayment.currency,
+        method: gatewayPayment.method,
       },
     });
 
@@ -86,12 +126,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+
+    await admin
+      .from('payment_gateway_attempts')
+      .update({ status: 'captured', updated_at: new Date().toISOString() })
+      .eq('id', attempt.id);
+
     return NextResponse.json({
       success: true,
       data: confirmation,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Internal Server Error';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Internal Server Error';
     console.error('Error verifying payment signature:', err);
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }

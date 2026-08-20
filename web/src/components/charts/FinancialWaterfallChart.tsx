@@ -1,8 +1,6 @@
 'use client';
 
-import React from 'react';
-import { ArrowDownRight, ArrowRight, TrendingUp, DollarSign, PackageX } from 'lucide-react';
-
+import { TrendingUp } from 'lucide-react';
 interface FinancialWaterfallProps {
   grossSales: number;
   first500Discount: number;

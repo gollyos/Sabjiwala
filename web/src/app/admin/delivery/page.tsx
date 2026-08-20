@@ -1,32 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Truck, 
-  Package, 
-  CheckCircle2, 
-  AlertCircle, 
-  DollarSign, 
-  Calendar, 
-  User, 
-  Plus, 
-  Search, 
-  RefreshCw, 
-  MapPin, 
-  Check, 
-  X, 
-  AlertTriangle, 
-  Layers,
-  ArrowRight,
-  ShieldCheck,
-  Phone,
-  Clock
-} from 'lucide-react';
+import { Truck, CheckCircle2, DollarSign, User, Plus, RefreshCw, X, Clock } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { StatCard } from '@/components/ui/StatCard';
 import { StatusChip } from '@/components/ui/StatusChip';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
-
 interface DriverOption {
   id: string;
   full_name: string;
@@ -101,7 +79,7 @@ export default function AdminDeliveryPage() {
   // Batch creation modal state
   const [showBatchModal, setShowBatchModal] = useState<boolean>(false);
   const [batchDriverId, setBatchDriverId] = useState<string>('');
-  const [batchSlot, setBatchSlot] = useState<string>('10:00 AM - 01:00 PM');
+  const batchSlot = '10:00 AM - 01:00 PM';
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [areaFilter, setAreaFilter] = useState<string>('all');
 

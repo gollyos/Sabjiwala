@@ -1,6 +1,8 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { RazorpayService } from '@/lib/razorpay';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(req: NextRequest) {
   try {
@@ -81,6 +83,27 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const admin = createAdminClient();
+    const { error: attemptError } = await admin
+      .from('payment_gateway_attempts')
+      .insert({
+        order_id: order.id,
+        customer_id: order.customer_id,
+        provider: 'razorpay',
+        gateway_order_id: rzpOrder.id,
+        amount_paise: amountPaise,
+        currency: 'INR',
+        status: 'created',
+      });
+
+    if (attemptError) {
+      console.error('Unable to persist Razorpay payment attempt:', attemptError);
+      return NextResponse.json(
+        { success: false, error: 'Payment initialization could not be recorded. Please retry.' },
+        { status: 503 }
+      );
+    }
+
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_sabjiwala_mock';
 
     return NextResponse.json({
@@ -99,7 +122,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Internal Server Error';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Internal Server Error';
     console.error('Error creating Razorpay order:', err);
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }

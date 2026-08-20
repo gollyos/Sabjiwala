@@ -14,22 +14,34 @@
 
 Set these environment variables in your Vercel Project Settings (`Settings` $\rightarrow$ `Environment Variables`) and server environments:
 
+Use [web/.env.example](../web/.env.example) as the authoritative variable list. Generate every secret independently with a cryptographically secure password generator; never reuse the sample text below or commit real values.
+
 ```ini
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://jaotajpowcgzxgpcezvi.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-or-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 
-# Internal API Secret for n8n Webhooks & Background Workers
-INTERNAL_API_SECRET=sabjiwala_prod_internal_secret_2026
+# Separate internal secrets
+INTERNAL_WORKER_SECRET=generate-a-random-32-byte-secret
+INTERNAL_SEED_SECRET=generate-a-different-random-32-byte-secret
+PROCUREMENT_LOCK_SECRET=generate-another-random-32-byte-secret
 
-# Meta WhatsApp Cloud API (Optional if managed via n8n)
-WHATSAPP_PHONE_NUMBER_ID=sabjiwala_phone_id_halol
-WHATSAPP_ACCESS_TOKEN=EAAG...
-WHATSAPP_VERIFY_TOKEN=sabjiwala_meta_webhook_verify_token_2026
+# Razorpay
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_or_test_key_id
+RAZORPAY_KEY_ID=rzp_live_or_test_key_id
+RAZORPAY_KEY_SECRET=your-server-only-key-secret
+RAZORPAY_WEBHOOK_SECRET=your-dedicated-webhook-secret
 
-# Public App URL
-NEXT_PUBLIC_APP_URL=https://sabjiwala.store
+# Meta WhatsApp Cloud API and n8n
+WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
+WHATSAPP_ACCESS_TOKEN=your-access-token
+WHATSAPP_VERIFY_TOKEN=your-random-verification-token
+N8N_ORDER_WEBHOOK_URL=https://your-n8n-host.example/webhook/order-created
+
+# Public app details
+NEXT_PUBLIC_SITE_URL=https://your-domain.example
+NEXT_PUBLIC_STORE_PHONE=+910000000000
 ```
 
 ---
@@ -61,10 +73,17 @@ NEXT_PUBLIC_APP_URL=https://sabjiwala.store
 3. **Storage Bucket Policies:**
    - `product-images`: Public read, authenticated admin write.
    - `delivery-proofs`: Strictly private read/write, accessible only by authenticated staff and driver.
+4. **Migrations:** Apply every SQL file in `docs/migrations` in filename order, including the `20260821` role, payment-attempt, and worker-outbox hardening migrations.
+5. **Phone Auth:** Configure an SMS provider, India TRAI/DLT compliance, CAPTCHA, and production rate limits before enabling OTP login.
 
----
+## 5. Background Workers
 
-## 5. Post-Deployment Smoke Test
+Invoke both endpoints on a one-minute schedule using n8n, a trusted cron service, or Vercel Cron. Send `Authorization: Bearer <INTERNAL_WORKER_SECRET>` and never call these endpoints from the browser:
+
+- `POST /api/notifications/process`
+- `POST /api/workers/automation`
+
+## 6. Post-Deployment Smoke Test
 
 Immediately verify in production:
 1. `GET https://sabjiwala.store/api/health` returns `{"status": "healthy", "release_version": "v1.0.0"}`.

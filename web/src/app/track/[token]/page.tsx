@@ -1,28 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/errors';
+
+
+
+
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  Package, 
-  CheckCircle2, 
-  Clock, 
-  Truck, 
-  MapPin, 
-  ShoppingBag, 
-  Phone, 
-  MessageCircle, 
-  RefreshCw, 
-  AlertCircle,
-  ArrowRight,
-  ShieldCheck,
-  RotateCcw
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, Clock, MapPin, ShoppingBag, MessageCircle, RefreshCw, AlertCircle, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrderTrackingPage() {
   const params = useParams();
   const router = useRouter();
   const token = params?.token as string;
+  const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
+  const supportUrl = supportPhone
+    ? `https://wa.me/${supportPhone}?text=Hi%20TaazaTokra%20Support,%20I%20need%20help%20with%20my%20order`
+    : null;
 
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
@@ -43,8 +38,8 @@ export default function OrderTrackingPage() {
         }
 
         setOrder(json.order);
-      } catch (err: any) {
-        setError(err.message || 'Unable to load order details');
+      } catch (err) {
+        setError(getErrorMessage(err) || 'Unable to load order details');
       } finally {
         setLoading(false);
       }
@@ -66,8 +61,8 @@ export default function OrderTrackingPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Repeat order failed');
       setRepeatResult(json);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(getErrorMessage(err));
     } finally {
       setRepeating(false);
     }
@@ -140,15 +135,17 @@ export default function OrderTrackingPage() {
               TaazaTokra 🌿
             </span>
           </Link>
-          <a
-            href="https://wa.me/919876543210?text=Hi%20TaazaTokra%20Support,%20I%20need%20help%20with%20my%20order"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/80 border border-emerald-700/60 rounded-full text-emerald-400 text-xs font-bold hover:bg-emerald-900 transition-all"
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>WhatsApp Support</span>
-          </a>
+          {supportUrl && (
+            <a
+              href={supportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/80 border border-emerald-700/60 rounded-full text-emerald-400 text-xs font-bold hover:bg-emerald-900 transition-all"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>WhatsApp Support</span>
+            </a>
+          )}
         </div>
       </header>
 
@@ -234,7 +231,7 @@ export default function OrderTrackingPage() {
                 <span>Delivery Window</span>
               </div>
               <div className="font-bold text-white">10:00 AM - 1:00 PM Daily</div>
-              <div className="text-[10px] text-slate-400">Fresh morning delivery</div>
+              <div className="text-[10px] text-slate-400">Scheduled Halol delivery window</div>
             </div>
 
             <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">

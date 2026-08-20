@@ -1,27 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  ShoppingBag, 
-  Search, 
-  Calendar, 
-  Download, 
-  RefreshCw, 
-  Phone, 
-  MapPin, 
-  Printer, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle,
-  ExternalLink,
-  ChevronRight,
-  Filter,
-  X
-} from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
+
+
+
+
+
+
+import { useState, useCallback, useEffect } from 'react';
+import { Printer, ShoppingBag, Search, Download, RefreshCw, Phone, MapPin, AlertCircle, ExternalLink, ChevronRight, X } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { SlideOverDrawer } from '@/components/ui/SlideOverDrawer';
-import ThermalBagSticker, { StickerPayload } from '@/components/ThermalBagSticker';
+import ThermalBagSticker from '@/components/ThermalBagSticker';
 
 type OrderTab = 'all' | 'new' | 'confirmed' | 'packing' | 'out_for_delivery' | 'delivered' | 'issues';
 
@@ -74,8 +65,8 @@ export default function AdminOrdersPage() {
 
       setOrders(json.data?.orders || []);
       setTotalCount(json.data?.total_count || 0);
-    } catch (err: any) {
-      setError(err.message || 'Error fetching orders');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error fetching orders');
     } finally {
       setLoading(false);
     }
@@ -384,7 +375,7 @@ export default function AdminOrdersPage() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         title={selectedOrder ? `Order #${selectedOrder.order_number}` : 'Order Detail'}
-        subtitle={selectedOrder ? `Placed on ${new Date(selectedOrder.created_at || Date.now()).toLocaleDateString()}` : ''}
+        subtitle={selectedOrder?.created_at ? `Placed on ${new Date(selectedOrder.created_at).toLocaleDateString()}` : ''}
         footer={
           selectedOrder && (
             <div className="flex items-center justify-between gap-3">

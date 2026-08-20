@@ -1,15 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { 
-  formatBilingualOrderConfirmed, 
-  formatBilingualOutForDelivery, 
-  formatBilingualOrderDelivered, 
-  formatBilingualDeliveryFailed,
-  formatOwnerProcurementReport,
-  formatOwnerOperationalAlert,
-  sendWhatsAppMessage 
-} from '../src/lib/whatsapp';
+import { formatBilingualOrderConfirmed, formatBilingualOutForDelivery, formatBilingualOrderDelivered, formatBilingualDeliveryFailed, formatOwnerProcurementReport, sendWhatsAppMessage } from '../src/lib/whatsapp';
 
 // Load .env.local if present
 const envPath = path.resolve(__dirname, '../.env.local');

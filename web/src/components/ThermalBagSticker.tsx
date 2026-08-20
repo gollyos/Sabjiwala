@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-
 export interface StickerItemSummary {
   name_en: string;
   name_gu: string;

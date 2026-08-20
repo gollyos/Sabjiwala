@@ -1,34 +1,41 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  TrendingUp, 
-  ShoppingBag, 
-  DollarSign, 
-  Truck, 
-  RefreshCw, 
-  Clock, 
-  Tag, 
-  Layers, 
-  Boxes, 
-  ArrowRight,
-  AlertCircle,
-  BarChart3,
-  ExternalLink
-} from 'lucide-react';
-import Link from 'next/link';
+import { getErrorMessage } from '@/lib/errors';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdminNav } from '@/components/AdminNav';
-import { StatCard } from '@/components/ui/StatCard';
-import { NeedsAttentionSection, AttentionItem } from '@/components/ui/NeedsAttentionSection';
-import { FlowProgressStrip } from '@/components/ui/FlowProgressStrip';
+import { AttentionItem, NeedsAttentionSection } from '@/components/ui/NeedsAttentionSection';
 import AreaTrendChart, { AreaDataPoint } from '@/components/charts/AreaTrendChart';
 import HorizontalBarChart, { BarItem } from '@/components/charts/HorizontalBarChart';
+import { TrendingUp, ShoppingBag, DollarSign, Truck, RefreshCw, Tag, Layers, Boxes, ArrowRight, AlertCircle, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
+import { AdminNav } from '@/components/AdminNav';
+import { StatCard } from '@/components/ui/StatCard';
+import { FlowProgressStrip } from '@/components/ui/FlowProgressStrip';
+
+interface DashboardProduct extends BarItem {
+  product_id: string;
+}
+
+interface DashboardAttentionItem {
+  id?: string;
+  type?: string;
+  title: string;
+  subtitle?: string;
+  severity?: AttentionItem['severity'];
+}
+
+interface DashboardData {
+  kpis?: Record<string, number>;
+  daily_summary?: Record<string, number>;
+  sales_trend?: AreaDataPoint[];
+  top_products?: DashboardProduct[];
+  needs_attention?: DashboardAttentionItem[];
+}
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchDashboardData = useCallback(async () => {
@@ -44,8 +51,8 @@ export default function AdminDashboardPage() {
       }
 
       setData(json.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load business dashboard');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Failed to load business dashboard');
     } finally {
       setLoading(false);
     }
@@ -73,7 +80,7 @@ export default function AdminDashboardPage() {
   const kpis = data?.kpis || {};
   const dailySummary = data?.daily_summary || {};
   const salesTrend: AreaDataPoint[] = data?.sales_trend || [];
-  const topProducts: BarItem[] = (data?.top_products || []).slice(0, 5).map((p: any) => ({
+  const topProducts: BarItem[] = (data?.top_products || []).slice(0, 5).map((p) => ({
     id: p.product_id,
     name_en: p.name_en,
     name_gu: p.name_gu,
@@ -85,9 +92,9 @@ export default function AdminDashboardPage() {
   }));
 
   // Map needs attention items
-  const needsAttentionRaw: any[] = data?.needs_attention || [];
-  const attentionItems: AttentionItem[] = needsAttentionRaw.map((item: any) => ({
-    id: item.id || String(Math.random()),
+  const needsAttentionRaw = data?.needs_attention || [];
+  const attentionItems: AttentionItem[] = needsAttentionRaw.map((item, index) => ({
+    id: item.id || `${item.type || 'general'}-${index}`,
     type: item.type || 'general',
     title: item.title,
     subtitle: item.subtitle,

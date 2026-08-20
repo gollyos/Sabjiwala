@@ -1,8 +1,6 @@
-import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-
 export default function NotFound() {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">

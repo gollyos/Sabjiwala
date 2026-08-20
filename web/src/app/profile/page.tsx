@@ -2,31 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, AddressInput } from '@/context/AuthContext';
-import { 
-  User, 
-  Phone, 
-  MapPin, 
-  ShieldCheck, 
-  Award, 
-  LogOut, 
-  Plus, 
-  Home, 
-  Briefcase, 
-  Building,
-  Loader2,
-  Trash2,
-  Edit2,
-  CheckCircle2,
-  AlertCircle,
-  ArrowRight,
-  Package,
-  Calendar,
-  Clock,
-  ChevronRight,
-  ShoppingBag,
-  CreditCard,
-  Banknote
-} from 'lucide-react';
+import { User, Phone, ShieldCheck, ArrowRight, MapPin, LogOut, Plus, Home, Briefcase, Building, Loader2, Trash2, Edit2, CheckCircle2, AlertCircle, Package, Calendar, Clock, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CustomerAddress } from '@/types/sabjiwala';
 import { createClient } from '@/lib/supabase/client';
 
@@ -367,7 +343,11 @@ export default function ProfilePage() {
           {/* TAB 1: MY ORDERS */}
           {activeTab === 'orders' && (
             <div className="space-y-6">
-              {selectedOrderId && selectedOrderDetail ? (
+              {selectedOrderId && loadingOrderDetail ? (
+                <div className="py-16 text-center text-sm font-semibold text-slate-500" role="status">
+                  Loading order details…
+                </div>
+              ) : selectedOrderId && selectedOrderDetail ? (
                 /* Order Detail View */
                 <div className="space-y-6">
                   <div className="flex items-center justify-between pb-4 border-b border-slate-100">

@@ -1,6 +1,4 @@
-import React from 'react';
 import { LucideIcon, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-
 interface StatCardProps {
   title: string;
   subtitle?: string;

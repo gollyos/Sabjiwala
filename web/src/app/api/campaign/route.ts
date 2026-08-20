@@ -1,9 +1,11 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 
@@ -47,7 +49,7 @@ export async function GET() {
       campaign: settingRow.value,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Error fetching campaign';
+    const msg = err instanceof Error ? getErrorMessage(err) : 'Error fetching campaign';
     return NextResponse.json(
       { success: false, error: msg },
       { status: 500 }

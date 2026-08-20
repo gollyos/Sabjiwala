@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -64,7 +65,7 @@ export async function GET() {
       total_count: formattedStaff.length,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error fetching staff accounts';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error fetching staff accounts';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }
@@ -117,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data);
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error creating staff account';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error creating staff account';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }
@@ -170,7 +171,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(data);
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error updating staff account';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error updating staff account';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }

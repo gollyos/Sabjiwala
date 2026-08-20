@@ -1,22 +1,8 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
-import { 
-  TrendingUp, 
-  ShoppingBag, 
-  Package, 
-  Users, 
-  Boxes, 
-  Truck, 
-  DollarSign, 
-  Building2, 
-  ArrowRight,
-  BarChart3,
-  Scale
-} from 'lucide-react';
+import { TrendingUp, ShoppingBag, Package, Users, Boxes, Truck, Building2, BarChart3, ArrowRight } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
-
 export default function ReportsHubPage() {
   const reportCategories = [
     {

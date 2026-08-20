@@ -2,18 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { 
-  Truck, 
-  CheckCircle2, 
-  Phone, 
-  MapPin, 
-  Navigation, 
-  Check, 
-  X, 
-  RefreshCw, 
-  Lock,
-  ArrowLeft
-} from 'lucide-react';
+import { Navigation, Truck, CheckCircle2, Phone, MapPin, Check, X, RefreshCw, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { StatusChip } from '@/components/ui/StatusChip';
 
@@ -444,12 +433,16 @@ export default function DriverMobileScreen() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase px-1">
             <span>Stops Queue ({deliveries.length})</span>
-            <button onClick={loadDriverDeliveries} className="text-emerald-400 flex items-center gap-1 cursor-pointer min-h-[32px]">
-              <RefreshCw className="w-3 h-3" /> Refresh
+            <button disabled={isLoading} onClick={loadDriverDeliveries} className="text-emerald-400 disabled:opacity-60 flex items-center gap-1 cursor-pointer min-h-[32px]">
+              <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
             </button>
           </div>
 
-          {deliveries.length === 0 ? (
+          {isLoading ? (
+            <div className="p-12 text-center text-xs text-slate-400 bg-slate-950 rounded-3xl border border-slate-800">
+              Loading today&apos;s route…
+            </div>
+          ) : deliveries.length === 0 ? (
             <div className="p-12 text-center text-xs text-slate-500 italic bg-slate-950 rounded-3xl border border-slate-800">
               No delivery stops assigned to you today.
             </div>

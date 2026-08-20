@@ -1,11 +1,10 @@
-import React from 'react';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { Package, ShieldCheck, CheckCircle2, AlertCircle, Clock, MapPin, Truck } from 'lucide-react';
+import { Package, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
-
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 

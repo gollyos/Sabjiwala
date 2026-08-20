@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error fetching purchases';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error fetching purchases';
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 }
@@ -169,7 +170,7 @@ export async function POST(req: NextRequest) {
       message: `Purchase of ${qty} ${unit_code || 'kg'} at ₹${rate}/kg logged successfully.`,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error saving purchase entry';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error saving purchase entry';
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 }

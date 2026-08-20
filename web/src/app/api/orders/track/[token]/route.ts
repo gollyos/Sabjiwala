@@ -1,10 +1,12 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 
@@ -23,7 +25,7 @@ export async function GET(
     const { data: { user } } = await serverSupabase.auth.getUser();
 
     // 1. Primary lookup by secure tracking_token
-    let { data: order, error } = await serviceSupabase
+    const orderLookup = await serviceSupabase
       .from('orders')
       .select(`
         id,
@@ -61,6 +63,8 @@ export async function GET(
       `)
       .eq('tracking_token', token)
       .maybeSingle();
+    let order = orderLookup.data;
+    const error = orderLookup.error;
 
     // 2. If not matched by tracking_token, allow UUID lookup ONLY if user is authenticated and owns order or is staff
     if (!order && user) {
@@ -181,7 +185,7 @@ export async function GET(
       },
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error tracking order';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error tracking order';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }

@@ -1,5 +1,4 @@
-import React from 'react';
-import { AlertTriangle, X, Check } from 'lucide-react';
+import { AlertTriangle, Check } from 'lucide-react';
 
 interface ConfirmationModalProps {
   isOpen: boolean;

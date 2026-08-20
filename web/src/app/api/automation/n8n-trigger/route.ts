@@ -1,7 +1,6 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { dispatchN8nOrderWebhook } from '@/lib/n8n';
-import { createClient } from '@/lib/supabase/server';
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -9,15 +8,32 @@ export async function POST(req: NextRequest) {
 
     // If test trigger from settings page
     if (is_test && test_webhook_url) {
+      let webhookUrl: URL;
+      try {
+        webhookUrl = new URL(test_webhook_url);
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Enter a valid public HTTPS webhook URL.' },
+          { status: 400 }
+        );
+      }
+      const blockedHost = /^(localhost|\[::1\]|127\.|0\.|10\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(webhookUrl.hostname);
+      if (webhookUrl.protocol !== 'https:' || blockedHost) {
+        return NextResponse.json(
+          { success: false, error: 'Test webhook must use a public HTTPS URL.' },
+          { status: 400 }
+        );
+      }
+
       const testPayload = {
         event: 'TEST_EVENT',
         timestamp: new Date().toISOString(),
-        source: 'sabjiwala_settings_test',
-        message: '✅ Sabjiwala & n8n Webhook connection verified successfully!',
+        source: 'taazatokra_settings_test',
+        message: '✅ TaazaTokra & n8n webhook connection verified successfully!',
         sample_order: {
           order_number: 'SBJ-SAMPLE-2026',
           customer_name: 'Test Customer (ટેસ્ટ ગ્રાહક)',
-          customer_mobile: '+919876543210',
+          customer_mobile: '+910000000000',
           delivery_date: new Date().toISOString().split('T')[0],
           delivery_slot: '10:00 AM – 01:00 PM',
           delivery_area: 'Pavagadh Bypass, Halol',
@@ -27,7 +43,7 @@ export async function POST(req: NextRequest) {
         },
       };
 
-      const res = await fetch(test_webhook_url, {
+      const res = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testPayload),
@@ -56,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error in n8n trigger route';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error in n8n trigger route';
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 }

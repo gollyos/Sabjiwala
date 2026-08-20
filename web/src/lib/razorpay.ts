@@ -36,15 +36,27 @@ export interface RazorpayPaymentEntity {
 
 export class RazorpayService {
   private static getKeyId(): string {
-    return process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_sabjiwala_mock';
+    const key = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    if (!key && process.env.NODE_ENV === 'production') {
+      throw new Error('Razorpay key ID is not configured.');
+    }
+    return key || 'rzp_test_sabjiwala_mock';
   }
 
   private static getKeySecret(): string {
-    return process.env.RAZORPAY_KEY_SECRET || 'sabjiwala_mock_secret_test_key_123';
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      throw new Error('Razorpay key secret is not configured.');
+    }
+    return secret || 'sabjiwala_mock_secret_test_key_123';
   }
 
   private static getWebhookSecret(): string {
-    return process.env.RAZORPAY_WEBHOOK_SECRET || 'sabjiwala_mock_webhook_secret_456';
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      throw new Error('Razorpay webhook secret is not configured.');
+    }
+    return secret || 'sabjiwala_mock_webhook_secret_456';
   }
 
   /**

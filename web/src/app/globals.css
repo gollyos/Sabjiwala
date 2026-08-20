@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fbfcf7;
+  --foreground: #142019;
+  --brand: #08783f;
+  --brand-strong: #075c34;
+  --brand-soft: #e9f7ee;
+  --accent: #f4a62a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
-    --foreground: #f8fafc;
+    --background: #07140f;
+    --foreground: #f4f8f5;
   }
 }
 
@@ -22,7 +26,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-manrope), var(--font-gujarati), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -30,9 +34,61 @@ body {
   width: 100%;
 }
 
+:lang(gu) {
+  font-family: var(--font-gujarati), var(--font-manrope), sans-serif;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--brand-strong);
+  padding: 0.75rem 1rem;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 18%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgb(244 166 42 / 85%);
+  outline-offset: 3px;
+}
+
 /* Fast tap response for mobile buttons */
 button, a, input, select, textarea {
   touch-action: manipulation;
+}
+
+button, a {
+  -webkit-tap-highlight-color: rgb(8 120 63 / 16%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Smooth horizontal scroll for category chips */

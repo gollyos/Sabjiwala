@@ -1,22 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Bell, 
-  Search, 
-  RefreshCw, 
-  Send, 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock, 
-  RotateCw, 
-  MessageSquare, 
-  Filter, 
-  Smartphone,
-  Eye,
-  ArrowRight
-} from 'lucide-react';
-import Link from 'next/link';
+import { getErrorMessage } from '@/lib/errors';
+import { useState, useCallback, useEffect } from 'react';
+import { Bell, Search, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, RotateCw, Smartphone } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
 export default function AdminNotificationCenterPage() {
@@ -48,8 +34,8 @@ export default function AdminNotificationCenterPage() {
       }
 
       setData(json);
-    } catch (err: any) {
-      setError(err.message || 'Error loading notifications');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading notifications');
     } finally {
       setLoading(false);
     }
@@ -69,8 +55,8 @@ export default function AdminNotificationCenterPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Processing failed');
       await fetchQueue();
-    } catch (err: any) {
-      alert(`Worker error: ${err.message}`);
+    } catch (err) {
+      alert(`Worker error: ${getErrorMessage(err)}`);
     } finally {
       setProcessing(false);
     }
@@ -86,8 +72,8 @@ export default function AdminNotificationCenterPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Retry failed');
       await fetchQueue();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(getErrorMessage(err));
     }
   };
 
@@ -102,8 +88,8 @@ export default function AdminNotificationCenterPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Retry all failed');
       await fetchQueue();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(getErrorMessage(err));
     }
   };
 
@@ -115,6 +101,11 @@ export default function AdminNotificationCenterPage() {
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {error && (
+          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+            {error}
+          </div>
+        )}
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">

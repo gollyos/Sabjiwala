@@ -1,16 +1,4 @@
-import React from 'react';
-import { 
-  CheckCircle2, 
-  Clock, 
-  Layers, 
-  Truck, 
-  AlertTriangle, 
-  XCircle, 
-  Lock, 
-  ShieldAlert,
-  PackageCheck
-} from 'lucide-react';
-
+import { CheckCircle2, Clock, Layers, Truck, AlertTriangle, XCircle, Lock, PackageCheck } from 'lucide-react';
 export type StatusType = 
   | 'new' 
   | 'draft' 

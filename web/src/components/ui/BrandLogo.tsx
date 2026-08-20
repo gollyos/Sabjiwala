@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 
 interface BrandLogoProps {
@@ -48,7 +47,7 @@ export function BrandLogo({
     <div className={`flex items-center gap-1.5 sm:gap-2 select-none min-w-0 ${className}`}>
       {/* Brand Icon Badge with Vector Leaf */}
       <div className={`${currentSize.icon} rounded-xl bg-gradient-to-tr from-emerald-700 via-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-xs shrink-0 border border-emerald-400/30`}>
-        <svg className={`${currentSize.svg} text-white`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className={`${currentSize.svg} text-white`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 2L9.5 7.5L4 8L8 12.5L7 18L12 15L17 18L16 12.5L20 8L14.5 7.5L12 2Z" fill="rgba(255,255,255,0.2)" />
           <path d="M11 20A7 7 0 0 1 4 13C4 7 11 3 11 3S18 7 18 13A7 7 0 0 1 11 20Z" fill="currentColor" opacity="0.9" />
           <path d="M11 9V17" stroke="#047857" strokeWidth="2" />
@@ -79,7 +78,7 @@ export function BrandLogo({
 
   if (asLink) {
     return (
-      <Link href={href} className="inline-block transition-transform hover:scale-[1.01] active:scale-98 focus:outline-hidden min-w-0">
+      <Link href={href} aria-label="TaazaTokra home" className="inline-block transition-transform hover:scale-[1.01] active:scale-98 min-w-0 rounded-xl">
         {content}
       </Link>
     );

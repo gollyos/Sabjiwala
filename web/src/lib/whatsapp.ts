@@ -1,3 +1,6 @@
+import { getErrorMessage } from '@/lib/errors';
+
+
 /**
  * TaazaTokra WhatsApp Business & Message Rendering Service
  * Handles bilingual (English / Gujarati) formatting and Meta Cloud API integration.
@@ -16,12 +19,57 @@ export interface WhatsAppConfig {
   pwaBaseUrl: string;
 }
 
-export function formatBilingualOrderConfirmed(payload: any, pwaBaseUrl: string): string {
+interface WhatsAppItemSample {
+  name_en: string;
+  name_gu: string;
+  variant?: string;
+  qty: number;
+  unit: string;
+  total?: number;
+}
+
+interface WhatsAppPayload {
+  order_id?: string;
+  order_number?: string;
+  tracking_token?: string;
+  delivery_date?: string;
+  delivery_slot?: string;
+  delivery_area?: string;
+  items_sample?: WhatsAppItemSample[];
+  more_items_count?: number;
+  subtotal?: number;
+  first500_discount?: number;
+  cod_discount?: number;
+  final_amount?: number;
+  support_mobile?: string;
+  amount_collected?: number;
+  cash_paid?: number;
+  upi_paid?: number;
+  reason?: string;
+  more_products_count?: number;
+  total_orders?: number;
+  expected_cod?: number;
+  batch_number?: string;
+  total_products_count?: number;
+  customer_name?: string;
+  customer_mobile?: string;
+  area?: string;
+  issue?: string;
+  driver_name?: string;
+  expected_cash?: number;
+  collected_cash?: number;
+  handed_over_cash?: number;
+  difference?: number;
+  notes?: string;
+  [key: string]: unknown;
+}
+
+export function formatBilingualOrderConfirmed(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const itemsText = (payload.items_sample || [])
-    .map((item: any) => `• ${item.name_en} / ${item.name_gu} (${item.variant || ''}) × ${item.qty} ${item.unit} — ₹${item.total}`)
+    .map((item) => `• ${item.name_en} / ${item.name_gu} (${item.variant || ''}) × ${item.qty} ${item.unit} — ₹${item.total}`)
     .join('\n');
 
-  const moreText = payload.more_items_count > 0 
+  const moreText = Number(payload.more_items_count || 0) > 0 
     ? `\n+ ${payload.more_items_count} more items (અન્ય વસ્તુઓ)` 
     : '';
 
@@ -38,7 +86,7 @@ export function formatBilingualOrderConfirmed(payload: any, pwaBaseUrl: string):
 ${itemsText}${moreText}
 
 *Subtotal:* ₹${payload.subtotal}
-${payload.first500_discount > 0 ? `*FIRST500 Discount:* -₹${payload.first500_discount}\n` : ''}${payload.cod_discount > 0 ? `*COD 2% Discount:* -₹${payload.cod_discount}\n` : ''}*Final COD to Pay:* ₹${payload.final_amount}
+${Number(payload.first500_discount || 0) > 0 ? `*FIRST500 Discount:* -₹${payload.first500_discount}\n` : ''}${Number(payload.cod_discount || 0) > 0 ? `*COD 2% Discount:* -₹${payload.cod_discount}\n` : ''}*Final COD to Pay:* ₹${payload.final_amount}
 
 *View Order & Track Live / ઓર્ડર જુઓ:*
 ${trackingLink}
@@ -46,7 +94,7 @@ ${trackingLink}
 _Need help? Reply HELP or call ${payload.support_mobile || 'Support'}_`;
 }
 
-export function formatBilingualOutForDelivery(payload: any, pwaBaseUrl: string): string {
+export function formatBilingualOutForDelivery(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
   return `*TaazaTokra 🚚 Out for Delivery*
@@ -63,7 +111,7 @@ Please keep cash or UPI ready at delivery.
 ${trackingLink}`;
 }
 
-export function formatBilingualOrderDelivered(payload: any, pwaBaseUrl: string): string {
+export function formatBilingualOrderDelivered(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
   return `*TaazaTokra ✅ Order Delivered*
@@ -71,7 +119,7 @@ export function formatBilingualOrderDelivered(payload: any, pwaBaseUrl: string):
 
 *Order No:* ${payload.order_number}
 *Amount Collected:* ₹${payload.amount_collected}
-${payload.cash_paid > 0 ? `(Cash: ₹${payload.cash_paid}) ` : ''}${payload.upi_paid > 0 ? `(UPI: ₹${payload.upi_paid})` : ''}
+${Number(payload.cash_paid || 0) > 0 ? `(Cash: ₹${payload.cash_paid}) ` : ''}${Number(payload.upi_paid || 0) > 0 ? `(UPI: ₹${payload.upi_paid})` : ''}
 
 Thank you for choosing TaazaTokra for fresh fruits & vegetables!
 તાજા ફળો અને શાકભાજી માટે તાજાટોકરા પસંદ કરવા બદલ આભાર.
@@ -82,7 +130,7 @@ ${trackingLink}
 _Any quality issue? Reply HELP within 2 hours._`;
 }
 
-export function formatBilingualDeliveryFailed(payload: any, pwaBaseUrl: string): string {
+export function formatBilingualDeliveryFailed(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
   return `*TaazaTokra ⚠️ Delivery Update*
@@ -99,12 +147,12 @@ Our operations team will contact you shortly regarding the next delivery attempt
 ${trackingLink}`;
 }
 
-export function formatOwnerProcurementReport(payload: any, pwaBaseUrl: string): string {
+export function formatOwnerProcurementReport(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const itemsText = (payload.items_sample || [])
-    .map((item: any) => `• ${item.name_en} / ${item.name_gu}: *${item.qty} ${item.unit}*`)
+    .map((item) => `• ${item.name_en} / ${item.name_gu}: *${item.qty} ${item.unit}*`)
     .join('\n');
 
-  const moreText = payload.more_products_count > 0 
+  const moreText = Number(payload.more_products_count || 0) > 0 
     ? `\n+ ${payload.more_products_count} more products` 
     : '';
 
@@ -125,7 +173,7 @@ ${itemsText}${moreText}
 ${pwaBaseUrl}/admin/procurement`;
 }
 
-export function formatOwnerOperationalAlert(type: string, payload: any, pwaBaseUrl: string): string {
+export function formatOwnerOperationalAlert(type: string, payload: WhatsAppPayload, pwaBaseUrl: string): string {
   if (type === 'PACKING_PROBLEM') {
     return `*⚠️ TAAZATOKRA GODOWN ALERT: PACKING PROBLEM*
 
@@ -182,12 +230,19 @@ export async function sendWhatsAppMessage(
   // Clean E.164 recipient for Meta API (digits only, e.g. 919876543210)
   const metaRecipient = recipient.replace(/[^0-9]/g, '');
 
-  if (!token || !phoneId || process.env.NODE_ENV === 'test' || token.startsWith('mock_')) {
+  if (process.env.NODE_ENV === 'test' || (process.env.NODE_ENV !== 'production' && token?.startsWith('mock_'))) {
     // Simulated Dev/Test Transport
     const simulatedMsgId = `wamid.HBgL${Date.now()}_sim_${Math.floor(Math.random() * 100000)}`;
     return {
       success: true,
       messageId: simulatedMsgId
+    };
+  }
+
+  if (!token || !phoneId) {
+    return {
+      success: false,
+      error: 'WhatsApp delivery is not configured. Set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID.',
     };
   }
 
@@ -208,7 +263,10 @@ export async function sendWhatsAppMessage(
       }),
     });
 
-    const json = await res.json();
+    const json = await res.json() as {
+      error?: { message?: string };
+      messages?: Array<{ id?: string }>;
+    };
     if (!res.ok || json.error) {
       return {
         success: false,
@@ -218,10 +276,10 @@ export async function sendWhatsAppMessage(
 
     const messageId = json.messages?.[0]?.id || `wamid.${Date.now()}`;
     return { success: true, messageId };
-  } catch (err: any) {
+  } catch (err) {
     return {
       success: false,
-      error: err.message || 'Network error connecting to Meta WhatsApp API',
+      error: getErrorMessage(err) || 'Network error connecting to Meta WhatsApp API',
     };
   }
 }

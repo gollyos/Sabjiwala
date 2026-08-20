@@ -1,15 +1,18 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 
 function escapeCsv(val: unknown): string {
   if (val === null || val === undefined) return '';
-  const str = String(val);
+  const raw = String(val);
+  const str = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
   if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
@@ -19,14 +22,19 @@ function escapeCsv(val: unknown): string {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get('type') || 'orders';
+    const requestedType = searchParams.get('type') || 'orders';
+    const validTypes = new Set(['orders', 'products', 'customers', 'suppliers', 'procurement', 'delivery', 'sales']);
+    if (!validTypes.has(requestedType)) {
+      return NextResponse.json({ success: false, error: 'Unsupported report type.' }, { status: 400 });
+    }
+    const type = requestedType;
     const startDate = searchParams.get('start_date') || new Date().toISOString().split('T')[0];
     const endDate = searchParams.get('end_date') || new Date().toISOString().split('T')[0];
 
     const supabase = getServiceSupabase();
     let csvHeader = '';
     let csvRows: string[] = [];
-    let filename = `taazatokra_${type}_${startDate}_to_${endDate}.csv`;
+    const filename = `taazatokra_${type}_${startDate}_to_${endDate}.csv`;
 
     if (type === 'orders') {
       const { data } = await supabase.rpc('get_detailed_orders_report', {
@@ -41,9 +49,10 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Order Number,Delivery Date,Customer Name,Mobile,Area,Address,Order Status,Payment Status,Payment Method,Subtotal (₹),FIRST500 (₹),COD Disc (₹),Final Payable (₹),Items Summary';
       const orders = data?.orders || [];
-      csvRows = orders.map((o: any) => {
+      csvRows = (orders as Array<Record<string, unknown>>).map((o) => {
         const address = `${o.delivery_flat_house_snapshot || ''}, ${o.delivery_society_street_snapshot || ''}, ${o.delivery_landmark_snapshot || ''}`.trim();
-        const itemsSummary = (o.items || []).map((it: any) => `${it.product_name_en} (${it.quantity}x ${it.variant_name_en})`).join('; ');
+        const items = (o.items as Array<Record<string, unknown>> | undefined) || [];
+        const itemsSummary = items.map((item) => `${item.product_name_en} (${item.quantity}x ${item.variant_name_en})`).join('; ');
         return [
           escapeCsv(o.order_number),
           escapeCsv(o.delivery_date),
@@ -71,7 +80,7 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Product Name (EN),Product Name (GU),Category,Base Unit,Quantity Sold,Total Orders,Net Sales (₹),Estimated Cost (₹),Gross Contribution (₹),Avg Selling Price (₹),Avg Cost (₹),Margin (%)';
       const prods = data?.products || [];
-      csvRows = prods.map((p: any) => [
+      csvRows = (prods as Array<Record<string, unknown>>).map((p) => [
         escapeCsv(p.name_en),
         escapeCsv(p.name_gu),
         escapeCsv(p.category_name_en),
@@ -95,11 +104,15 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Customer Name,Mobile,Sequence No,Registered On,Total Orders,Lifetime Spend (₹),AOV (₹),Last Order Date,FIRST500 Used';
       const custs = data?.customers || [];
-      csvRows = custs.map((c: any) => [
+      csvRows = (custs as Array<Record<string, unknown>>).map((c) => [
         escapeCsv(c.full_name),
         escapeCsv(c.mobile),
         escapeCsv(c.verified_sequence),
-        escapeCsv(c.registration_date ? new Date(c.registration_date).toLocaleDateString('en-IN') : ''),
+        escapeCsv(
+          typeof c.registration_date === 'string' || typeof c.registration_date === 'number'
+            ? new Date(c.registration_date).toLocaleDateString('en-IN')
+            : ''
+        ),
         escapeCsv(c.total_orders),
         escapeCsv(c.lifetime_spend),
         escapeCsv(Number(c.average_order_value).toFixed(2)),
@@ -114,7 +127,7 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Supplier Name,Contact Person,Mobile,APMC Location,Total Batches,Purchased Qty,Purchase Value (₹),Wastage Qty,Average Rate (₹),Last Purchase Date';
       const supps = data?.suppliers || [];
-      csvRows = supps.map((s: any) => [
+      csvRows = (supps as Array<Record<string, unknown>>).map((s) => [
         escapeCsv(s.supplier_name),
         escapeCsv(s.contact_person),
         escapeCsv(s.mobile),
@@ -135,7 +148,7 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Batch Number,Delivery Date,Product Name (EN),Product Name (GU),Unit,Demand Qty,Required Qty,Purchased Qty,Received Qty,Usable Qty,Wastage Qty,Purchase Rate (₹),Total Cost (₹),Supplier';
       const items = data?.items || [];
-      csvRows = items.map((it: any) => [
+      csvRows = (items as Array<Record<string, unknown>>).map((it) => [
         escapeCsv(it.batch_number),
         escapeCsv(it.delivery_date),
         escapeCsv(it.name_en),
@@ -160,7 +173,7 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Driver Name,Assigned Deliveries,Completed,Failed,COD Expected (₹),COD Collected (₹),Cash Collected (₹),UPI Collected (₹)';
       const drivers = data?.driver_performance || [];
-      csvRows = drivers.map((d: any) => [
+      csvRows = (drivers as Array<Record<string, unknown>>).map((d) => [
         escapeCsv(d.driver_name),
         escapeCsv(d.total_assigned),
         escapeCsv(d.completed_deliveries),
@@ -178,7 +191,7 @@ export async function GET(req: NextRequest) {
 
       csvHeader = 'Date,Gross Sales (GMV ₹),FIRST500 Disc (₹),COD Disc (₹),Net Revenue (₹)';
       const breakdown = data?.daily_breakdown || [];
-      csvRows = breakdown.map((b: any) => [
+      csvRows = (breakdown as Array<Record<string, unknown>>).map((b) => [
         escapeCsv(b.delivery_date),
         escapeCsv(b.gross_sales),
         escapeCsv(b.first500_discount),
@@ -197,7 +210,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Internal Server Error';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Internal Server Error';
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 }

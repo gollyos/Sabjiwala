@@ -1,21 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  ShoppingBag, 
-  Search, 
-  Calendar, 
-  Download, 
-  RefreshCw, 
-  ChevronDown, 
-  ChevronUp, 
-  Truck, 
-  CheckCircle2, 
-  AlertCircle, 
-  MapPin, 
-  Phone,
-  FileText
-} from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
+import { useState, useCallback, useEffect } from 'react';
+import { ShoppingBag, Search, Download, RefreshCw, ChevronDown, ChevronUp, MapPin, Phone } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 
 export default function OrdersReportPage() {
@@ -57,8 +44,8 @@ export default function OrdersReportPage() {
 
       setOrders(json.data?.orders || []);
       setTotalCount(json.data?.total_count || 0);
-    } catch (err: any) {
-      setError(err.message || 'Error fetching orders');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error fetching orders');
     } finally {
       setLoading(false);
     }
@@ -91,8 +78,8 @@ export default function OrdersReportPage() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      alert(`Export error: ${err.message}`);
+    } catch (err) {
+      alert(`Export error: ${getErrorMessage(err)}`);
     } finally {
       setExporting(false);
     }
@@ -103,6 +90,11 @@ export default function OrdersReportPage() {
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {error && (
+          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+            {error}
+          </div>
+        )}
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">

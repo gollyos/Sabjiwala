@@ -1,22 +1,10 @@
-import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { 
-  MapPin, 
-  Clock, 
-  CheckCircle2, 
-  Truck, 
-  ShieldCheck, 
-  Leaf, 
-  ShoppingBag,
-  ArrowRight,
-  Phone
-} from 'lucide-react';
+import { MapPin, Clock, ShieldCheck, ShoppingBag, ArrowRight } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-
 export const metadata: Metadata = {
   title: 'Fresh Fruits & Vegetables Delivery in Halol | TaazaTokra (તાજાટોકરા)',
-  description: 'TaazaTokra delivers farm-fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies. Order today for guaranteed next-day morning delivery.',
+  description: 'TaazaTokra delivers fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies in the 10 AM–1 PM delivery window.',
   keywords: [
     'fresh fruits Halol',
     'fresh vegetables Halol',
@@ -68,7 +56,7 @@ export default function HalolDeliveryAreaPage() {
             </div>
             <div className="font-extrabold text-sm text-slate-900 dark:text-white">Delivery Window</div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Every morning from <strong>10:00 AM to 01:00 PM</strong>. Orders placed before 8 PM are delivered next day.
+              Every day from <strong>10:00 AM to 1:00 PM</strong>. Orders placed before 7:50 PM are scheduled for next-day delivery.
             </p>
           </div>
 

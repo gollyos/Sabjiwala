@@ -1,10 +1,8 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { RefreshCw, Home, AlertCircle } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-
 export default function ErrorPage({
   error,
   reset,
@@ -28,6 +26,9 @@ export default function ErrorPage({
           <p className="text-xs text-slate-500 dark:text-slate-400">
             We encountered an unexpected error loading this page. Please try refreshing.
           </p>
+          {error.digest && (
+            <p className="text-[11px] font-mono text-slate-400">Reference: {error.digest}</p>
+          )}
         </div>
 
         <div className="flex items-center justify-center gap-3 pt-2">

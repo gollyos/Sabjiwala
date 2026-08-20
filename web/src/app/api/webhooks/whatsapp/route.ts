@@ -1,10 +1,12 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
   return createSupabaseClient(url, key);
 }
 
@@ -42,8 +44,8 @@ export async function POST(req: NextRequest) {
       .single();
 
     const config = configRow?.value || {};
-    const pwaBaseUrl = config.pwa_base_url || 'https://sabjiwala.store';
-    const supportMobile = config.support_mobile || '+919876543210';
+    const pwaBaseUrl = config.pwa_base_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+    const supportMobile = config.support_mobile || process.env.NEXT_PUBLIC_STORE_PHONE || '';
 
     const entries = body.entry || [];
 
@@ -87,7 +89,7 @@ export async function POST(req: NextRequest) {
             let replyText = '';
 
             if (textBody.includes('HELP') || textBody.includes('મદદ') || textBody.includes('SUPPORT')) {
-              replyText = `*TaazaTokra Support (તાજાટોકરા સહાયતા)* 🤝\n\nNeed help with your fresh fruits & vegetables order? Contact our Halol support desk:\n📞 Call/WhatsApp: ${supportMobile}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
+              replyText = `*TaazaTokra Support (તાજાટોકરા સહાયતા)* 🤝\n\nNeed help with your fresh fruits & vegetables order?${supportMobile ? `\n📞 Call/WhatsApp: ${supportMobile}` : ''}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
             } else if (textBody.includes('ORDER') || textBody.includes('ઓર્ડર') || textBody.includes('BUY') || textBody.includes('SHOP')) {
               replyText = `*Order Fresh Fruits & Vegetables (તાજા ફળો અને શાકભાજી)* 🍎🥦\n\nPlace your next-day morning delivery order on our web app:\n👉 ${pwaBaseUrl}\n\n• Farm-fresh mandi rates\n• 10% OFF with FIRST500\n• 2% Cash on Delivery discount`;
             } else if (textBody.includes('STATUS') || textBody.includes('MY ORDER') || textBody.includes('TRACK') || textBody.includes('મારો ઓર્ડર')) {
@@ -126,9 +128,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: err.message || 'Webhook processing exception' },
+      { success: false, error: getErrorMessage(err) || 'Webhook processing exception' },
       { status: 500 }
     );
   }

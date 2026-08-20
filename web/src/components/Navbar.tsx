@@ -1,25 +1,15 @@
 'use client';
 
-import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { 
-  ShoppingBag, 
-  User, 
-  MapPin, 
-  ShieldCheck, 
-  ChevronDown
-} from 'lucide-react';
+import { ShoppingBag, User, MapPin, ShieldCheck, ChevronDown } from 'lucide-react';
 import { PromoCountdownBanner } from './PromoCountdownBanner';
 import { BrandLogo } from './ui/BrandLogo';
 import { usePathname } from 'next/navigation';
-import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
-
 export function Navbar() {
   const pathname = usePathname();
   const { user, customer, isOnboarded, openAuthModal, openProfileModal, verifiedSequence } = useAuth();
   const { cart, openCartDrawer } = useCart();
-  const deliveryInfo = getDeliveryScheduleInfo();
 
   // Hide customer navbar on Admin, Driver, and Tracking routes
   if (
@@ -39,24 +29,8 @@ export function Navbar() {
       {/* Live Promo Offer & Countdown Banner */}
       <PromoCountdownBanner />
 
-      {/* Top Delivery Notification Bar (Desktop only to prevent mobile cramping) */}
-      <div className="hidden sm:flex bg-emerald-950 text-emerald-100 text-xs px-4 py-1.5 font-medium items-center justify-between overflow-x-auto border-b border-emerald-800/40">
-        <div className="flex items-center space-x-2 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>{deliveryInfo.bannerNotice}</span>
-        </div>
-        <div className="flex items-center space-x-3 text-emerald-300 shrink-0">
-          <span className="flex items-center gap-1 font-semibold">
-            <MapPin className="w-3 h-3 text-emerald-400" />
-            Halol APMC Sourced
-          </span>
-          <span>•</span>
-          <span className="font-semibold">₹200 Min Order</span>
-        </div>
-      </div>
-
       {/* Main Navbar */}
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
         
         {/* Brand & Location */}
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">

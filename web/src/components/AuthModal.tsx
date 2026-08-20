@@ -2,20 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  X, 
-  Phone, 
-  ShieldCheck, 
-  MapPin, 
-  User, 
-  ArrowRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Loader2,
-  Leaf
-} from 'lucide-react';
-import { BrandLogo } from './ui/BrandLogo';
-
+import { Leaf, X, Phone, ShieldCheck, MapPin, User, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 export function AuthModal() {
   const { 
     authModalOpen, 
@@ -34,7 +21,6 @@ export function AuthModal() {
   const [canResend, setCanResend] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDemoOtp, setIsDemoOtp] = useState(false);
   const [verifiedSeq, setVerifiedSeq] = useState<number | null>(null);
 
   // Onboarding Form State
@@ -60,7 +46,6 @@ export function AuthModal() {
       }
       setError(null);
       setLoading(false);
-      setIsDemoOtp(false);
       setOtp(['', '', '', '', '', '']);
     }
   }, [authModalOpen, isOnboarded, customer]);
@@ -94,9 +79,6 @@ export function AuthModal() {
     setLoading(false);
 
     if (res.success) {
-      if (res.isDevMode) {
-        setIsDemoOtp(true);
-      }
       setStep('otp');
       setTimer(30);
       setCanResend(false);
@@ -327,12 +309,6 @@ export function AuthModal() {
                   Enter 6-Digit Verification Code
                 </label>
                 
-                {isDemoOtp && (
-                  <div className="mb-3 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center text-xs text-emerald-800 dark:text-emerald-300 font-semibold">
-                    🔑 Test OTP: <strong>123456</strong>
-                  </div>
-                )}
-
                 <div className="flex justify-center gap-2 sm:gap-2.5">
                   {otp.map((digit, idx) => (
                     <input

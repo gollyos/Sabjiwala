@@ -1,16 +1,10 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Home, 
-  Search, 
-  ShoppingBag, 
-  User 
-} from 'lucide-react';
+import { Home, Search, ShoppingBag, User } from 'lucide-react';
 
 export function MobileBottomNav() {
   const pathname = usePathname();

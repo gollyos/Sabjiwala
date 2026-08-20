@@ -1,29 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/errors';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { Product, ProductVariant, Category, ProductUnit } from '@/types/sabjiwala';
+import { Product, Category, ProductUnit, ProductVariant } from '@/types/sabjiwala';
 import { AdminNav } from '@/components/AdminNav';
-import { 
-  Package, 
-  Plus, 
-  Edit2, 
-  Check, 
-  X, 
-  Image as ImageIcon, 
-  Upload, 
-  Layers, 
-  AlertCircle, 
-  CheckCircle2, 
-  Loader2, 
-  Trash2, 
-  Tag, 
-  Eye, 
-  EyeOff, 
-  Search, 
-  Zap,
-  Save
-} from 'lucide-react';
+import { Package, Plus, Edit2, Check, X, Upload, AlertCircle, CheckCircle2, Loader2, Trash2, Eye, EyeOff, Search, Save } from 'lucide-react';
 
 export default function AdminProductsPage() {
   const [supabase] = useState(() => createClient());
@@ -73,15 +56,7 @@ export default function AdminProductsPage() {
   const [varIsActive, setVarIsActive] = useState(true);
   const [savingVariant, setSavingVariant] = useState(false);
 
-  // Category Modal State
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [catSlug, setCatSlug] = useState('');
-  const [catNameEn, setCatNameEn] = useState('');
-  const [catNameGu, setCatNameGu] = useState('');
-  const [catDisplayOrder, setCatDisplayOrder] = useState(0);
-  const [savingCategory, setSavingCategory] = useState(false);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const { data: catData } = await supabase.from('categories').select('*').order('display_order', { ascending: true });
@@ -102,17 +77,17 @@ export default function AdminProductsPage() {
         }));
         setProducts(mapped as Product[]);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading products data:', err);
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to load catalog data.' });
+      setStatusMsg({ type: 'error', text: getErrorMessage(err) || 'Failed to load catalog data.' });
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
     loadData();
-  }, [supabase]);
+  }, [loadData]);
 
   // Handle Product Image Upload to Supabase Storage
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,9 +121,9 @@ export default function AdminProductsPage() {
 
       const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
       setProdImageUrl(urlData.publicUrl);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error uploading image:', err);
-      alert(err.message || 'Failed to upload image. You can also paste an image URL directly.');
+      alert(getErrorMessage(err) || 'Failed to upload image. You can also paste an image URL directly.');
     } finally {
       setUploadingImage(false);
     }
@@ -171,7 +146,7 @@ export default function AdminProductsPage() {
         type: 'success',
         text: `${prod.name_gu} is now ${newStock ? 'IN STOCK' : 'OUT OF STOCK'}.`,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating stock:', err);
       // Revert optimistic update
       loadData();
@@ -195,28 +170,9 @@ export default function AdminProductsPage() {
         type: 'success',
         text: `${prod.name_gu} is now ${newActive ? 'VISIBLE on store' : 'HIDDEN from store'}.`,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating active state:', err);
       loadData();
-    }
-  };
-
-  // Fast Inline Price Quick-Edit
-  const handleQuickUpdateVariantPrice = async (variantId: string, newPriceVal: number) => {
-    if (isNaN(newPriceVal) || newPriceVal <= 0) return;
-
-    try {
-      const { error } = await supabase.rpc('bulk_update_variant_prices', {
-        p_updates: [{ variant_id: variantId, selling_price: newPriceVal }],
-        p_change_reason: 'Quick Price Update',
-      });
-
-      if (error) throw error;
-      setStatusMsg({ type: 'success', text: `Price updated to ₹${newPriceVal}` });
-      await loadData();
-    } catch (err: any) {
-      console.error('Error saving price:', err);
-      alert('Failed to update price');
     }
   };
 
@@ -335,9 +291,9 @@ export default function AdminProductsPage() {
       setIsProductModalOpen(false);
       setStatusMsg({ type: 'success', text: `Vegetable "${prodNameGu}" saved successfully!` });
       await loadData();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error saving product:', err);
-      alert(err.message || 'Failed to save product.');
+      alert(getErrorMessage(err) || 'Failed to save product.');
     } finally {
       setSavingProduct(false);
     }
@@ -408,9 +364,9 @@ export default function AdminProductsPage() {
       setIsVariantModalOpen(false);
       setStatusMsg({ type: 'success', text: 'Pack size saved successfully!' });
       await loadData();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error saving variant:', err);
-      alert(err.message || 'Failed to save variant.');
+      alert(getErrorMessage(err) || 'Failed to save variant.');
     } finally {
       setSavingVariant(false);
     }
@@ -434,9 +390,9 @@ export default function AdminProductsPage() {
       setIsVariantModalOpen(false);
       setStatusMsg({ type: 'success', text: `Pack size "${variantName}" removed successfully!` });
       await loadData();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting variant:', err);
-      alert(err.message || 'Failed to remove pack size.');
+      alert(getErrorMessage(err) || 'Failed to remove pack size.');
     } finally {
       setLoading(false);
     }
@@ -572,12 +528,14 @@ export default function AdminProductsPage() {
                   <div>
                     {/* Top Row: Image, Info, and Controls */}
                     <div className="flex items-start gap-3.5 mb-3">
-                      <div className="w-18 h-18 rounded-2xl bg-slate-100 dark:bg-slate-950 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800">
+                      <div className="relative w-18 h-18 rounded-2xl bg-slate-100 dark:bg-slate-950 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800">
                         {prod.image_url ? (
-                          <img
+                          <Image
                             src={prod.image_url}
                             alt={prod.name_en}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="72px"
+                            className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-3xl">
@@ -823,9 +781,9 @@ export default function AdminProductsPage() {
               <div className="space-y-1.5">
                 <label className="block text-slate-500 font-bold">Product Image (ફોટો)</label>
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                  <div className="relative w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                     {prodImageUrl ? (
-                      <img src={prodImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <Image src={prodImageUrl} alt="Product preview" fill sizes="64px" className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xl">🥬</div>
                     )}

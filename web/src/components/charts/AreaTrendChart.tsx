@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export interface AreaDataPoint {
   date: string;
@@ -37,8 +37,6 @@ export default function AreaTrendChart({
 
   const values = data.map((d) => Number(d[metricKey] || 0));
   const maxValue = Math.max(...values, 1);
-  const minValue = 0;
-
   const width = 800;
   const height = 260;
   const paddingX = 45;

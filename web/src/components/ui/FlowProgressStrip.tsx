@@ -1,13 +1,5 @@
-import React from 'react';
 import Link from 'next/link';
-import { 
-  ShoppingBag, 
-  Lock, 
-  Layers, 
-  Truck, 
-  CheckCircle2, 
-  ChevronRight 
-} from 'lucide-react';
+import { Lock, CheckCircle2 } from 'lucide-react';
 
 export interface FlowStep {
   label: string;

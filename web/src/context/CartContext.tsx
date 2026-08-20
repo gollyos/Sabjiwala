@@ -1,6 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { getErrorMessage } from '@/lib/errors';
+
+
+
+
+import React, { createContext, useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { Product, ProductVariant, CartItem, CheckoutQuote } from '@/types/sabjiwala';
 import { useAuth } from './AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -98,17 +103,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user, customer, defaultAddress, isOnboarded, openAuthModal } = useAuth();
   
   // Persistent local cart
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('sabjiwala_cart');
-        return saved ? JSON.parse(saved) : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
+  // Start with the same value on the server and the first browser render to
+  // prevent hydration mismatches. Restore the saved basket after hydration.
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [hasRestoredCart, setHasRestoredCart] = useState(false);
 
   const [cartDrawerOpen, setCartDrawerOpen] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
@@ -122,12 +120,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [orderSuccessData, setOrderSuccessData] = useState<OrderResult | null>(null);
   const prevQuoteTotalRef = useRef<number | null>(null);
 
-  // Sync with LocalStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('sabjiwala_cart');
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      if (Array.isArray(parsed)) {
+        setCart(parsed as CartItem[]);
+      }
+    } catch {
+      localStorage.removeItem('sabjiwala_cart');
+    } finally {
+      setHasRestoredCart(true);
+    }
+  }, []);
+
+  // Sync changes only after the initial saved basket has been restored.
+  useEffect(() => {
+    if (hasRestoredCart) {
       localStorage.setItem('sabjiwala_cart', JSON.stringify(cart));
     }
-  }, [cart]);
+  }, [cart, hasRestoredCart]);
 
   // Recalculate Authoritative Server-Side Quote
   const refreshQuote = useCallback(async () => {
@@ -315,20 +327,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCartDrawerOpen(false);
         setOrderSuccessData(orderResult);
 
-        // Instantly trigger background notification processor for customer & admin alerts
-        fetch('/api/notifications/process', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        }).catch((err) => console.error('Notification dispatch trigger:', err));
-
-        // Instantly trigger n8n automated webhook for Google Sheets & WhatsApp dispatch
-        fetch('/api/automation/n8n-trigger', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: orderResult.order_id }),
-        }).catch((err) => console.error('n8n dispatch trigger:', err));
-
         return { success: true, data: orderResult };
       }
 
@@ -394,17 +392,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 setCartDrawerOpen(false);
                 setOrderSuccessData(confirmedResult);
 
-                // Instantly trigger notifications & n8n webhook
-                fetch('/api/notifications/process', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).catch(() => {});
-                fetch('/api/automation/n8n-trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderResult.order_id }) }).catch(() => {});
-
                 resolve({ success: true, data: confirmedResult });
               } else {
                 setOrderError(verifyData.error || 'Payment signature verification delayed. We are checking status.');
                 resolve({ success: false, error: verifyData.error });
               }
             } catch (err: unknown) {
-              const msg = err instanceof Error ? err.message : 'Error confirming payment';
+              const msg = err instanceof Error ? getErrorMessage(err) : 'Error confirming payment';
               console.error('Error verifying payment:', err);
               setOrderError(msg);
               resolve({ success: false, error: msg });
@@ -425,7 +419,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       });
 
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to place order';
+      const msg = err instanceof Error ? getErrorMessage(err) : 'Failed to place order';
       console.error('Unexpected order placement error:', err);
       setOrderError(msg);
       return { success: false, error: msg };

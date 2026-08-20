@@ -1,24 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/errors';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Product, ProductVariant, SellingPriceHistory } from '@/types/sabjiwala';
+import { Product, SellingPriceHistory } from '@/types/sabjiwala';
 import { AdminNav } from '@/components/AdminNav';
-import { 
-  Tag, 
-  Save, 
-  History, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  RotateCcw,
-  Plus,
-  Minus,
-  Search,
-  Check
-} from 'lucide-react';
+import { Tag, Save, History, CheckCircle2, AlertCircle, Plus, Minus, Search } from 'lucide-react';
 
 interface PriceRow {
   variantId: string;
@@ -35,20 +22,17 @@ interface PriceRow {
 
 export default function DailyPricingPage() {
   const [supabase] = useState(() => createClient());
-  const [products, setProducts] = useState<Product[]>([]);
   const [priceRows, setPriceRows] = useState<PriceRow[]>([]);
   const [priceHistory, setPriceHistory] = useState<SellingPriceHistory[]>([]);
-  const [reason, setReason] = useState('Daily Morning APMC Price Revision');
-  const [loading, setLoading] = useState(true);
+  const reason = 'Daily Morning APMC Price Revision';
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [pricingFilter, setPricingFilter] = useState<'all' | 'vegetables' | 'fruits'>('all');
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'daily_pricing' | 'history'>('daily_pricing');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
-      setLoading(true);
       const { data: prodData, error: prodErr } = await supabase
         .from('products')
         .select('*, product_variants(*)')
@@ -57,7 +41,6 @@ export default function DailyPricingPage() {
       if (prodErr) throw prodErr;
 
       const prods = (prodData || []) as Product[];
-      setProducts(prods);
 
       const rows: PriceRow[] = [];
       prods.forEach((p) => {
@@ -96,17 +79,15 @@ export default function DailyPricingPage() {
         .limit(25);
 
       if (histData) setPriceHistory(histData as SellingPriceHistory[]);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading pricing data:', err);
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to load catalog pricing.' });
-    } finally {
-      setLoading(false);
+      setStatusMsg({ type: 'error', text: getErrorMessage(err) || 'Failed to load catalog pricing.' });
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
     loadData();
-  }, [supabase]);
+  }, [loadData]);
 
   const handlePriceChange = (variantId: string, valStr: string) => {
     const val = parseFloat(valStr);
@@ -182,9 +163,9 @@ export default function DailyPricingPage() {
       });
 
       await loadData();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error saving prices:', err);
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to update prices.' });
+      setStatusMsg({ type: 'error', text: getErrorMessage(err) || 'Failed to update prices.' });
     } finally {
       setSaving(false);
     }

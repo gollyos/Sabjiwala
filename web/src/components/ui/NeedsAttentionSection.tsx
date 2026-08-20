@@ -1,15 +1,5 @@
-import React from 'react';
 import Link from 'next/link';
-import { 
-  ShieldAlert, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ChevronRight,
-  Layers,
-  Truck,
-  DollarSign,
-  AlertCircle
-} from 'lucide-react';
+import { ShieldAlert, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export interface AttentionItem {
   id?: string;

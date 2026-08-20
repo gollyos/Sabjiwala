@@ -1,21 +1,14 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { RazorpayService } from '@/lib/razorpay';
-
-// Service client for server-to-server webhook processing
-function getServiceSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createSupabaseClient(url, key);
-}
-
+import { createAdminClient } from '@/lib/supabase/admin';
 export async function POST(req: NextRequest) {
-  const supabase = getServiceSupabase();
   let rawBody = '';
   let eventId = '';
   let signature = '';
 
   try {
+    const supabase = createAdminClient();
     // 1. Read RAW request body (Preserve raw format for cryptographic HMAC verification)
     rawBody = await req.text();
     signature = req.headers.get('x-razorpay-signature') || '';
@@ -24,6 +17,10 @@ export async function POST(req: NextRequest) {
     if (!signature) {
       console.warn('[WEBHOOK SECURITY] Missing x-razorpay-signature header');
       return NextResponse.json({ error: 'Missing webhook signature' }, { status: 400 });
+    }
+
+    if (!eventId) {
+      return NextResponse.json({ error: 'Missing webhook event ID' }, { status: 400 });
     }
 
     // 2. Cryptographic Webhook Signature Verification
@@ -42,10 +39,6 @@ export async function POST(req: NextRequest) {
     const eventType: string = payload.event;
     const topLevelCreatedAt: number = payload.created_at || Math.floor(Date.now() / 1000);
     const gatewayEventCreatedAt = new Date(topLevelCreatedAt * 1000).toISOString();
-
-    if (!eventId) {
-      eventId = `evt_${topLevelCreatedAt}_${Math.random().toString(36).substring(2, 9)}`;
-    }
 
     // 4. Idempotency Check & Ingestion in payment_webhook_events
     const { data: existingEvent } = await supabase
@@ -79,6 +72,9 @@ export async function POST(req: NextRequest) {
 
       if (!insertErr && insertedEvent) {
         webhookRecordId = insertedEvent.id;
+      } else if (insertErr) {
+        console.error('[WEBHOOK] Failed to persist idempotency record:', insertErr);
+        return NextResponse.json({ error: 'Unable to persist webhook event' }, { status: 500 });
       }
     }
 
@@ -127,6 +123,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true, error: rpcErr.message }, { status: 500 });
       }
 
+
+      if (razorpayOrderId) {
+        await supabase
+          .from('payment_gateway_attempts')
+          .update({ status: 'captured', updated_at: new Date().toISOString() })
+          .eq('gateway_order_id', razorpayOrderId);
+      }
+
       return NextResponse.json({ received: true, success: true, result });
     }
 
@@ -149,6 +153,13 @@ export async function POST(req: NextRequest) {
           p_webhook_event_id: webhookRecordId,
           p_gateway_payload: payload,
         });
+
+        if (razorpayOrderId) {
+          await supabase
+            .from('payment_gateway_attempts')
+            .update({ status: 'failed', updated_at: new Date().toISOString() })
+            .eq('gateway_order_id', razorpayOrderId);
+        }
       }
 
       return NextResponse.json({ received: true, status: 'payment_failed_recorded' });
@@ -164,7 +175,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true, event: eventType, status: 'acknowledged' });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown webhook error';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Unknown webhook error';
     console.error('[WEBHOOK UNCAUGHT EXCEPTION]:', err);
     return NextResponse.json({ error: errorMsg }, { status: 500 });
   }

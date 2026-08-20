@@ -1,32 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  Package, 
-  CheckCircle2, 
-  AlertCircle, 
-  Printer, 
-  QrCode, 
-  Barcode, 
-  RefreshCw, 
-  Search, 
-  User, 
-  MapPin, 
-  Scale, 
-  Clock, 
-  Layers, 
-  ShieldAlert, 
-  ChevronRight, 
-  X, 
-  Check, 
-  Plus, 
-  Minus,
-  AlertTriangle,
-  Play
-} from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import ThermalBagSticker, { StickerPayload } from '@/components/ThermalBagSticker';
+import { CheckCircle2, Printer, RefreshCw, Search, MapPin, X, Check, Plus, Minus, AlertTriangle, Play } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
-import ThermalBagSticker, { StickerPayload } from '@/components/ThermalBagSticker';
 
 interface QueueItem {
   id: string;
@@ -102,7 +80,7 @@ export default function GodownPackingStation() {
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [statusFilter, setStatusFilter] = useState<'all' | 'waiting' | 'packing' | 'problem' | 'ready'>('waiting');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [staffName, setStaffName] = useState<string>('Godown Worker 1');
+  const staffName = 'Godown Worker 1';
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [queue, setQueue] = useState<QueueOrder[]>([]);
@@ -112,8 +90,6 @@ export default function GodownPackingStation() {
   const [activeOrder, setActiveOrder] = useState<QueueOrder | null>(null);
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const [printStickers, setPrintStickers] = useState<StickerPayload[] | null>(null);
-  const [scannedCode, setScannedCode] = useState<string>('');
-  const [scanMessage, setScanMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   
   // Problem Report Modal
@@ -178,7 +154,6 @@ export default function GodownPackingStation() {
           packing_status: 'packing',
           packed_by_name: staffName,
         });
-        setScanMessage(null);
         await loadQueueData();
         setTimeout(() => scanInputRef.current?.focus(), 150);
       } else if (json.error_code === 'ORDER_LOCKED_BY_OTHER') {
@@ -323,31 +298,6 @@ export default function GodownPackingStation() {
     } catch (err) {
       console.error('Quick pack error:', err);
       alert('Error completing quick pack');
-    }
-  };
-
-  // Mark Order Ready for Delivery
-  const handleMarkReady = async () => {
-    if (!activeOrder) return;
-    try {
-      const res = await fetch('/api/packing/ready', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_id: activeOrder.order_id,
-        }),
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        setActionMessage({ text: `Order ${activeOrder.order_number} marked READY FOR DELIVERY!`, type: 'success' });
-        setActiveOrder(null);
-        loadQueueData();
-      } else {
-        alert(json.message || json.error || 'Cannot mark ready: ensure all items are confirmed.');
-      }
-    } catch (err) {
-      console.error('Error marking order ready:', err);
     }
   };
 

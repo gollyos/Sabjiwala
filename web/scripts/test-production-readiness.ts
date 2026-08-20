@@ -72,7 +72,7 @@ async function runProductionReadinessTests() {
   // 4. Test 8 PM Cutoff Boundary Calculation
   console.log('\n4. Verifying 8:00 PM Cutoff Delivery Date Logic...');
   function calculateDeliveryDate(orderTimeIST: string): string {
-    const [hours, minutes] = orderTimeIST.split(':').map(Number);
+    const [hours] = orderTimeIST.split(':').map(Number);
     if (hours < 20) {
       return 'Next-Day Delivery (Tomorrow 10 AM - 1 PM)';
     } else {

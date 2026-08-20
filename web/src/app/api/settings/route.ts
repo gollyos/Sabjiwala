@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
@@ -103,7 +104,7 @@ export async function GET() {
       },
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error fetching settings';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error fetching settings';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }
@@ -184,7 +185,7 @@ export async function PUT(req: NextRequest) {
       message: `Setting ${key} updated successfully`,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error updating settings';
+    const errorMsg = err instanceof Error ? getErrorMessage(err) : 'Error updating settings';
     return NextResponse.json(
       { success: false, error: errorMsg },
       { status: 500 }
