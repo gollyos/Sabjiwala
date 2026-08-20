@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { generateCode128Svg } from '@/lib/barcode';
 import { generateQrCodeSvg } from '@/lib/qr';
 
@@ -11,8 +12,33 @@ function getServiceSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { order_id, bag_id, is_reprint, reprint_reason, requested_by, idempotency_key } = body;
+    const serverSupabase = await createClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Staff authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { data: roleRows } = await serverSupabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (roleRows || []).map((r) => r.role);
+    const isAuthorized = roles.includes('packing') || roles.includes('manager') || roles.includes('owner');
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Packing authorization required' },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const { order_id, bag_id, is_reprint, reprint_reason, idempotency_key } = body;
 
     if (!order_id) {
       return NextResponse.json({ success: false, error: 'Missing order_id' }, { status: 400 });
@@ -37,7 +63,7 @@ export async function POST(req: NextRequest) {
       p_bag_id: bag_id || null,
       p_is_reprint: Boolean(is_reprint),
       p_reprint_reason: reprint_reason || null,
-      p_requested_by: requested_by || null,
+      p_requested_by: user.id,
       p_idempotency_key: idempotency_key || null,
     });
 

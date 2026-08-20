@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -9,6 +10,31 @@ function getServiceSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
+    const serverSupabase = await createClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Staff authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { data: roleRows } = await serverSupabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (roleRows || []).map((r) => r.role);
+    const isAuthorized = roles.includes('manager') || roles.includes('owner');
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Insufficient privileges' },
+        { status: 403 }
+      );
+    }
+
     const supabase = getServiceSupabase();
     const body = await req.json().catch(() => ({}));
     const { job_id, retry_all_failed } = body;

@@ -45,6 +45,22 @@ export default function AdminSettingsPage() {
     timezone: 'Asia/Kolkata',
   });
 
+  const [campaignSettings, setCampaignSettings] = useState({
+    is_active: true,
+    promo_code: 'FIRST500',
+    title_en: 'Grand Launch Celebration Offer',
+    title_gu: 'ગ્રાન્ડ લૉન્ચ ઓફર',
+    discount_percentage: 10,
+    max_verified_customer_seq: 500,
+    max_orders_per_customer: 3,
+    min_order_subtotal: 200,
+    valid_from: '2026-08-01T00:00',
+    valid_until: '2026-10-31T23:59',
+    show_timer: true,
+    banner_message_en: 'First 500 verified customers in Halol get 10% OFF on their first 3 orders!',
+    banner_message_gu: 'હલોલના પ્રથમ 500 ગ્રાહકોને પ્રથમ 3 ઓર્ડર પર 10% છૂટ!',
+  });
+
   const [minOrderAmount, setMinOrderAmount] = useState(200);
   const [codDiscountPct, setCodDiscountPct] = useState(2);
   const [cutoffTime, setCutoffTime] = useState('20:00:00');
@@ -93,6 +109,13 @@ export default function AdminSettingsPage() {
       setPromoStats(json.promotion_stats || {});
 
       if (s.business_profile) setBusinessProfile(s.business_profile);
+      if (s.launch_campaign) {
+        setCampaignSettings({
+          ...s.launch_campaign,
+          valid_from: s.launch_campaign.valid_from ? s.launch_campaign.valid_from.slice(0, 16) : '2026-08-01T00:00',
+          valid_until: s.launch_campaign.valid_until ? s.launch_campaign.valid_until.slice(0, 16) : '2026-10-31T23:59',
+        });
+      }
       if (s.min_order_amount?.amount !== undefined) setMinOrderAmount(s.min_order_amount.amount);
       if (s.cod_discount_pct?.percentage !== undefined) setCodDiscountPct(s.cod_discount_pct.percentage);
       if (s.cutoff_time?.time) setCutoffTime(s.cutoff_time.time);
@@ -140,7 +163,7 @@ export default function AdminSettingsPage() {
   const tabs = [
     { id: 'business', label: 'Business Profile', icon: Building2 },
     { id: 'ordering', label: 'Ordering & COD', icon: ShoppingBag },
-    { id: 'first500', label: 'FIRST500 Campaign', icon: Gift },
+    { id: 'first500', label: 'Offers & Campaigns', icon: Gift },
     { id: 'delivery', label: 'Delivery & Cutoff', icon: Truck },
     { id: 'procurement', label: 'Procurement Buffer', icon: Boxes },
     { id: 'printer', label: 'Thermal Printer', icon: Printer },
@@ -378,75 +401,240 @@ export default function AdminSettingsPage() {
           </div>
         )}
 
-        {/* TAB 3: FIRST500 Campaign */}
+        {/* TAB 3: Dynamic Campaign & Promotion Engine */}
         {activeTab === 'first500' && (
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+            
+            {/* Header Ribbon */}
+            <div className="border-b border-slate-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">FIRST500 Welcome Campaign</h3>
-                <p className="text-xs text-slate-400">10% discount on the first order for the first 500 verified phone numbers in Halol.</p>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-amber-400" />
+                  <span>Promotional Campaign & Launch Offer Engine (ઓફર મેનેજમેન્ટ)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Configure dynamic discount percentage, target verified cohort, maximum orders per client, date validity, and header countdown timer.
+                </p>
               </div>
-              <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-bold font-mono">
-                {promoStats.first500?.consumed || 0} / 500 Consumed
+              <span className="self-start sm:self-center px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-bold font-mono">
+                {promoStats.first500?.consumed || 0} Orders Redeemed
               </span>
             </div>
 
+            {/* Campaign Analytics Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
                 <div className="text-[10px] text-slate-400 font-bold uppercase">Discount Rate</div>
                 <div className="text-2xl font-black text-emerald-400 font-mono">
-                  {promoStats.first500?.discount_percentage || 10}%
+                  {campaignSettings.discount_percentage}%
                 </div>
                 <div className="text-[10px] text-slate-500">Applied on eligible subtotal</div>
               </div>
 
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Max Cohort Quota</div>
-                <div className="text-2xl font-black text-white font-mono">500</div>
-                <div className="text-[10px] text-slate-500">First 500 verified customers</div>
-              </div>
-
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">In-Flight Reserved</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Orders / Customer</div>
                 <div className="text-2xl font-black text-amber-400 font-mono">
-                  {promoStats.first500?.reserved || 0}
+                  First {campaignSettings.max_orders_per_customer} Orders
                 </div>
-                <div className="text-[10px] text-slate-500">Active pending orders</div>
+                <div className="text-[10px] text-slate-500">Max limit per verified phone</div>
               </div>
 
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Remaining Coupons</div>
-                <div className="text-2xl font-black text-blue-400 font-mono">
-                  {promoStats.first500?.remaining || 500}
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Target Sequence</div>
+                <div className="text-2xl font-black text-white font-mono">
+                  First #{campaignSettings.max_verified_customer_seq}
                 </div>
-                <div className="text-[10px] text-slate-500">Quota available for new users</div>
+                <div className="text-[10px] text-slate-500">Verified customers in Halol</div>
+              </div>
+
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Total Verified Users</div>
+                <div className="text-2xl font-black text-blue-400 font-mono">
+                  {promoStats.first500?.total_verified_customers || 0}
+                </div>
+                <div className="text-[10px] text-slate-500">Registered on platform</div>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between text-xs">
-              <div>
-                <div className="font-bold text-white">Campaign Status</div>
-                <div className="text-[11px] text-slate-400">
-                  {promoStats.first500?.is_active ? 'Active and redeeming for verified cohort' : 'Paused by Owner'}
+            {/* Live Header Banner Preview */}
+            <div className="p-4 bg-slate-950 border border-emerald-500/30 rounded-2xl space-y-2">
+              <div className="text-[10px] text-slate-400 uppercase font-bold flex items-center justify-between">
+                <span>Live Customer Header Banner Preview</span>
+                <span className="text-emerald-400 text-[10px]">● Real-time sync</span>
+              </div>
+              <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 p-3 rounded-xl border border-emerald-500/20 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-inner">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black uppercase">
+                    Launch Offer
+                  </span>
+                  <span className="text-emerald-100 font-semibold text-[11px]">
+                    {campaignSettings.banner_message_en || `First ${campaignSettings.max_verified_customer_seq} customers get ${campaignSettings.discount_percentage}% OFF on first ${campaignSettings.max_orders_per_customer} orders!`}
+                  </span>
                 </div>
+                {campaignSettings.show_timer && (
+                  <div className="flex items-center gap-1 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-[10px] font-mono text-emerald-300 font-bold">
+                    <Clock className="w-3 h-3 text-amber-400 mr-1" />
+                    <span>Offer Ends: 05d : 14h : 23m : 45s</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Editable Campaign Form */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              
+              {/* Promo Code */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Promo Code</label>
+                <input
+                  type="text"
+                  value={campaignSettings.promo_code}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, promo_code: e.target.value.toUpperCase() })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold uppercase"
+                />
               </div>
 
+              {/* Discount Percentage */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Discount Percentage (%)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={campaignSettings.discount_percentage}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, discount_percentage: Number(e.target.value) })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                />
+              </div>
+
+              {/* Max Orders Per Customer */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Max Orders per Customer</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={campaignSettings.max_orders_per_customer}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, max_orders_per_customer: Number(e.target.value) })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                />
+                <p className="text-[10px] text-slate-500">Number of orders eligible for discount (e.g. 3)</p>
+              </div>
+
+              {/* Max Verified Sequence */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Max Customer Sequence (Quota)</label>
+                <input
+                  type="number"
+                  min="1"
+                  step="50"
+                  value={campaignSettings.max_verified_customer_seq}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, max_verified_customer_seq: Number(e.target.value) })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                />
+                <p className="text-[10px] text-slate-500">First N verified customers (e.g. 500)</p>
+              </div>
+
+              {/* Valid From Date */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Valid From Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={campaignSettings.valid_from}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, valid_from: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                />
+              </div>
+
+              {/* Valid Until Date */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Valid Until (End Date & Time)</label>
+                <input
+                  type="datetime-local"
+                  value={campaignSettings.valid_until}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, valid_until: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold text-amber-300"
+                />
+              </div>
+
+              {/* Banner Message (English) */}
+              <div className="sm:col-span-2 space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Banner Message (English)</label>
+                <input
+                  type="text"
+                  value={campaignSettings.banner_message_en}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, banner_message_en: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              {/* Banner Message (Gujarati) */}
+              <div className="space-y-1">
+                <label className="text-slate-400 font-bold uppercase text-[10px]">Banner Message (Gujarati)</label>
+                <input
+                  type="text"
+                  value={campaignSettings.banner_message_gu}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, banner_message_gu: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-gujarati"
+                />
+              </div>
+            </div>
+
+            {/* Status & Timer Controls */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-white">Campaign Active Status</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {campaignSettings.is_active ? 'Active on customer checkout & cart' : 'Paused by Owner'}
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={campaignSettings.is_active}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, is_active: e.target.checked })}
+                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                />
+              </div>
+
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-white">Show Countdown Timer on Header</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    Displays live ticking countdown clock on website header
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={campaignSettings.show_timer}
+                  onChange={(e) => setCampaignSettings({ ...campaignSettings, show_timer: e.target.checked })}
+                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[11px] text-slate-500">
+                Saving updates both server pricing calculations and the customer frontend countdown.
+              </span>
               <button
                 type="button"
-                onClick={() => handleSaveSetting('first_500_promo', {
-                  is_active: !promoStats.first500?.is_active,
-                  percentage: 10,
-                  max_customer_sequence: 500,
+                onClick={() => handleSaveSetting('launch_campaign', {
+                  ...campaignSettings,
+                  valid_from: campaignSettings.valid_from.length === 16 ? `${campaignSettings.valid_from}:00+05:30` : campaignSettings.valid_from,
+                  valid_until: campaignSettings.valid_until.length === 16 ? `${campaignSettings.valid_until}:00+05:30` : campaignSettings.valid_until,
                 })}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  promoStats.first500?.is_active
-                    ? 'bg-red-950 text-red-300 border border-red-800 hover:bg-red-900'
-                    : 'bg-emerald-600 text-white hover:bg-emerald-500'
-                }`}
+                disabled={saving}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                {promoStats.first500?.is_active ? 'Pause Campaign' : 'Resume Campaign'}
+                <Save className="w-4 h-4" />
+                <span>Save Campaign Settings</span>
               </button>
             </div>
+
           </div>
         )}
 

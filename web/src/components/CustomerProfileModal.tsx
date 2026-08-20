@@ -1,18 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth, AddressInput, ProfileUpdateInput } from '@/context/AuthContext';
+import { useAuth, AddressInput } from '@/context/AuthContext';
 import { CustomerAddress } from '@/types/sabjiwala';
 import { 
   X, 
-  User, 
   Phone, 
   MapPin, 
   ShieldCheck, 
   Award, 
   LogOut, 
   Plus, 
-  Check, 
   Home, 
   Briefcase, 
   Building,
@@ -34,7 +32,7 @@ export function CustomerProfileModal() {
     deleteAddress,
     setDefaultAddress, 
     updateProfile,
-    signOut,
+    signOut, 
     verifiedSequence 
   } = useAuth();
 
@@ -164,8 +162,8 @@ export function CustomerProfileModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 animate-scaleUp flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 dark:border-slate-800 animate-scaleUp flex flex-col max-h-[90vh]">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 px-6 py-5 text-white flex items-center justify-between shrink-0">
@@ -188,20 +186,21 @@ export function CustomerProfileModal() {
           </div>
           <button
             onClick={closeProfileModal}
-            className="p-2 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+            aria-label="Close profile modal"
+            className="p-2 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-100 px-6 bg-slate-50/70 shrink-0">
+        <div className="flex border-b border-slate-100 dark:border-slate-800 px-6 bg-slate-50/70 dark:bg-slate-950/70 shrink-0">
           <button
             onClick={() => { setActiveTab('addresses'); setIsAddressFormOpen(false); }}
             className={`py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
               activeTab === 'addresses'
-                ? 'border-emerald-600 text-emerald-700 bg-white shadow-xs'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900 shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             Saved Addresses ({allAddresses.length})
@@ -210,8 +209,8 @@ export function CustomerProfileModal() {
             onClick={() => { setActiveTab('edit_profile'); setIsAddressFormOpen(false); }}
             className={`py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
               activeTab === 'edit_profile'
-                ? 'border-emerald-600 text-emerald-700 bg-white shadow-xs'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900 shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             Edit Profile
@@ -223,23 +222,23 @@ export function CustomerProfileModal() {
           
           {/* Verified Customer Status */}
           {verifiedSequence && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/10 to-amber-500/10 border border-amber-300/80 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/10 to-amber-500/10 border border-amber-300/80 dark:border-amber-500/30 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
                     Verified Customer Sequence
                   </div>
-                  <div className="text-sm font-semibold text-slate-800">
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     Customer #{verifiedSequence} in Halol
                   </div>
                 </div>
               </div>
               {verifiedSequence <= 500 && (
                 <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-sm">
-                  10% OFF 1st Order
+                  10% OFF with FIRST500
                 </span>
               )}
             </div>
@@ -252,13 +251,13 @@ export function CustomerProfileModal() {
               {!isAddressFormOpen ? (
                 <>
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-emerald-600" />
+                    <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       Delivery Addresses (સરનામાં)
                     </h4>
                     <button
                       onClick={openAddAddressForm}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add New Address</span>
@@ -267,7 +266,7 @@ export function CustomerProfileModal() {
 
                   <div className="space-y-3">
                     {allAddresses.length === 0 ? (
-                      <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-500 text-xs">
+                      <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 text-slate-500 text-xs">
                         No delivery address saved yet. Click Add New Address to add one.
                       </div>
                     ) : (
@@ -278,18 +277,18 @@ export function CustomerProfileModal() {
                             key={addr.id}
                             className={`p-4 rounded-2xl border transition-all ${
                               isAddrDefault
-                                ? 'border-emerald-500 bg-emerald-50/50 shadow-sm ring-1 ring-emerald-500/30'
-                                : 'border-slate-200 bg-white hover:border-slate-300'
+                                ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-sm ring-1 ring-emerald-500/30'
+                                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
                             }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex items-center space-x-2">
-                                <span className="p-1.5 rounded-lg bg-slate-100 text-slate-600">
+                                <span className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                   {addr.address_type === 'home' && <Home className="w-3.5 h-3.5" />}
                                   {addr.address_type === 'work' && <Briefcase className="w-3.5 h-3.5" />}
                                   {addr.address_type === 'temporary' && <Building className="w-3.5 h-3.5" />}
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                                   {addr.address_type}
                                 </span>
                                 {isAddrDefault && (
@@ -304,15 +303,16 @@ export function CustomerProfileModal() {
                                   <button
                                     onClick={() => handleSetDefault(addr.id)}
                                     disabled={settingDefaultId === addr.id}
-                                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-800 disabled:text-slate-400"
+                                    className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 disabled:text-slate-400 min-h-[32px] px-2 cursor-pointer"
                                   >
                                     {settingDefaultId === addr.id ? 'Setting...' : 'Set as Default'}
                                   </button>
                                 )}
                                 <button
                                   onClick={() => openEditAddressForm(addr)}
-                                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
                                   title="Edit Address"
+                                  aria-label="Edit Address"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
@@ -320,8 +320,9 @@ export function CustomerProfileModal() {
                                   <button
                                     onClick={() => handleDeleteAddress(addr.id)}
                                     disabled={deletingId === addr.id}
-                                    className="p-1 text-red-400 hover:text-red-600 rounded-lg disabled:opacity-50"
+                                    className="p-1.5 text-red-400 hover:text-red-600 rounded-lg disabled:opacity-50 cursor-pointer"
                                     title="Delete Address"
+                                    aria-label="Delete Address"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -329,12 +330,12 @@ export function CustomerProfileModal() {
                               </div>
                             </div>
 
-                            <div className="mt-2 text-sm text-slate-800 leading-relaxed font-medium">
+                            <div className="mt-2 text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
                               {addr.flat_house_no}, {addr.society_street_name}
-                              <div className="text-xs text-slate-500 font-normal mt-0.5">
+                              <div className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
                                 {addr.landmark && `Landmark: ${addr.landmark} • `}Area: {addr.area_locality}
                               </div>
-                              <div className="text-xs text-slate-500 font-normal">
+                              <div className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                                 {addr.city}, {addr.district} - {addr.pincode}
                               </div>
                             </div>
@@ -346,23 +347,23 @@ export function CustomerProfileModal() {
                 </>
               ) : (
                 /* Address Add / Edit Form */
-                <form onSubmit={handleSaveAddress} className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                    <h5 className="font-bold text-sm text-slate-800">
+                <form onSubmit={handleSaveAddress} className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <h5 className="font-bold text-sm text-slate-800 dark:text-slate-200">
                       {editingAddressId ? 'Edit Address' : 'Add New Halol Address'}
                     </h5>
                     <button
                       type="button"
                       onClick={() => setIsAddressFormOpen(false)}
-                      className="text-xs text-slate-500 hover:text-slate-700"
+                      className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 min-h-[32px] px-2 cursor-pointer"
                     >
                       Cancel
                     </button>
                   </div>
 
                   {addressError && (
-                    <div className="p-3 bg-red-50 text-red-700 rounded-xl text-xs flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <div className="p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 rounded-xl text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
                       <span>{addressError}</span>
                     </div>
                   )}
@@ -374,10 +375,10 @@ export function CustomerProfileModal() {
                         key={t}
                         type="button"
                         onClick={() => setAddrType(t)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all min-h-[36px] cursor-pointer ${
                           addrType === t
                             ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-white text-slate-600 border border-slate-200'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                         }`}
                       >
                         {t}
@@ -387,7 +388,7 @@ export function CustomerProfileModal() {
 
                   <div className="space-y-2.5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                         Flat / House / Bungalow No. *
                       </label>
                       <input
@@ -395,13 +396,13 @@ export function CustomerProfileModal() {
                         placeholder="e.g. B-402, Gokul Dham"
                         value={flatHouseNo}
                         onChange={(e) => setFlatHouseNo(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                         Society / Street / Complex *
                       </label>
                       <input
@@ -409,14 +410,14 @@ export function CustomerProfileModal() {
                         placeholder="e.g. Godhra Road / Pavagadh Road"
                         value={societyStreetName}
                         onChange={(e) => setSocietyStreetName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                         required
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                           Landmark (Optional)
                         </label>
                         <input
@@ -424,12 +425,12 @@ export function CustomerProfileModal() {
                           placeholder="e.g. Near Bus Stand"
                           value={landmark}
                           onChange={(e) => setLandmark(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                           Area / Locality *
                         </label>
                         <input
@@ -437,7 +438,7 @@ export function CustomerProfileModal() {
                           placeholder="e.g. Kanjari Road Area"
                           value={areaLocality}
                           onChange={(e) => setAreaLocality(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                           required
                         />
                       </div>
@@ -445,31 +446,31 @@ export function CustomerProfileModal() {
 
                     <div className="grid grid-cols-3 gap-2.5">
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-500 mb-1">City</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">City</label>
                         <input
                           type="text"
                           value="Halol"
                           disabled
-                          className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600"
+                          className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 min-h-[44px]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-500 mb-1">District</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">District</label>
                         <input
                           type="text"
                           value="Panchmahal"
                           disabled
-                          className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600"
+                          className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 min-h-[44px]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-500 mb-1">Pincode *</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Pincode *</label>
                         <input
                           type="text"
                           value={pincode}
                           onChange={(e) => setPincode(e.target.value)}
                           placeholder="389350"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                         />
                       </div>
                     </div>
@@ -480,9 +481,9 @@ export function CustomerProfileModal() {
                         id="is_default_check"
                         checked={isDefault}
                         onChange={(e) => setIsDefault(e.target.checked)}
-                        className="w-4 h-4 text-emerald-600 rounded-sm border-slate-300 focus:ring-emerald-500"
+                        className="w-4 h-4 text-emerald-600 rounded-sm border-slate-300 dark:border-slate-700 focus:ring-emerald-500"
                       />
-                      <label htmlFor="is_default_check" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                      <label htmlFor="is_default_check" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                         Set as default delivery address (મુખ્ય સરનામું બનાવો)
                       </label>
                     </div>
@@ -492,14 +493,14 @@ export function CustomerProfileModal() {
                     <button
                       type="button"
                       onClick={() => setIsAddressFormOpen(false)}
-                      className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
+                      className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 min-h-[44px] cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={addressSaving}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer min-h-[44px]"
                     >
                       {addressSaving ? (
                         <>
@@ -524,41 +525,41 @@ export function CustomerProfileModal() {
                 <div
                   className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
                     profileMsg.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : 'bg-red-50 text-red-700 border border-red-200'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                      : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
                   }`}
                 >
                   {profileMsg.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
                   )}
                   <span>{profileMsg.text}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Full Name (પૂરું નામ) *
                 </label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Verified Mobile (મોબાઇલ નંબર)
                 </label>
                 <input
                   type="text"
                   value={customer.mobile}
                   disabled
-                  className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-500 cursor-not-allowed"
+                  className="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 cursor-not-allowed min-h-[44px]"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Primary phone number is verified and cannot be changed directly.
@@ -566,7 +567,7 @@ export function CustomerProfileModal() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Alternate Mobile (વૈકલ્પિક નંબર)
                 </label>
                 <input
@@ -575,12 +576,12 @@ export function CustomerProfileModal() {
                   placeholder="e.g. 9876543211"
                   value={editAlternateMobile}
                   onChange={(e) => setEditAlternateMobile(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Email Address (ઈમેલ)
                 </label>
                 <input
@@ -588,14 +589,14 @@ export function CustomerProfileModal() {
                   placeholder="your.email@example.com"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={profileSaving}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer min-h-[48px]"
               >
                 {profileSaving ? (
                   <>
@@ -612,13 +613,13 @@ export function CustomerProfileModal() {
         </div>
 
         {/* Footer Logout */}
-        <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="text-xs text-slate-400">
             Halol Delivery System • Sabjiwala
           </div>
           <button
             onClick={signOut}
-            className="px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer min-h-[36px]"
           >
             <LogOut className="w-4 h-4" />
             <span>Log Out (લૉગ આઉટ)</span>

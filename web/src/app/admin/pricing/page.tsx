@@ -30,6 +30,7 @@ interface PriceRow {
   currentPrice: number;
   newPrice: number;
   isModified: boolean;
+  isFruit: boolean;
 }
 
 export default function DailyPricingPage() {
@@ -41,6 +42,7 @@ export default function DailyPricingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [pricingFilter, setPricingFilter] = useState<'all' | 'vegetables' | 'fruits'>('all');
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'daily_pricing' | 'history'>('daily_pricing');
 
@@ -59,6 +61,17 @@ export default function DailyPricingPage() {
 
       const rows: PriceRow[] = [];
       prods.forEach((p) => {
+        const isFruit = (p.slug || '').includes('apple') || 
+                        (p.slug || '').includes('banana') || 
+                        (p.slug || '').includes('dadam') || 
+                        (p.slug || '').includes('mosambi') || 
+                        (p.slug || '').includes('orange') || 
+                        (p.slug || '').includes('papaya') || 
+                        (p.slug || '').includes('guava') || 
+                        (p.slug || '').includes('watermelon') || 
+                        (p.slug || '').includes('dragon') ||
+                        (p.slug || '').includes('fruit');
+
         (p.variants || []).forEach((v) => {
           rows.push({
             variantId: v.id,
@@ -70,6 +83,7 @@ export default function DailyPricingPage() {
             currentPrice: Number(v.selling_price),
             newPrice: Number(v.selling_price),
             isModified: false,
+            isFruit,
           });
         });
       });
@@ -177,11 +191,16 @@ export default function DailyPricingPage() {
   };
 
   const modifiedCount = priceRows.filter((r) => r.isModified).length;
-  const filteredRows = priceRows.filter((r) => 
-    !search.trim() ||
-    r.productNameEn.toLowerCase().includes(search.toLowerCase()) ||
-    r.productNameGu.includes(search)
-  );
+  const filteredRows = priceRows.filter((r) => {
+    // 1. Module filter
+    if (pricingFilter === 'fruits' && !r.isFruit) return false;
+    if (pricingFilter === 'vegetables' && r.isFruit) return false;
+
+    // 2. Search filter
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return r.productNameEn.toLowerCase().includes(q) || r.productNameGu.includes(q) || r.variantNameEn.toLowerCase().includes(q);
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
@@ -197,10 +216,10 @@ export default function DailyPricingPage() {
               <span>Daily Morning APMC Price Revision</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Daily Selling Prices (શાકભાજીના રોજના ભાવ)
+              Daily Selling Prices (ફળો અને શાકભાજીના રોજના ભાવ)
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Review and adjust daily consumer rates for Halol.
+              Review and adjust daily consumer rates for Halol (Historical past orders remain locked & immutable).
             </p>
           </div>
 
@@ -250,10 +269,42 @@ export default function DailyPricingPage() {
             
             {/* Search & Bulk Actions Bar */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              
+              {/* Module Filter Chips */}
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-2xl text-xs font-bold shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPricingFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    pricingFilter === 'all' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500'
+                  }`}
+                >
+                  All ({priceRows.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPricingFilter('vegetables')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    pricingFilter === 'vegetables' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500'
+                  }`}
+                >
+                  Vegetables ({priceRows.filter(r => !r.isFruit).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPricingFilter('fruits')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    pricingFilter === 'fruits' ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-500'
+                  }`}
+                >
+                  Fruits ({priceRows.filter(r => r.isFruit).length})
+                </button>
+              </div>
+
               <div className="relative flex-1">
                 <input
                   type="text"
-                  placeholder="Search vegetable..."
+                  placeholder="Search item name (સફરજન, ટામેટાં, કેળાં, બટાટા...)"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100"
@@ -266,14 +317,14 @@ export default function DailyPricingPage() {
                   <button
                     type="button"
                     onClick={handleResetAll}
-                    className="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                   >
                     Reset
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Publish {modifiedCount} Changed Prices</span>

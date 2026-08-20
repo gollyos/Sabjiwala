@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
                 .limit(1)
                 .single();
 
-              if (latestOrder) {
-                const trackUrl = `${pwaBaseUrl}/track/${latestOrder.tracking_token || latestOrder.id}`;
+              if (latestOrder && latestOrder.tracking_token) {
+                const trackUrl = `${pwaBaseUrl}/track/${latestOrder.tracking_token}`;
                 replyText = `*Your Latest Sabjiwala Order (તમારો છેલ્લો ઓર્ડર)* 📦\n\n*Order No:* ${latestOrder.order_number}\n*Delivery Date:* ${latestOrder.delivery_date}\n*Status:* ${latestOrder.order_status.toUpperCase()}\n*Payable:* ₹${latestOrder.final_payable_amount}\n\n*Track Details / બિલ જુઓ:* \n${trackUrl}`;
               } else {
                 replyText = `*No Active Orders Found*\n\nWe could not find an order linked to ${senderE164}.\nPlace your order fresh at: ${pwaBaseUrl}`;

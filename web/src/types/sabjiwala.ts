@@ -123,6 +123,27 @@ export interface PromotionQuote {
   percentage: number;
   discount_amount: number;
   reason: string;
+  order_index?: number;
+  max_orders?: number;
+  orders_remaining?: number;
+  valid_until?: string;
+  show_timer?: boolean;
+}
+
+export interface CampaignSettings {
+  is_active: boolean;
+  promo_code: string;
+  title_en: string;
+  title_gu: string;
+  discount_percentage: number;
+  max_verified_customer_seq: number;
+  max_orders_per_customer: number;
+  min_order_subtotal: number;
+  valid_from: string;
+  valid_until: string;
+  show_timer: boolean;
+  banner_message_en: string;
+  banner_message_gu: string;
 }
 
 export interface PaymentQuote {

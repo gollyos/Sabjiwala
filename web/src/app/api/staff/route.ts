@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-
-function getServiceSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createSupabaseClient(url, key);
-}
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
-    const supabase = getServiceSupabase();
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    // Verify caller has owner or manager role
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (userRoles || []).map(r => r.role);
+    if (!roles.includes('owner') && !roles.includes('manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Insufficient privileges to view staff' }, { status: 403 });
+    }
 
     const { data: staffList, error } = await supabase
       .from('user_profiles')
@@ -30,7 +40,15 @@ export async function GET() {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const formattedStaff = (staffList || []).map((staff: any) => ({
+    const formattedStaff = (staffList || []).map((staff: {
+      id: string;
+      full_name: string;
+      mobile: string;
+      is_active: boolean;
+      created_at: string;
+      updated_at: string;
+      user_roles?: Array<{ role: string }>;
+    }) => ({
       id: staff.id,
       full_name: staff.full_name,
       mobile: staff.mobile,
@@ -45,9 +63,10 @@ export async function GET() {
       staff: formattedStaff,
       total_count: formattedStaff.length,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Error fetching staff accounts';
     return NextResponse.json(
-      { success: false, error: err.message || 'Error fetching staff accounts' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }
@@ -55,9 +74,26 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = getServiceSupabase();
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    // Strict Owner role verification
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (userRoles || []).map(r => r.role);
+    if (!roles.includes('owner')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Only Owner can create staff accounts' }, { status: 403 });
+    }
+
     const body = await req.json().catch(() => ({}));
-    const { admin_id, full_name, mobile, role, is_active } = body;
+    const { full_name, mobile, role, is_active } = body;
 
     if (!full_name || !mobile || !role) {
       return NextResponse.json(
@@ -66,20 +102,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Default to first owner if admin_id not provided in dev/testing
-    let effectiveAdminId = admin_id;
-    if (!effectiveAdminId) {
-      const { data: ownerProfile } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'owner')
-        .limit(1)
-        .single();
-      effectiveAdminId = ownerProfile?.user_id;
-    }
-
     const { data, error } = await supabase.rpc('manage_staff_user', {
-      p_admin_id: effectiveAdminId,
+      p_admin_id: user.id,
       p_target_user_id: null,
       p_full_name: full_name,
       p_mobile: mobile,
@@ -92,9 +116,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Error creating staff account';
     return NextResponse.json(
-      { success: false, error: err.message || 'Error creating staff account' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }
@@ -102,9 +127,26 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const supabase = getServiceSupabase();
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    // Strict Owner role verification
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (userRoles || []).map(r => r.role);
+    if (!roles.includes('owner')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Only Owner can modify staff accounts' }, { status: 403 });
+    }
+
     const body = await req.json().catch(() => ({}));
-    const { admin_id, user_id, full_name, mobile, role, is_active } = body;
+    const { user_id, full_name, mobile, role, is_active } = body;
 
     if (!user_id || !full_name || !mobile || !role) {
       return NextResponse.json(
@@ -113,19 +155,8 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    let effectiveAdminId = admin_id;
-    if (!effectiveAdminId) {
-      const { data: ownerProfile } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'owner')
-        .limit(1)
-        .single();
-      effectiveAdminId = ownerProfile?.user_id;
-    }
-
     const { data, error } = await supabase.rpc('manage_staff_user', {
-      p_admin_id: effectiveAdminId,
+      p_admin_id: user.id,
       p_target_user_id: user_id,
       p_full_name: full_name,
       p_mobile: mobile,
@@ -138,9 +169,10 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Error updating staff account';
     return NextResponse.json(
-      { success: false, error: err.message || 'Error updating staff account' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }

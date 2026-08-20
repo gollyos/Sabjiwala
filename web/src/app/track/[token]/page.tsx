@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { 
   Package, 
   CheckCircle2, 
@@ -21,6 +21,7 @@ import Link from 'next/link';
 
 export default function OrderTrackingPage() {
   const params = useParams();
+  const router = useRouter();
   const token = params?.token as string;
 
   const [loading, setLoading] = useState(true);
@@ -345,12 +346,27 @@ export default function OrderTrackingPage() {
               </div>
 
               <div className="pt-2">
-                <Link
-                  href="/"
-                  className="w-full block text-center py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all"
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (repeatResult?.items) {
+                      const validItems = repeatResult.items
+                        .filter((i: any) => i.is_available && i.product && i.variant)
+                        .map((i: any) => ({
+                          product: i.product,
+                          variant: i.variant,
+                          quantity: i.quantity,
+                        }));
+                      if (validItems.length > 0) {
+                        localStorage.setItem('sabjiwala_cart', JSON.stringify(validItems));
+                      }
+                    }
+                    router.push('/?open_cart=true');
+                  }}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer min-h-[44px]"
                 >
                   Proceed to Checkout with Today’s Cart →
-                </Link>
+                </button>
               </div>
             </div>
           )}

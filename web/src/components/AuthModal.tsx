@@ -12,10 +12,7 @@ import {
   ArrowRight, 
   CheckCircle2, 
   AlertCircle, 
-  Loader2,
-  Home,
-  Building,
-  Briefcase
+  Loader2
 } from 'lucide-react';
 
 export function AuthModal() {
@@ -215,11 +212,11 @@ export function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 animate-scaleUp">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 dark:border-slate-800 animate-scaleUp flex flex-col max-h-[90vh]">
         
         {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 px-6 py-5 text-white flex items-center justify-between">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 px-6 py-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
               <Sparkles className="w-5 h-5 text-amber-300" />
@@ -241,27 +238,28 @@ export function AuthModal() {
           </div>
           <button
             onClick={closeAuthModal}
-            className="p-2 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+            aria-label="Close authentication modal"
+            className="p-2 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* First 500 Promo Badge */}
-        <div className="bg-amber-50 border-b border-amber-200/60 px-6 py-2.5 flex items-center space-x-2 text-amber-900 text-xs font-medium">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200/60 dark:border-amber-800/40 px-6 py-2.5 flex items-center space-x-2 text-amber-900 dark:text-amber-300 text-xs font-medium shrink-0">
           <span className="bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold text-[10px] tracking-wide uppercase shadow-sm">
             Launch Offer
           </span>
-          <span>First 500 verified customers in Halol get <strong>10% OFF</strong> on 1st order!</span>
+          <span>First 500 verified customers in Halol get <strong>10% OFF</strong> on their first order with FIRST500!</span>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto">
+        <div className="p-6 md:p-8 overflow-y-auto flex-1">
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-red-50 border border-red-200 flex items-start space-x-3 text-red-700 text-sm animate-shake">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-500" />
+            <div className="mb-6 p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 flex items-start space-x-3 text-red-700 dark:text-red-300 text-sm animate-shake">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
               <span>{error}</span>
             </div>
           )}
@@ -270,11 +268,11 @@ export function AuthModal() {
           {step === 'phone' && (
             <form onSubmit={handleSendOtp} className="space-y-6">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Mobile Number (મોબાઇલ નંબર)
                 </label>
                 <div className="relative flex items-center">
-                  <div className="absolute left-4 flex items-center space-x-1.5 text-slate-500 font-medium">
+                  <div className="absolute left-4 flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 font-medium">
                     <span className="text-lg">🇮🇳</span>
                     <span>+91</span>
                   </div>
@@ -284,13 +282,13 @@ export function AuthModal() {
                     placeholder="98765 43210"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-24 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium text-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+                    className="w-full pl-24 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-medium text-lg focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-400 min-h-[48px]"
                     autoFocus
                     required
                   />
                 </div>
-                <p className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   We will send a 6-digit OTP to verify your phone number.
                 </p>
               </div>
@@ -298,7 +296,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading || mobile.length !== 10}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed min-h-[48px]"
               >
                 {loading ? (
                   <>
@@ -319,7 +317,7 @@ export function AuthModal() {
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3 text-center">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3 text-center">
                   Enter 6-Digit Verification Code
                 </label>
                 <div className="flex justify-center gap-2 sm:gap-3">
@@ -333,7 +331,7 @@ export function AuthModal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-bold bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all shadow-sm"
+                      className="w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all shadow-sm"
                       autoFocus={idx === 0}
                     />
                   ))}
@@ -344,7 +342,7 @@ export function AuthModal() {
                 <button
                   type="button"
                   onClick={() => setStep('phone')}
-                  className="text-xs font-medium text-slate-500 hover:text-emerald-700 transition-colors"
+                  className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors min-h-[32px] px-2 cursor-pointer"
                 >
                   Change mobile number
                 </button>
@@ -353,7 +351,7 @@ export function AuthModal() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={loading}
-                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                    className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors min-h-[32px] px-2 cursor-pointer"
                   >
                     Resend OTP
                   </button>
@@ -367,7 +365,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading || otp.join('').length !== 6}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed min-h-[48px]"
               >
                 {loading ? (
                   <>
@@ -387,15 +385,15 @@ export function AuthModal() {
           {/* STEP 3: First-time Customer Onboarding */}
           {step === 'onboarding' && (
             <form onSubmit={handleOnboardingSubmit} className="space-y-4">
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200/70 flex items-center space-x-3 text-emerald-900 text-xs">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/50 flex items-center space-x-3 text-emerald-900 dark:text-emerald-300 text-xs">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>Phone verified! Complete your profile once for seamless 1-click orders.</span>
               </div>
 
               {/* Personal Info */}
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Full Name (પૂરું નામ) *
                   </label>
                   <div className="relative">
@@ -405,7 +403,7 @@ export function AuthModal() {
                       placeholder="e.g. Rameshbhai Patel"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                       required
                       autoFocus
                     />
@@ -414,7 +412,7 @@ export function AuthModal() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                       Alternate Mobile (Optional)
                     </label>
                     <div className="relative">
@@ -425,12 +423,12 @@ export function AuthModal() {
                         placeholder="e.g. 9876543211"
                         value={alternateMobile}
                         onChange={(e) => setAlternateMobile(e.target.value.replace(/\D/g, ''))}
-                        className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                       Email (Optional)
                     </label>
                     <input
@@ -438,17 +436,17 @@ export function AuthModal() {
                       placeholder="email@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Delivery Address in Halol */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Delivery Address (હલોલ ડિલિવરી સરનામું)
                   </span>
                   <div className="flex space-x-1">
@@ -457,10 +455,10 @@ export function AuthModal() {
                         key={t}
                         type="button"
                         onClick={() => setAddressType(t)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize transition-all min-h-[32px] cursor-pointer ${
                           addressType === t
                             ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                         }`}
                       >
                         {t}
@@ -475,7 +473,7 @@ export function AuthModal() {
                     placeholder="Flat / House / Bungalow No. (e.g. B-402, Gokul Dham)"
                     value={flatHouseNo}
                     onChange={(e) => setFlatHouseNo(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                     required
                   />
 
@@ -484,7 +482,7 @@ export function AuthModal() {
                     placeholder="Society / Street / Complex (e.g. Godhra Road / Pavagadh Bypass)"
                     value={societyStreetName}
                     onChange={(e) => setSocietyStreetName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                     required
                   />
 
@@ -494,7 +492,7 @@ export function AuthModal() {
                       placeholder="Landmark (e.g. Near Bus Stand)"
                       value={landmark}
                       onChange={(e) => setLandmark(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                       required
                     />
 
@@ -503,7 +501,7 @@ export function AuthModal() {
                       placeholder="Area / Locality (e.g. Kanjari Area)"
                       value={areaLocality}
                       onChange={(e) => setAreaLocality(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                       required
                     />
                   </div>
@@ -513,20 +511,20 @@ export function AuthModal() {
                       type="text"
                       value="Halol"
                       disabled
-                      className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600"
+                      className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 min-h-[44px]"
                     />
                     <input
                       type="text"
                       value="Panchmahal"
                       disabled
-                      className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600"
+                      className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 min-h-[44px]"
                     />
                     <input
                       type="text"
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value)}
                       placeholder="389350"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -535,7 +533,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer mt-4"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all cursor-pointer mt-4 min-h-[48px]"
               >
                 {loading ? (
                   <>
@@ -555,21 +553,21 @@ export function AuthModal() {
           {/* STEP 4: Success Greeting & Launch Promo */}
           {step === 'success' && (
             <div className="py-8 text-center space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 shadow-inner animate-bounce">
+              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400 shadow-inner animate-bounce">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h4 className="text-xl font-bold text-slate-800">
+              <h4 className="text-xl font-bold text-slate-800 dark:text-white">
                 {customer?.full_name ? `Welcome, ${customer.full_name}!` : 'Login Successful!'}
               </h4>
               {verifiedSeq && verifiedSeq <= 500 && (
-                <div className="p-4 bg-gradient-to-r from-amber-100 via-amber-50 to-amber-100 border border-amber-300 rounded-2xl text-amber-900 text-sm font-semibold">
+                <div className="p-4 bg-gradient-to-r from-amber-100 via-amber-50 to-amber-100 dark:from-amber-950/40 dark:via-amber-900/30 dark:to-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-2xl text-amber-900 dark:text-amber-200 text-sm font-semibold">
                   🎉 Congratulations! You are verified customer <strong>#{verifiedSeq}</strong>!
-                  <div className="text-xs font-normal text-amber-800 mt-1">
-                    Your 10% First Order Discount has been unlocked.
+                  <div className="text-xs font-normal text-amber-800 dark:text-amber-300 mt-1">
+                    Your 10% Launch Discount on your first order with FIRST500 has been unlocked!
                   </div>
                 </div>
               )}
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Saved address loaded. Redirecting to your cart...
               </p>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 export interface DonutSegment {
   id: string;
@@ -36,8 +36,31 @@ export default function DonutBreakdownChart({
 }: DonutBreakdownChartProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const validSegments = segments.filter((s) => Number(s.value) > 0);
-  const total = validSegments.reduce((acc, s) => acc + Number(s.value), 0);
+  const validSegments = useMemo(() => segments.filter((s) => Number(s.value) > 0), [segments]);
+  const total = useMemo(() => validSegments.reduce((acc, s) => acc + Number(s.value), 0), [validSegments]);
+
+  const size = 180;
+  const strokeWidth = 24;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  const renderedSegments = useMemo(() => {
+    let currentOffset = 0;
+    return validSegments.map((seg, idx) => {
+      const percent = total > 0 ? (Number(seg.value) / total) * 100 : 0;
+      const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
+      const strokeDashoffset = -((currentOffset / 100) * circumference);
+      currentOffset += percent;
+      return {
+        ...seg,
+        idx,
+        percent,
+        strokeDasharray,
+        strokeDashoffset,
+        color: seg.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
+      };
+    });
+  }, [validSegments, total, circumference]);
 
   if (validSegments.length === 0 || total === 0) {
     return (
@@ -46,13 +69,6 @@ export default function DonutBreakdownChart({
       </div>
     );
   }
-
-  const size = 180;
-  const strokeWidth = 24;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  let accumulatedPercent = 0;
 
   return (
     <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
@@ -65,28 +81,22 @@ export default function DonutBreakdownChart({
         {/* SVG Donut */}
         <div className="relative flex items-center justify-center shrink-0">
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
-            {validSegments.map((seg, idx) => {
-              const percent = (Number(seg.value) / total) * 100;
-              const strokeDasharray = `${(percent / 100) * circumference} ${circumference}`;
-              const strokeDashoffset = -((accumulatedPercent / 100) * circumference);
-              accumulatedPercent += percent;
-
-              const color = seg.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
-              const isHovered = hoveredIdx === idx;
+            {renderedSegments.map((seg) => {
+              const isHovered = hoveredIdx === seg.idx;
 
               return (
                 <circle
-                  key={seg.id || idx}
+                  key={seg.id || seg.idx}
                   cx={size / 2}
                   cy={size / 2}
                   r={radius}
                   fill="transparent"
-                  stroke={color}
+                  stroke={seg.color}
                   strokeWidth={isHovered ? strokeWidth + 4 : strokeWidth}
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
+                  strokeDasharray={seg.strokeDasharray}
+                  strokeDashoffset={seg.strokeDashoffset}
                   className="transition-all duration-200 cursor-pointer"
-                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseEnter={() => setHoveredIdx(seg.idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
                 />
               );
@@ -108,22 +118,20 @@ export default function DonutBreakdownChart({
 
         {/* Legend List */}
         <div className="flex-1 w-full space-y-2 text-xs">
-          {validSegments.map((seg, idx) => {
-            const color = seg.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
-            const pct = ((Number(seg.value) / total) * 100).toFixed(1);
-            const isHovered = hoveredIdx === idx;
+          {renderedSegments.map((seg) => {
+            const isHovered = hoveredIdx === seg.idx;
 
             return (
               <div
-                key={seg.id || idx}
-                onMouseEnter={() => setHoveredIdx(idx)}
+                key={seg.id || seg.idx}
+                onMouseEnter={() => setHoveredIdx(seg.idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
                 className={`flex items-center justify-between p-2 rounded-xl transition-all cursor-pointer ${
                   isHovered ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800/40'
                 }`}
               >
                 <div className="flex items-center space-x-2 truncate">
-                  <span className="w-3 h-3 rounded-md shrink-0" style={{ backgroundColor: color }} />
+                  <span className="w-3 h-3 rounded-md shrink-0" style={{ backgroundColor: seg.color }} />
                   <span className="truncate font-semibold">{seg.label}</span>
                 </div>
 
@@ -131,7 +139,7 @@ export default function DonutBreakdownChart({
                   <span className="font-bold text-white">
                     {seg.formattedValue || `₹${Number(seg.value).toLocaleString('en-IN')}`}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-bold">({pct}%)</span>
+                  <span className="text-[10px] text-slate-500 font-bold">({seg.percent.toFixed(1)}%)</span>
                 </div>
               </div>
             );

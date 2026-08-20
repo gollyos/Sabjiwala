@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -13,14 +14,22 @@ export async function GET(
 ) {
   try {
     const { token } = await params;
-    const supabase = getServiceSupabase();
+    if (!token || typeof token !== 'string' || token.trim().length < 8) {
+      return NextResponse.json({ success: false, error: 'Invalid tracking token' }, { status: 400 });
+    }
 
-    // Check if token matches tracking_token or order id
-    let query = supabase
+    const serviceSupabase = getServiceSupabase();
+    const serverSupabase = await createClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+
+    // 1. Primary lookup by secure tracking_token
+    let { data: order, error } = await serviceSupabase
       .from('orders')
       .select(`
         id,
         order_number,
+        tracking_token,
+        customer_id,
         delivery_date,
         delivery_slot_start,
         delivery_slot_end,
@@ -49,19 +58,76 @@ export async function GET(
           selling_price_snapshot,
           line_total
         )
-      `);
+      `)
+      .eq('tracking_token', token)
+      .maybeSingle();
 
-    if (token.length === 32 || token.length === 64) {
-      query = query.eq('tracking_token', token);
-    } else {
-      query = query.or(`tracking_token.eq.${token},id.eq.${token}`);
+    // 2. If not matched by tracking_token, allow UUID lookup ONLY if user is authenticated and owns order or is staff
+    if (!order && user) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
+      if (isUuid) {
+        // Check if user is staff
+        const { data: staffRoles } = await serverSupabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+        const isStaff = (staffRoles || []).length > 0;
+
+        // Check if user is customer owner
+        const { data: customerRow } = await serverSupabase
+          .from('customers')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .maybeSingle();
+
+        const { data: matchedOrder } = await serviceSupabase
+          .from('orders')
+          .select(`
+            id,
+            order_number,
+            tracking_token,
+            customer_id,
+            delivery_date,
+            delivery_slot_start,
+            delivery_slot_end,
+            order_status,
+            payment_status,
+            payment_method,
+            subtotal_amount,
+            first_order_discount,
+            cod_discount,
+            final_payable_amount,
+            delivery_flat_house_snapshot,
+            delivery_society_street_snapshot,
+            delivery_landmark_snapshot,
+            delivery_area_snapshot,
+            customer_name_snapshot,
+            customer_mobile_snapshot,
+            created_at,
+            order_items (
+              id,
+              product_name_en_snapshot,
+              product_name_gu_snapshot,
+              variant_name_en_snapshot,
+              quantity,
+              equivalent_base_qty,
+              unit_code_snapshot,
+              selling_price_snapshot,
+              line_total
+            )
+          `)
+          .eq('id', token)
+          .maybeSingle();
+
+        if (matchedOrder && (isStaff || (customerRow && matchedOrder.customer_id === customerRow.id))) {
+          order = matchedOrder;
+        }
+      }
     }
-
-    const { data: order, error } = await query.single();
 
     if (error || !order) {
       return NextResponse.json(
-        { success: false, error: 'Order not found or link has expired' },
+        { success: false, error: 'Order not found or tracking token invalid' },
         { status: 404 }
       );
     }
@@ -94,7 +160,15 @@ export async function GET(
           landmark: order.delivery_landmark_snapshot,
           area: order.delivery_area_snapshot,
         },
-        items: (order.order_items || []).map((item: any) => ({
+        items: (order.order_items || []).map((item: {
+          product_name_en_snapshot: string;
+          product_name_gu_snapshot: string;
+          variant_name_en_snapshot: string;
+          quantity: number;
+          unit_code_snapshot: string;
+          selling_price_snapshot: number;
+          line_total: number;
+        }) => ({
           name_en: item.product_name_en_snapshot,
           name_gu: item.product_name_gu_snapshot,
           variant: item.variant_name_en_snapshot,
@@ -106,9 +180,10 @@ export async function GET(
         created_at: order.created_at,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Error tracking order';
     return NextResponse.json(
-      { success: false, error: err.message || 'Error tracking order' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }

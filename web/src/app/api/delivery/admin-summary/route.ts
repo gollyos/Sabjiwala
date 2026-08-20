@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -9,6 +10,23 @@ function getServiceSupabase() {
 
 export async function GET(req: NextRequest) {
   try {
+    const serverSupabase = await createClient();
+    const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    const { data: userRoles } = await serverSupabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (userRoles || []).map(r => r.role);
+    if (!roles.includes('owner') && !roles.includes('manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Owner or Manager role required' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const date = searchParams.get('date') || null;
 
@@ -23,11 +41,23 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: statsErr.message }, { status: 500 });
     }
 
-    // 2. Fetch Active Drivers for dropdown
-    const { data: drivers, error: driverErr } = await supabase
-      .from('user_profiles')
-      .select('id, full_name, mobile')
-      .eq('is_active', true);
+    // 2. Fetch Active Drivers with delivery role for assignment dropdown
+    const { data: driverRoles } = await supabase
+      .from('user_roles')
+      .select(`
+        user_id,
+        user_profiles!inner (
+          id,
+          full_name,
+          mobile,
+          is_active
+        )
+      `)
+      .eq('role', 'delivery');
+
+    const drivers = (driverRoles || [])
+      .map((dr: any) => dr.user_profiles)
+      .filter((p: any) => p && p.is_active);
 
     return NextResponse.json({
       success: true,

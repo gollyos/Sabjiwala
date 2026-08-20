@@ -13,17 +13,33 @@ import {
   Phone,
   ChevronDown
 } from 'lucide-react';
+import { PromoCountdownBanner } from './PromoCountdownBanner';
+import { usePathname } from 'next/navigation';
 
 export function Navbar() {
+  const pathname = usePathname();
   const { user, customer, isOnboarded, openAuthModal, openProfileModal, verifiedSequence } = useAuth();
   const { cart, openCartDrawer, subtotal } = useCart();
+
+  // Hide customer navbar on Admin, Driver, and Tracking routes
+  if (
+    pathname.startsWith('/admin') || 
+    pathname.startsWith('/driver') || 
+    pathname.startsWith('/track') || 
+    pathname.startsWith('/b/')
+  ) {
+    return null;
+  }
 
   const totalItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
       
-      {/* Top Notification Bar */}
+      {/* Live Promo Offer & Countdown Banner */}
+      <PromoCountdownBanner />
+
+      {/* Top Delivery Notification Bar */}
       <div className="bg-emerald-900 text-emerald-100 text-xs px-4 py-1.5 font-medium flex items-center justify-between overflow-x-auto">
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>

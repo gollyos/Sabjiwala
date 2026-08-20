@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -9,7 +10,32 @@ function getServiceSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const serverSupabase = await createClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Staff authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { data: roleRows } = await serverSupabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (roleRows || []).map((r) => r.role);
+    const isAuthorized = roles.includes('manager') || roles.includes('owner');
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Procurement purchase authorization required' },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json().catch(() => ({}));
     const {
       procurement_item_id,
       supplier_id,
@@ -17,7 +43,6 @@ export async function POST(req: NextRequest) {
       rate_per_unit,
       mandi_lot_or_bill_no,
       notes,
-      purchased_by,
     } = body;
 
     if (!procurement_item_id || !purchased_qty || rate_per_unit === undefined) {
@@ -35,7 +60,7 @@ export async function POST(req: NextRequest) {
       p_rate_per_unit: Number(rate_per_unit),
       p_mandi_lot_or_bill_no: mandi_lot_or_bill_no || null,
       p_notes: notes || null,
-      p_purchased_by: purchased_by || null,
+      p_purchased_by: user.id,
     });
 
     if (error) {

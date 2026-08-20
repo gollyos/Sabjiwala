@@ -112,7 +112,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const [cartDrawerOpen, setCartDrawerOpen] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
-  const [isOnlinePaymentEnabled, setIsOnlinePaymentEnabled] = useState<boolean>(true);
+  const [isOnlinePaymentEnabled, setIsOnlinePaymentEnabled] = useState<boolean>(false);
   const [specialInstructions, setSpecialInstructions] = useState<string>('');
   const [serverQuote, setServerQuote] = useState<CheckoutQuote | null>(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState<boolean>(false);
@@ -128,17 +128,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('sabjiwala_cart', JSON.stringify(cart));
     }
   }, [cart]);
-
-  // Load Razorpay Checkout Script when online payment is active
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !document.getElementById('razorpay-checkout-script')) {
-      const script = document.createElement('script');
-      script.id = 'razorpay-checkout-script';
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
 
   // Recalculate Authoritative Server-Side Quote
   const refreshQuote = useCallback(async () => {
@@ -192,7 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoadingQuote(false);
     }
-  }, [cart, paymentMethod, supabase, user]);
+  }, [cart, paymentMethod, supabase]);
 
   // Auto-refresh quote when cart, payment method, or auth state changes
   useEffect(() => {

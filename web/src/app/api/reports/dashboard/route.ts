@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -104,6 +105,24 @@ function resolveDates(range: string | null, customStart: string | null, customEn
 
 export async function GET(req: NextRequest) {
   try {
+    const serverSupabase = await createClient();
+    const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    // Verify Owner or Manager role
+    const { data: userRoles } = await serverSupabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = (userRoles || []).map(r => r.role);
+    if (!roles.includes('owner') && !roles.includes('manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Insufficient privileges for executive financial reports' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const range = searchParams.get('range');
     const customStart = searchParams.get('start_date');
@@ -133,6 +152,10 @@ export async function GET(req: NextRequest) {
     const { data: dailySummary, error: dailyErr } = await supabase.rpc('get_daily_owner_summary', {
       p_date: end_date,
     });
+
+    if (dailyErr) {
+      console.warn('Daily summary warning:', dailyErr.message);
+    }
 
     return NextResponse.json({
       success: true,

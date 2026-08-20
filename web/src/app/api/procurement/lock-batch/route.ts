@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
         .eq('key', 'procurement_lock_secret')
         .single();
 
-      const validSecret = settingData?.value?.secret || process.env.PROCUREMENT_LOCK_SECRET || 'sabjiwala_procurement_lock_token_halol_2026';
-      if (secretHeader === validSecret) {
+      const validSecret = settingData?.value?.secret || process.env.PROCUREMENT_LOCK_SECRET;
+      if (validSecret && secretHeader === validSecret) {
         isAuthorized = true;
       }
     }
@@ -32,19 +32,19 @@ export async function POST(req: NextRequest) {
     // 2. If no valid secret header, check Owner / Manager session cookie
     if (!isAuthorized) {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
 
-      if (user) {
+      if (!authErr && user) {
         // Verify staff role
-        const { data: profile } = await serviceSupabase
-          .from('user_profiles')
-          .select('id, role')
-          .eq('auth_user_id', user.id)
-          .single();
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
 
-        if (profile && (profile.role === 'owner' || profile.role === 'manager')) {
+        const roles = (userRoles || []).map(r => r.role);
+        if (roles.includes('owner') || roles.includes('manager')) {
           isAuthorized = true;
-          actorId = profile.id;
+          actorId = user.id;
         }
       }
     }

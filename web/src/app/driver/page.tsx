@@ -1,26 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { 
   Truck, 
-  Package, 
   CheckCircle2, 
-  AlertCircle, 
   Phone, 
   MapPin, 
   Navigation, 
-  Barcode, 
-  DollarSign, 
   Check, 
   X, 
-  AlertTriangle, 
   RefreshCw, 
-  User, 
-  Calendar, 
-  Send,
-  HelpCircle,
-  Clock,
-  QrCode
+  Lock,
+  ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { StatusChip } from '@/components/ui/StatusChip';
@@ -82,9 +74,15 @@ interface DriverMetrics {
 }
 
 export default function DriverMobileScreen() {
+  const [supabase] = useState(() => createClient());
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isManagerOrOwner, setIsManagerOrOwner] = useState(false);
+
   const [driverId, setDriverId] = useState<string>('');
+  const [driverName, setDriverName] = useState<string>('');
   const [driversList, setDriversList] = useState<{ id: string; full_name: string; mobile: string }[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [batch, setBatch] = useState<DriverBatch | null>(null);
   const [deliveries, setDeliveries] = useState<DriverDelivery[]>([]);
   const [metrics, setMetrics] = useState<DriverMetrics | null>(null);
@@ -101,28 +99,70 @@ export default function DriverMobileScreen() {
   const [collectionMethod, setCollectionMethod] = useState<'cash' | 'upi_delivery'>('cash');
   const [collectedAmount, setCollectedAmount] = useState<string>('');
   const [mismatchReason, setMismatchReason] = useState<string>('');
+  const [completingDelivery, setCompletingDelivery] = useState(false);
 
   // Failure modal state
   const [showFailureModal, setShowFailureModal] = useState<boolean>(false);
   const [failureReason, setFailureReason] = useState<string>('customer_unavailable');
   const [failureNotes, setFailureNotes] = useState<string>('');
 
-  // Fetch drivers list
+  // 1. Authenticate Driver Session
   useEffect(() => {
-    async function loadDrivers() {
+    async function checkAuth() {
       try {
-        const res = await fetch('/api/delivery/admin-summary');
-        const json = await res.json();
-        if (json.success && json.data?.drivers?.length > 0) {
-          setDriversList(json.data.drivers);
-          setDriverId(json.data.drivers[0].id);
+        setCheckingAuth(true);
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          setIsAuthorized(false);
+          return;
+        }
+
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id);
+
+        const roles = (roleData || []).map(r => r.role);
+        const hasAccess = roles.includes('delivery') || roles.includes('manager') || roles.includes('owner');
+
+        if (!hasAccess) {
+          setIsAuthorized(false);
+          return;
+        }
+
+        setIsAuthorized(true);
+        const managerOrOwner = roles.includes('owner') || roles.includes('manager');
+        setIsManagerOrOwner(managerOrOwner);
+
+        setDriverId(session.user.id);
+
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('full_name')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        setDriverName(profile?.full_name || 'Delivery Partner');
+
+        // If manager or owner, allow viewing other drivers
+        if (managerOrOwner) {
+          const res = await fetch('/api/delivery/admin-summary');
+          const json = await res.json();
+          if (json.success && json.data?.drivers?.length > 0) {
+            setDriversList(json.data.drivers);
+          }
         }
       } catch (err) {
-        console.error('Error loading drivers:', err);
+        console.error('Driver auth check error:', err);
+        setIsAuthorized(false);
+      } finally {
+        setCheckingAuth(false);
       }
     }
-    loadDrivers();
-  }, []);
+
+    checkAuth();
+  }, [supabase]);
 
   // Load Driver Deliveries
   const loadDriverDeliveries = useCallback(async () => {
@@ -153,8 +193,10 @@ export default function DriverMobileScreen() {
   }, [driverId, selectedDate, activeDelivery]);
 
   useEffect(() => {
-    loadDriverDeliveries();
-  }, [loadDriverDeliveries]);
+    if (isAuthorized && driverId) {
+      loadDriverDeliveries();
+    }
+  }, [isAuthorized, driverId, loadDriverDeliveries]);
 
   // Open Stop
   const handleOpenStop = (del: DriverDelivery) => {
@@ -221,7 +263,7 @@ export default function DriverMobileScreen() {
 
   // Confirm Complete Delivery
   const handleConfirmDelivered = async () => {
-    if (!activeDelivery) return;
+    if (!activeDelivery || completingDelivery) return;
 
     const amount = parseFloat(collectedAmount);
     if (isNaN(amount) || amount < 0) {
@@ -230,14 +272,16 @@ export default function DriverMobileScreen() {
     }
 
     try {
+      setCompletingDelivery(true);
       const res = await fetch('/api/delivery/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          delivery_id: activeDelivery.delivery_id,
-          payment_method: collectionMethod,
+          order_id: activeDelivery.order_id,
+          collection_method: collectionMethod,
           collected_amount: amount,
           mismatch_reason: mismatchReason.trim() || null,
+          driver_user_id: driverId,
         }),
       });
 
@@ -251,6 +295,8 @@ export default function DriverMobileScreen() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setCompletingDelivery(false);
     }
   };
 
@@ -285,11 +331,47 @@ export default function DriverMobileScreen() {
     }
   };
 
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-100 p-4">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center animate-pulse mb-4">
+          <Truck className="w-6 h-6 text-emerald-400" />
+        </div>
+        <p className="text-sm font-semibold text-slate-300">Checking Driver Authorization...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 mx-auto flex items-center justify-center text-amber-500">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-white tracking-tight">Driver Access Required</h1>
+            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+              This portal is restricted to active Sabjiwala delivery partners. Please log in with your verified driver phone number.
+            </p>
+          </div>
+          <Link
+            href="/"
+            className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Storefront</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const pendingStops = metrics?.pending || 0;
   const deliveredStops = metrics?.delivered || 0;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 pb-20 font-sans">
+    <div className="min-h-screen bg-slate-900 text-slate-100 pb-24 font-sans">
       
       {/* Mobile-first Driver Header */}
       <header className="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-40">
@@ -297,20 +379,22 @@ export default function DriverMobileScreen() {
           <div className="flex items-center space-x-2">
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
             <h1 className="text-base font-extrabold text-white">
-              Sabjiwala Driver &bull; <span className="text-emerald-400">Halol</span>
+              Sabjiwala Driver &bull; <span className="text-emerald-400">{driverName}</span>
             </h1>
           </div>
 
-          <Link
-            href="/admin/dashboard"
-            className="text-xs text-slate-400 hover:text-white font-bold"
-          >
-            Admin HQ &rarr;
-          </Link>
+          {isManagerOrOwner && (
+            <Link
+              href="/admin/dashboard"
+              className="text-xs text-slate-400 hover:text-white font-bold"
+            >
+              Admin HQ &rarr;
+            </Link>
+          )}
         </div>
 
-        {/* Driver selector for testing */}
-        {driversList.length > 1 && (
+        {/* Driver selector for Owner / Manager only */}
+        {isManagerOrOwner && driversList.length > 1 && (
           <div className="mt-2.5">
             <select
               value={driverId}
@@ -341,7 +425,7 @@ export default function DriverMobileScreen() {
           {batch && batch.status === 'assigned' && (
             <button
               onClick={handleStartRun}
-              className="w-full py-3 bg-emerald-600 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer mt-2"
+              className="w-full py-3 bg-emerald-600 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer mt-2 min-h-[44px]"
             >
               <Truck className="w-4 h-4" />
               <span>Start Delivery Route 🚀</span>
@@ -360,7 +444,7 @@ export default function DriverMobileScreen() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase px-1">
             <span>Stops Queue ({deliveries.length})</span>
-            <button onClick={loadDriverDeliveries} className="text-emerald-400 flex items-center gap-1">
+            <button onClick={loadDriverDeliveries} className="text-emerald-400 flex items-center gap-1 cursor-pointer min-h-[32px]">
               <RefreshCw className="w-3 h-3" /> Refresh
             </button>
           </div>
@@ -412,7 +496,7 @@ export default function DriverMobileScreen() {
                   {!isDelivered && !isFailed && (
                     <button
                       onClick={() => handleOpenStop(del)}
-                      className="w-full py-3 bg-slate-800 hover:bg-slate-700 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      className="w-full py-3 bg-slate-800 hover:bg-slate-700 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px]"
                     >
                       <span>Open Delivery Stop</span>
                     </button>
@@ -436,7 +520,7 @@ export default function DriverMobileScreen() {
                 <span className="text-[10px] font-mono uppercase text-emerald-400 font-bold">Stop #{activeDelivery.delivery_sequence} &bull; {activeDelivery.order_number}</span>
                 <h3 className="text-lg font-black text-white">{activeDelivery.customer_name_snapshot}</h3>
               </div>
-              <button onClick={() => setActiveDelivery(null)} className="p-2 text-slate-400 hover:text-white">
+              <button onClick={() => setActiveDelivery(null)} aria-label="Close delivery modal" className="p-2 text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -445,7 +529,7 @@ export default function DriverMobileScreen() {
             <div className="grid grid-cols-2 gap-2 text-xs font-bold">
               <a
                 href={`tel:${activeDelivery.customer_mobile_snapshot}`}
-                className="p-3 rounded-2xl bg-blue-600 text-white flex items-center justify-center gap-2 active:scale-98"
+                className="p-3 rounded-2xl bg-blue-600 text-white flex items-center justify-center gap-2 active:scale-98 min-h-[44px]"
               >
                 <Phone className="w-4 h-4" />
                 <span>Call Customer</span>
@@ -457,7 +541,7 @@ export default function DriverMobileScreen() {
                 )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-slate-800 text-white flex items-center justify-center gap-2 active:scale-98"
+                className="p-3 rounded-2xl bg-slate-800 text-white flex items-center justify-center gap-2 active:scale-98 min-h-[44px]"
               >
                 <Navigation className="w-4 h-4 text-emerald-400" />
                 <span>Open Map</span>
@@ -486,7 +570,7 @@ export default function DriverMobileScreen() {
                 <button
                   type="button"
                   onClick={() => setCollectionMethod('cash')}
-                  className={`p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`p-2.5 rounded-xl text-xs font-bold transition-all min-h-[40px] cursor-pointer ${
                     collectionMethod === 'cash' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'
                   }`}
                 >
@@ -495,7 +579,7 @@ export default function DriverMobileScreen() {
                 <button
                   type="button"
                   onClick={() => setCollectionMethod('upi_delivery')}
-                  className={`p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`p-2.5 rounded-xl text-xs font-bold transition-all min-h-[40px] cursor-pointer ${
                     collectionMethod === 'upi_delivery' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-300'
                   }`}
                 >
@@ -509,7 +593,7 @@ export default function DriverMobileScreen() {
                   type="number"
                   value={collectedAmount}
                   onChange={(e) => setCollectedAmount(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-base font-black text-white"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-base font-black text-white min-h-[44px]"
                 />
               </div>
             </div>
@@ -524,9 +608,9 @@ export default function DriverMobileScreen() {
                   placeholder="Scan bag barcode..."
                   value={scannedBagCode}
                   onChange={(e) => setScannedBagCode(e.target.value)}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono min-h-[44px]"
                 />
-                <button type="submit" className="px-3 py-2 bg-slate-800 text-white font-bold rounded-xl">
+                <button type="submit" className="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl cursor-pointer min-h-[44px]">
                   Scan
                 </button>
               </div>
@@ -542,16 +626,17 @@ export default function DriverMobileScreen() {
               <button
                 type="button"
                 onClick={handleConfirmDelivered}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black rounded-2xl text-sm shadow-md cursor-pointer flex items-center justify-center gap-2"
+                disabled={completingDelivery}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black rounded-2xl text-sm shadow-md cursor-pointer flex items-center justify-center gap-2 min-h-[48px] disabled:opacity-50"
               >
                 <Check className="w-5 h-5 stroke-[3]" />
-                <span>Confirm Delivered &bull; ₹{collectedAmount} Collected</span>
+                <span>{completingDelivery ? 'Recording Delivery...' : `Confirm Delivered • ₹${collectedAmount} Collected`}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowFailureModal(true)}
-                className="w-full py-2.5 rounded-2xl border border-rose-800 text-rose-300 text-xs font-bold hover:bg-rose-950/40"
+                className="w-full py-2.5 rounded-2xl border border-rose-800 text-rose-300 text-xs font-bold hover:bg-rose-950/40 min-h-[40px] cursor-pointer"
               >
                 Delivery Problem / Customer Not Home
               </button>
@@ -573,7 +658,7 @@ export default function DriverMobileScreen() {
                 <select
                   value={failureReason}
                   onChange={(e) => setFailureReason(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white min-h-[44px]"
                 >
                   <option value="customer_unavailable">Customer Not Available / House Locked</option>
                   <option value="phone_unreachable">Phone Switched Off / No Answer</option>
@@ -595,10 +680,10 @@ export default function DriverMobileScreen() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowFailureModal(false)} className="px-3 py-2 text-slate-400">
+                <button type="button" onClick={() => setShowFailureModal(false)} className="px-3 py-2 text-slate-400 min-h-[36px] cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-rose-600 text-white font-bold rounded-xl">
+                <button type="submit" className="px-4 py-2 bg-rose-600 text-white font-bold rounded-xl min-h-[36px] cursor-pointer">
                   Flag as Failed
                 </button>
               </div>
