@@ -176,6 +176,16 @@ export default function AdminOrdersPage() {
               </button>
             </div>
 
+            <a
+              href={`/api/reports/export?type=orders&start_date=${startDate}&end_date=${endDate}`}
+              download
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              title="Download orders in Excel/CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Excel (એક્સેલ)</span>
+            </a>
+
             <button
               onClick={fetchOrders}
               disabled={loading}

@@ -314,6 +314,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart();
         setCartDrawerOpen(false);
         setOrderSuccessData(orderResult);
+
+        // Instantly trigger background notification processor for customer & admin alerts
+        fetch('/api/notifications/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }).catch((err) => console.error('Notification dispatch trigger:', err));
+
         return { success: true, data: orderResult };
       }
 

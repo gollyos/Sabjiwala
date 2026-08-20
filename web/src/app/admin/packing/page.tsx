@@ -284,6 +284,48 @@ export default function GodownPackingStation() {
     }
   };
 
+  // 1-Click Quick Pack & Complete Order (No physical barcode scanning required)
+  const handleQuickPackAndReady = async () => {
+    if (!activeOrder) return;
+    try {
+      // 1. Confirm all unconfirmed items
+      for (const item of activeOrder.items) {
+        if (!item.is_confirmed) {
+          await fetch('/api/packing/item-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_item_id: item.id,
+              packed_quantity: item.quantity,
+              is_confirmed: true,
+            }),
+          });
+        }
+      }
+
+      // 2. Mark ready for delivery
+      const res = await fetch('/api/packing/ready', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: activeOrder.order_id,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setActionMessage({ text: `✅ Order ${activeOrder.order_number} successfully packed & marked ready for delivery!`, type: 'success' });
+        setActiveOrder(null);
+        loadQueueData();
+      } else {
+        alert(json.message || json.error || 'Failed to complete packing');
+      }
+    } catch (err) {
+      console.error('Quick pack error:', err);
+      alert('Error completing quick pack');
+    }
+  };
+
   // Mark Order Ready for Delivery
   const handleMarkReady = async () => {
     if (!activeOrder) return;
@@ -643,24 +685,26 @@ export default function GodownPackingStation() {
                 <span>Report Problem</span>
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handlePrintStickers}
                   disabled={isPrinting}
                   className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  title="Print stickers or normal invoice slip"
                 >
                   <Printer className="w-4 h-4 text-emerald-500" />
-                  <span>Print Bag Stickers</span>
+                  <span>Print Slip / Stickers</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleMarkReady}
-                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  onClick={handleQuickPackAndReady}
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer"
+                  title="Mark all items confirmed & complete packing in 1 click"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Complete Order ✓</span>
+                  <span>1-Click Complete & Ready (પેકિંગ પૂર્ણ ✓)</span>
                 </button>
               </div>
             </div>
