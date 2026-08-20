@@ -19,7 +19,8 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Store
+  Store,
+  LogOut
 } from 'lucide-react';
 
 export function AdminNav() {
@@ -138,6 +139,19 @@ export function AdminNav() {
                 </div>
               )}
             </div>
+
+            <button
+              onClick={async () => {
+                localStorage.removeItem('taazatokra_admin_user');
+                await fetch('/api/admin/login', { method: 'DELETE' });
+                window.location.reload();
+              }}
+              className="ml-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Logout from Admin HQ"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -200,6 +214,19 @@ export function AdminNav() {
                   </Link>
                 );
               })}
+
+              <button
+                onClick={async () => {
+                  setMobileMenuOpen(false);
+                  localStorage.removeItem('taazatokra_admin_user');
+                  await fetch('/api/admin/login', { method: 'DELETE' });
+                  window.location.reload();
+                }}
+                className="w-full p-2.5 rounded-xl flex items-center gap-2 text-rose-400 hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer mt-1"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Logout from Admin HQ</span>
+              </button>
             </div>
           </div>
         </div>
