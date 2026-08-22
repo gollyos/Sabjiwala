@@ -213,20 +213,20 @@ export default function AdminDeliveryPage() {
   const areasList = Array.from(new Set(eligibleOrders.map((o) => o.delivery_area_snapshot || 'Halol')));
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Top Header */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Fleet & Delivery Management (ડિલિવરી અને રોકડ મેનેજમેન્ટ)
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                Fleet &amp; Delivery Management (ડિલિવરી અને રોકડ મેનેજમેન્ટ)
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
               Today&apos;s Deliveries &bull; <span className="font-normal text-slate-500">{selectedDate}</span>
             </h1>
           </div>
@@ -244,16 +244,16 @@ export default function AdminDeliveryPage() {
             <button
               onClick={loadDashboardData}
               disabled={isLoading}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-700 dark:text-slate-300"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer shadow-2xs"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
             </button>
           </div>
         </div>
 
         {actionMessage && (
-          <div className="p-4 rounded-2xl text-xs flex items-center gap-2 border bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <div className="p-4 rounded-2xl text-xs flex items-center gap-2 border bg-emerald-50 border-emerald-200 text-emerald-900 font-semibold">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{actionMessage.text}</span>
           </div>
         )}
@@ -264,7 +264,7 @@ export default function AdminDeliveryPage() {
             title="Assigned Stops"
             value={metrics?.total_assigned || 0}
             icon={Truck}
-            iconColor="text-blue-500"
+            iconColor="text-blue-600"
             subValues={[
               { label: 'Out', value: metrics?.out_for_delivery || 0, color: 'text-amber-600' },
               { label: 'Delivered', value: metrics?.delivered || 0, color: 'text-emerald-600' },
@@ -275,7 +275,7 @@ export default function AdminDeliveryPage() {
             title="Completed Rate"
             value={metrics?.total_assigned ? `${Math.round(((metrics.delivered) / metrics.total_assigned) * 100)}%` : '0%'}
             icon={CheckCircle2}
-            iconColor="text-emerald-500"
+            iconColor="text-emerald-600"
             subValues={[
               { label: 'Successful', value: metrics?.delivered || 0 },
               { label: 'Failed', value: metrics?.failed || 0, color: metrics?.failed ? 'text-rose-600' : 'text-slate-400' },
@@ -286,10 +286,10 @@ export default function AdminDeliveryPage() {
             title="COD Collected (રોકડ)"
             value={`₹${Number(metrics?.total_collected || 0).toLocaleString('en-IN')}`}
             icon={DollarSign}
-            iconColor="text-cyan-500"
+            iconColor="text-teal-600"
             subValues={[
               { label: 'Cash', value: `₹${Number(metrics?.collected_cash || 0).toFixed(0)}` },
-              { label: 'UPI', value: `₹${Number(metrics?.collected_upi || 0).toFixed(0)}`, color: 'text-cyan-600' },
+              { label: 'UPI', value: `₹${Number(metrics?.collected_upi || 0).toFixed(0)}`, color: 'text-teal-600' },
             ]}
           />
 
@@ -297,19 +297,19 @@ export default function AdminDeliveryPage() {
             title="Pending COD Collection"
             value={`₹${Number(metrics?.pending_collection || 0).toLocaleString('en-IN')}`}
             icon={Clock}
-            iconColor="text-amber-500"
+            iconColor="text-amber-600"
             footerText={`Expected Total: ₹${Number(metrics?.expected_cod || 0).toFixed(0)}`}
           />
         </div>
 
         {/* Tab Toggle */}
-        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl text-xs font-bold w-fit shadow-2xs">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 p-1.5 rounded-2xl text-xs font-bold w-fit shadow-2xs">
           <button
             onClick={() => setActiveTab('batches')}
             className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
               activeTab === 'batches'
                 ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             Route Batches ({batches.length})
@@ -319,7 +319,7 @@ export default function AdminDeliveryPage() {
             className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
               activeTab === 'settlements'
                 ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             Driver Cash Settlements ({settlements.length})
@@ -328,25 +328,25 @@ export default function AdminDeliveryPage() {
 
         {/* BATCHES TAB */}
         {activeTab === 'batches' && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
             {batches.length === 0 ? (
               <div className="p-12 text-center text-xs text-slate-400">
-                <Truck className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-slate-700" />
-                <div className="font-bold text-slate-700 dark:text-slate-300">No delivery batches created today</div>
+                <Truck className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                <div className="font-bold text-slate-700">No delivery batches created today</div>
                 <div className="text-[11px] text-slate-500">Click &quot;Create Route Batch&quot; above to assign packed orders to a driver.</div>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="divide-y divide-slate-100">
                 {batches.map((b) => (
                   <div key={b.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-black text-slate-900 dark:text-white text-sm font-mono">{b.batch_name}</span>
+                        <span className="font-black text-slate-900 text-sm font-mono">{b.batch_name}</span>
                         <StatusChip status={b.status} size="sm" />
                       </div>
-                      <div className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                      <div className="text-slate-500 mt-1 flex items-center gap-2">
                         <User className="w-3.5 h-3.5" />
-                        <span>Driver: <strong className="text-slate-800 dark:text-slate-200">{b.driver_name || 'Unassigned'}</strong></span>
+                        <span>Driver: <strong className="text-slate-800">{b.driver_name || 'Unassigned'}</strong></span>
                         {b.driver_mobile && <span className="font-mono">({b.driver_mobile})</span>}
                       </div>
                     </div>
@@ -354,7 +354,7 @@ export default function AdminDeliveryPage() {
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <span className="text-[10px] text-slate-400 uppercase font-bold block">Progress</span>
-                        <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
+                        <span className="font-mono font-bold text-slate-900 text-sm">
                           {b.completed_deliveries} / {b.total_deliveries} Delivered
                         </span>
                       </div>
@@ -363,7 +363,7 @@ export default function AdminDeliveryPage() {
                         href="/driver"
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold"
+                        className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
                       >
                         Open Driver View &rarr;
                       </a>
@@ -377,8 +377,8 @@ export default function AdminDeliveryPage() {
 
         {/* SETTLEMENTS TAB */}
         {activeTab === 'settlements' && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 text-xs font-bold text-slate-700">
               Driver End-of-Day Cash Handover Ledger
             </div>
 
@@ -387,14 +387,14 @@ export default function AdminDeliveryPage() {
                 No cash settlements submitted for this date.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="divide-y divide-slate-100">
                 {settlements.map((s) => {
                   const hasDiff = Number(s.difference_amount || 0) !== 0;
 
                   return (
                     <div key={s.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-sm">
+                        <div className="font-bold text-slate-900 text-sm">
                           Driver: {s.driver_name}
                         </div>
                         <div className="text-slate-400 mt-0.5">
@@ -405,7 +405,7 @@ export default function AdminDeliveryPage() {
                       <div className="flex items-center gap-4 text-right font-mono">
                         <div>
                           <span className="text-[10px] text-slate-400 uppercase block">Expected Cash</span>
-                          <span className="font-bold text-slate-800 dark:text-slate-200">₹{Number(s.expected_cash_amount || 0).toFixed(0)}</span>
+                          <span className="font-bold text-slate-800">₹{Number(s.expected_cash_amount || 0).toFixed(0)}</span>
                         </div>
 
                         <div>
@@ -423,7 +423,7 @@ export default function AdminDeliveryPage() {
                         {s.status !== 'verified' && (
                           <button
                             onClick={() => setVerifyingSettlement(s)}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs cursor-pointer"
                           >
                             Verify
                           </button>
@@ -441,13 +441,13 @@ export default function AdminDeliveryPage() {
 
       {/* CREATE ROUTE BATCH MODAL */}
       {showBatchModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-xl w-full border border-slate-200 dark:border-slate-800 space-y-4 max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-xl w-full border border-slate-200 space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+              <h3 className="font-extrabold text-slate-900 text-base">
                 Create Delivery Route Batch
               </h3>
-              <button onClick={() => setShowBatchModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowBatchModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -458,7 +458,7 @@ export default function AdminDeliveryPage() {
                 <select
                   value={batchDriverId}
                   onChange={(e) => setBatchDriverId(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   required
                 >
                   {drivers.map((d) => (
@@ -474,7 +474,7 @@ export default function AdminDeliveryPage() {
                 <select
                   value={areaFilter}
                   onChange={(e) => setAreaFilter(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
                 >
                   <option value="all">All Areas ({eligibleOrders.length} Orders)</option>
                   {areasList.map((a) => (
@@ -487,18 +487,18 @@ export default function AdminDeliveryPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center font-bold">
                   <span>Select Orders to Assign ({selectedOrderIds.length} Selected)</span>
-                  <button type="button" onClick={handleSelectAllOrders} className="text-emerald-600">
+                  <button type="button" onClick={handleSelectAllOrders} className="text-emerald-600 cursor-pointer">
                     Toggle All
                   </button>
                 </div>
 
-                <div className="max-h-48 overflow-y-auto space-y-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 bg-slate-50 dark:bg-slate-950">
+                <div className="max-h-48 overflow-y-auto space-y-1.5 border border-slate-200 rounded-2xl p-2 bg-slate-50">
                   {eligibleOrders
                     .filter((o) => areaFilter === 'all' || o.delivery_area_snapshot === areaFilter)
                     .map((o) => (
                       <label
                         key={o.order_id}
-                        className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs cursor-pointer"
+                        className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 text-xs cursor-pointer hover:border-emerald-300"
                       >
                         <div className="flex items-center gap-2">
                           <input
@@ -507,11 +507,11 @@ export default function AdminDeliveryPage() {
                             onChange={() => handleToggleOrder(o.order_id)}
                             className="rounded text-emerald-600"
                           />
-                          <span className="font-mono font-bold">{o.order_number}</span>
+                          <span className="font-mono font-bold text-slate-900">{o.order_number}</span>
                           <span>&bull;</span>
-                          <span>{o.customer_name_snapshot} ({o.delivery_area_snapshot})</span>
+                          <span className="text-slate-700">{o.customer_name_snapshot} ({o.delivery_area_snapshot})</span>
                         </div>
-                        <span className="font-mono font-bold">₹{Number(o.final_payable_amount).toFixed(0)}</span>
+                        <span className="font-mono font-bold text-emerald-700">₹{Number(o.final_payable_amount).toFixed(0)}</span>
                       </label>
                     ))}
                 </div>
@@ -521,13 +521,13 @@ export default function AdminDeliveryPage() {
                 <button
                   type="button"
                   onClick={() => setShowBatchModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer shadow-xs"
                 >
                   Create Batch ({selectedOrderIds.length} Orders)
                 </button>
@@ -539,22 +539,22 @@ export default function AdminDeliveryPage() {
 
       {/* VERIFY SETTLEMENT MODAL */}
       {verifyingSettlement && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 space-y-4">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl">
+            <h3 className="font-extrabold text-slate-900 text-base">
               Verify Cash Handover &bull; {verifyingSettlement.driver_name}
             </h3>
 
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 text-xs space-y-1.5 font-mono">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 font-mono">
               <div className="flex justify-between">
-                <span>Expected COD Cash:</span>
-                <span>₹{Number(verifyingSettlement.expected_cash_amount || 0).toFixed(0)}</span>
+                <span className="text-slate-600">Expected COD Cash:</span>
+                <span className="font-bold text-slate-900">₹{Number(verifyingSettlement.expected_cash_amount || 0).toFixed(0)}</span>
               </div>
-              <div className="flex justify-between text-emerald-600 font-bold">
+              <div className="flex justify-between text-emerald-700 font-bold">
                 <span>Handed Over:</span>
                 <span>₹{Number(verifyingSettlement.handed_over_cash_amount || 0).toFixed(0)}</span>
               </div>
-              <div className="flex justify-between font-black text-rose-600 pt-1 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-between font-black text-rose-600 pt-1 border-t border-slate-200">
                 <span>Difference:</span>
                 <span>₹{Number(verifyingSettlement.difference_amount || 0).toFixed(0)}</span>
               </div>
@@ -566,9 +566,9 @@ export default function AdminDeliveryPage() {
                 <select
                   value={verifyStatus}
                   onChange={(e: any) => setVerifyStatus(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                 >
-                  <option value="verified">Approve & Deposit (Verified)</option>
+                  <option value="verified">Approve &amp; Deposit (Verified)</option>
                   <option value="disputed">Flag Discrepancy (Disputed)</option>
                 </select>
               </div>
@@ -580,7 +580,7 @@ export default function AdminDeliveryPage() {
                   placeholder="e.g. Deposited in SBI Godown Account"
                   value={verifyNotes}
                   onChange={(e) => setVerifyNotes(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -588,13 +588,13 @@ export default function AdminDeliveryPage() {
                 <button
                   type="button"
                   onClick={() => setVerifyingSettlement(null)}
-                  className="px-4 py-2 rounded-xl text-slate-500 font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer shadow-xs"
                 >
                   Save Verification
                 </button>
@@ -603,6 +603,7 @@ export default function AdminDeliveryPage() {
           </div>
         </div>
       )}
+
 
     </div>
   );

@@ -192,32 +192,32 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {error && (
-          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+          <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
             {error}
           </div>
         )}
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-5 rounded-3xl shadow-xs">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-              <Settings className="w-6 h-6 text-emerald-400" />
-              <span>Owner Controls & Business Settings (માલિક નિયંત્રણો)</span>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+              <Settings className="w-6 h-6 text-emerald-600" />
+              <span>Owner Controls &amp; Business Settings (માલિક નિયંત્રણો)</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Centralized server-authoritative configuration for pricing, delivery cutoffs, discounts, notifications, and hardware.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             {saveSuccess && (
-              <div className="px-3 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{saveSuccess}</span>
               </div>
             )}
@@ -226,15 +226,15 @@ export default function AdminSettingsPage() {
               type="button"
               onClick={fetchSettings}
               disabled={loading}
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
             </button>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex overflow-x-auto gap-2 pb-1 text-xs border-b border-slate-800">
+        <div className="flex overflow-x-auto gap-2 pb-1 text-xs border-b border-slate-200 scrollbar-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -245,8 +245,8 @@ export default function AdminSettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-lg'
-                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -258,86 +258,86 @@ export default function AdminSettingsPage() {
 
         {/* TAB 1: Business Profile */}
         {activeTab === 'business' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">Business Identity & Support</h3>
-                <p className="text-xs text-slate-400">Legal business entity name, contact channels, and customer support.</p>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Business Identity &amp; Support</h3>
+                <p className="text-xs text-slate-500">Legal business entity name, contact channels, and customer support.</p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
                 Halol Hub
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Business Name (English)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Business Name (English)</label>
                 <input
                   type="text"
                   value={businessProfile.business_name}
                   onChange={(e) => setBusinessProfile({ ...businessProfile, business_name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Business Name (Gujarati)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Business Name (Gujarati)</label>
                 <input
                   type="text"
                   value={businessProfile.business_name_gu}
                   onChange={(e) => setBusinessProfile({ ...businessProfile, business_name_gu: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-gujarati font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-gujarati font-bold focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Customer Support Mobile</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Customer Support Mobile</label>
                 <input
                   type="text"
                   value={businessProfile.support_mobile}
                   onChange={(e) => setBusinessProfile({ ...businessProfile, support_mobile: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">WhatsApp Business Number</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">WhatsApp Business Number</label>
                 <input
                   type="text"
                   value={businessProfile.whatsapp_number}
                   onChange={(e) => setBusinessProfile({ ...businessProfile, whatsapp_number: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Business & Godown Address</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Business &amp; Godown Address</label>
                 <input
                   type="text"
                   value={businessProfile.business_address}
                   onChange={(e) => setBusinessProfile({ ...businessProfile, business_address: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Timezone (Fixed)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Timezone (Fixed)</label>
                 <input
                   type="text"
                   value="Asia/Kolkata (IST, UTC+05:30)"
                   disabled
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-400 cursor-not-allowed font-mono"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-500 cursor-not-allowed font-mono"
                 />
-                <p className="text-[10px] text-slate-500">8 PM daily cutoff and calendar queries depend strictly on Asia/Kolkata.</p>
+                <p className="text-[10px] text-slate-400">8 PM daily cutoff and calendar queries depend strictly on Asia/Kolkata.</p>
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Default Currency</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Default Currency</label>
                 <input
                   type="text"
                   value="Indian Rupee (INR - ₹)"
                   disabled
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-400 cursor-not-allowed font-mono"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-500 cursor-not-allowed font-mono"
                 />
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={() => handleSaveSetting('business_profile', businessProfile)}
                 disabled={saving}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Business Profile</span>
@@ -358,92 +358,92 @@ export default function AdminSettingsPage() {
 
         {/* TAB 2: n8n Automation */}
         {activeTab === 'n8n' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-400" />
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-500" />
                   <span>n8n Workflow Automation (ઓટોમેશન સેટિંગ્સ)</span>
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Instant Google Sheets / Excel auto-entry, automated WhatsApp customer receipts, and admin alerts upon order confirmation.
                 </p>
               </div>
               <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                 n8nConfig.is_active
-                  ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 {n8nConfig.is_active ? 'Automation Active' : 'Disabled'}
               </span>
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px] flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px] flex items-center justify-between">
                   <span>n8n Webhook Production URL</span>
-                  <span className="text-amber-400 font-mono text-[10px]">POST /webhook/taazatokra-orders</span>
+                  <span className="text-amber-600 font-mono text-[10px]">POST /webhook/taazatokra-orders</span>
                 </label>
                 <input
                   type="url"
                   placeholder="https://your-n8n-domain.com/webhook/taazatokra-new-order"
                   value={n8nConfig.webhook_url}
                   onChange={(e) => setN8nConfig({ ...n8nConfig, webhook_url: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono placeholder:text-slate-600 focus:border-emerald-500 focus:outline-hidden"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder:text-slate-400 focus:border-emerald-500 focus:outline-hidden"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   Paste the Webhook URL from your n8n workflow. Whenever an order is confirmed, TaazaTokra immediately posts the full structured order payload to this URL.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                  <label className="text-slate-400 font-bold uppercase text-[10px]">Admin WhatsApp for Instant Alerts</label>
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                  <label className="text-slate-700 font-bold uppercase text-[10px]">Admin WhatsApp for Instant Alerts</label>
                   <input
                     type="text"
                     value={n8nConfig.admin_alert_phone}
                     onChange={(e) => setN8nConfig({ ...n8nConfig, admin_alert_phone: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:outline-none"
                   />
-                  <p className="text-[10px] text-slate-500">n8n will notify this number immediately on new order receipts.</p>
+                  <p className="text-[10px] text-slate-400">n8n will notify this number immediately on new order receipts.</p>
                 </div>
 
-                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                  <label className="text-slate-400 font-bold uppercase text-[10px]">Admin Alert Email</label>
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                  <label className="text-slate-700 font-bold uppercase text-[10px]">Admin Alert Email</label>
                   <input
                     type="email"
                     value={n8nConfig.admin_alert_email}
                     onChange={(e) => setN8nConfig({ ...n8nConfig, admin_alert_email: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:outline-none"
                   />
-                  <p className="text-[10px] text-slate-500">n8n can optionally dispatch HTML order summary emails.</p>
+                  <p className="text-[10px] text-slate-400">n8n can optionally dispatch HTML order summary emails.</p>
                 </div>
               </div>
 
               {/* Automation Feature Guide Box */}
-              <div className="p-4 bg-amber-950/30 border border-amber-900/60 rounded-2xl text-amber-200/90 text-xs space-y-2">
-                <div className="font-bold flex items-center gap-1.5 text-amber-300">
-                  <Zap className="w-4 h-4" />
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                  <Zap className="w-4 h-4 text-amber-600" />
                   <span>How the Automated Flow Works (ઓટોમેશન કેવી રીતે કામ કરે છે)</span>
                 </div>
-                <ol className="list-decimal list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                  <li><strong className="text-white">Customer Books Order:</strong> TaazaTokra records the order securely in Supabase and prepares customer, date, month, week #, and COD details.</li>
-                  <li><strong className="text-white">n8n Webhook Triggers:</strong> n8n receives the JSON payload instantaneously.</li>
-                  <li><strong className="text-white">WhatsApp to Customer:</strong> n8n automatically sends a rich order confirmation message with items breakdown and bill link to the customer&apos;s WhatsApp.</li>
-                  <li><strong className="text-white">Admin Alert:</strong> n8n sends a quick alert notification to the store owner&apos;s WhatsApp/Email.</li>
-                  <li><strong className="text-white">Dashboard Live Refresh:</strong> Admin orders page updates in Realtime.</li>
+                <ol className="list-decimal list-inside space-y-1 text-amber-950 text-[11px] leading-relaxed">
+                  <li><strong>Customer Books Order:</strong> TaazaTokra records the order securely in Supabase and prepares customer, date, month, week #, and COD details.</li>
+                  <li><strong>n8n Webhook Triggers:</strong> n8n receives the JSON payload instantaneously.</li>
+                  <li><strong>WhatsApp to Customer:</strong> n8n automatically sends a rich order confirmation message with items breakdown and bill link to the customer&apos;s WhatsApp.</li>
+                  <li><strong>Admin Alert:</strong> n8n sends a quick alert notification to the store owner&apos;s WhatsApp/Email.</li>
+                  <li><strong>Dashboard Live Refresh:</strong> Admin orders page updates in Realtime.</li>
                 </ol>
               </div>
 
               {/* Test Webhook Connection */}
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white">Test Connection to n8n</span>
+                  <span className="font-bold text-slate-900">Test Connection to n8n</span>
                   <button
                     type="button"
                     onClick={handleTestN8nWebhook}
                     disabled={n8nTestStatus.loading || !n8nConfig.webhook_url}
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
                   >
                     {n8nTestStatus.loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
                     <span>Test Webhook (ટેસ્ટ કરો)</span>
@@ -451,15 +451,15 @@ export default function AdminSettingsPage() {
                 </div>
 
                 {n8nTestStatus.message && (
-                  <div className="p-3 bg-emerald-950 border border-emerald-800 rounded-xl text-emerald-300 text-xs flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
                     <span>{n8nTestStatus.message}</span>
                   </div>
                 )}
 
                 {n8nTestStatus.error && (
-                  <div className="p-3 bg-rose-950 border border-rose-800 rounded-xl text-rose-300 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                     <span>{n8nTestStatus.error}</span>
                   </div>
                 )}
@@ -471,7 +471,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={() => handleSaveSetting('n8n_config', n8nConfig)}
                 disabled={saving}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save n8n Automation Settings</span>
@@ -482,38 +482,38 @@ export default function AdminSettingsPage() {
 
         {/* TAB 3: Ordering & COD Settings */}
         {activeTab === 'ordering' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Cart Thresholds & COD Discount</h3>
-              <p className="text-xs text-slate-400">Minimum merchandise subtotal and Cash on Delivery discount rules.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Cart Thresholds &amp; COD Discount</h3>
+              <p className="text-xs text-slate-500">Minimum merchandise subtotal and Cash on Delivery discount rules.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Minimum Order Amount (₹)</label>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Minimum Order Amount (₹)</label>
                 <input
                   type="number"
                   min="0"
                   step="10"
                   value={minOrderAmount}
                   onChange={(e) => setMinOrderAmount(Number(e.target.value))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-lg font-bold"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono text-lg font-bold focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-400">
-                  Cart subtotal must be <strong className="text-emerald-400">≥ ₹{minOrderAmount}</strong> before any discount to place an order.
+                <p className="text-[11px] text-slate-500">
+                  Cart subtotal must be <strong className="text-emerald-700">≥ ₹{minOrderAmount}</strong> before any discount to place an order.
                 </p>
                 <button
                   type="button"
                   onClick={() => handleSaveSetting('min_order_amount', { amount: minOrderAmount, currency: 'INR' })}
                   disabled={saving}
-                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   Save Minimum Amount
                 </button>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">COD Discount Percentage (%)</label>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px]">COD Discount Percentage (%)</label>
                 <input
                   type="number"
                   min="0"
@@ -521,28 +521,28 @@ export default function AdminSettingsPage() {
                   step="0.5"
                   value={codDiscountPct}
                   onChange={(e) => setCodDiscountPct(Number(e.target.value))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-lg font-bold"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono text-lg font-bold focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-400">
-                  Customers paying Cash on Delivery receive a <strong className="text-emerald-400">{codDiscountPct}% discount</strong>.
+                <p className="text-[11px] text-slate-500">
+                  Customers paying Cash on Delivery receive a <strong className="text-emerald-700">{codDiscountPct}% discount</strong>.
                 </p>
                 <button
                   type="button"
                   onClick={() => handleSaveSetting('cod_discount_pct', { percentage: codDiscountPct, is_active: codDiscountPct > 0 })}
                   disabled={saving}
-                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   Save COD Discount
                 </button>
               </div>
             </div>
 
-            <div className="p-4 bg-amber-950/30 border border-amber-800/50 rounded-2xl text-xs text-amber-300 space-y-1">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-1">
               <div className="font-bold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
+                <ShieldCheck className="w-4 h-4 text-amber-600" />
                 <span>Historical Price Immutability Guarantee</span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-amber-800">
                 Modifying the minimum order or COD discount applies only to future quotes and orders. All past orders retain their immutable snapshot calculations.
               </p>
             </div>
@@ -551,77 +551,77 @@ export default function AdminSettingsPage() {
 
         {/* TAB 3: Dynamic Campaign & Promotion Engine */}
         {activeTab === 'first500' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
             
             {/* Header Ribbon */}
-            <div className="border-b border-slate-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-amber-400" />
-                  <span>Promotional Campaign & Launch Offer Engine (ઓફર મેનેજમેન્ટ)</span>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-amber-500" />
+                  <span>Promotional Campaign &amp; Launch Offer Engine (ઓફર મેનેજમેન્ટ)</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Configure dynamic discount percentage, target verified cohort, maximum orders per client, date validity, and header countdown timer.
                 </p>
               </div>
-              <span className="self-start sm:self-center px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-bold font-mono">
+              <span className="self-start sm:self-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold font-mono">
                 {promoStats.first500?.consumed || 0} Orders Redeemed
               </span>
             </div>
 
             {/* Campaign Analytics Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Discount Rate</div>
-                <div className="text-2xl font-black text-emerald-400 font-mono">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="text-[10px] text-slate-500 font-bold uppercase">Discount Rate</div>
+                <div className="text-2xl font-black text-emerald-700 font-mono">
                   {campaignSettings.discount_percentage}%
                 </div>
-                <div className="text-[10px] text-slate-500">Applied on eligible subtotal</div>
+                <div className="text-[10px] text-slate-400">Applied on eligible subtotal</div>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Orders / Customer</div>
-                <div className="text-2xl font-black text-amber-400 font-mono">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="text-[10px] text-slate-500 font-bold uppercase">Orders / Customer</div>
+                <div className="text-2xl font-black text-amber-700 font-mono">
                   First {campaignSettings.max_orders_per_customer} Orders
                 </div>
-                <div className="text-[10px] text-slate-500">Max limit per verified phone</div>
+                <div className="text-[10px] text-slate-400">Max limit per verified phone</div>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Target Sequence</div>
-                <div className="text-2xl font-black text-white font-mono">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="text-[10px] text-slate-500 font-bold uppercase">Target Sequence</div>
+                <div className="text-2xl font-black text-slate-900 font-mono">
                   First #{campaignSettings.max_verified_customer_seq}
                 </div>
-                <div className="text-[10px] text-slate-500">Verified customers in Halol</div>
+                <div className="text-[10px] text-slate-400">Verified customers in Halol</div>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Total Verified Users</div>
-                <div className="text-2xl font-black text-blue-400 font-mono">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="text-[10px] text-slate-500 font-bold uppercase">Total Verified Users</div>
+                <div className="text-2xl font-black text-blue-700 font-mono">
                   {promoStats.first500?.total_verified_customers || 0}
                 </div>
-                <div className="text-[10px] text-slate-500">Registered on platform</div>
+                <div className="text-[10px] text-slate-400">Registered on platform</div>
               </div>
             </div>
 
             {/* Live Header Banner Preview */}
-            <div className="p-4 bg-slate-950 border border-emerald-500/30 rounded-2xl space-y-2">
-              <div className="text-[10px] text-slate-400 uppercase font-bold flex items-center justify-between">
+            <div className="p-4 bg-slate-50 border border-emerald-200 rounded-2xl space-y-2">
+              <div className="text-[10px] text-slate-600 uppercase font-bold flex items-center justify-between">
                 <span>Live Customer Header Banner Preview</span>
-                <span className="text-emerald-400 text-[10px]">● Real-time sync</span>
+                <span className="text-emerald-700 text-[10px] font-bold">● Real-time sync</span>
               </div>
-              <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 p-3 rounded-xl border border-emerald-500/20 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-inner">
+              <div className="bg-emerald-600 p-3 rounded-xl border border-emerald-700 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-xs">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black uppercase">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[9px] font-black uppercase">
                     Launch Offer
                   </span>
-                  <span className="text-emerald-100 font-semibold text-[11px]">
+                  <span className="text-white font-semibold text-[11px]">
                     {campaignSettings.banner_message_en || `First ${campaignSettings.max_verified_customer_seq} customers get ${campaignSettings.discount_percentage}% OFF on first ${campaignSettings.max_orders_per_customer} orders!`}
                   </span>
                 </div>
                 {campaignSettings.show_timer && (
-                  <div className="flex items-center gap-1 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-[10px] font-mono text-emerald-300 font-bold">
-                    <Clock className="w-3 h-3 text-amber-400 mr-1" />
+                  <div className="flex items-center gap-1 bg-emerald-800/80 px-2.5 py-1 rounded-lg border border-emerald-500/50 text-[10px] font-mono text-emerald-100 font-bold">
+                    <Clock className="w-3 h-3 text-amber-300 mr-1" />
                     <span>Offer Ends: 05d : 14h : 23m : 45s</span>
                   </div>
                 )}
@@ -633,18 +633,18 @@ export default function AdminSettingsPage() {
               
               {/* Promo Code */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Promo Code</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Promo Code</label>
                 <input
                   type="text"
                   value={campaignSettings.promo_code}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, promo_code: e.target.value.toUpperCase() })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold uppercase"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold uppercase focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Discount Percentage */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Discount Percentage (%)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Discount Percentage (%)</label>
                 <input
                   type="number"
                   min="1"
@@ -652,13 +652,13 @@ export default function AdminSettingsPage() {
                   step="1"
                   value={campaignSettings.discount_percentage}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, discount_percentage: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Max Orders Per Customer */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Max Orders per Customer</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Max Orders per Customer</label>
                 <input
                   type="number"
                   min="1"
@@ -666,76 +666,76 @@ export default function AdminSettingsPage() {
                   step="1"
                   value={campaignSettings.max_orders_per_customer}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, max_orders_per_customer: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:bg-white focus:outline-none"
                 />
-                <p className="text-[10px] text-slate-500">Number of orders eligible for discount (e.g. 3)</p>
+                <p className="text-[10px] text-slate-400">Number of orders eligible for discount (e.g. 3)</p>
               </div>
 
               {/* Max Verified Sequence */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Max Customer Sequence (Quota)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Max Customer Sequence (Quota)</label>
                 <input
                   type="number"
                   min="1"
                   step="50"
                   value={campaignSettings.max_verified_customer_seq}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, max_verified_customer_seq: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:bg-white focus:outline-none"
                 />
-                <p className="text-[10px] text-slate-500">First N verified customers (e.g. 500)</p>
+                <p className="text-[10px] text-slate-400">First N verified customers (e.g. 500)</p>
               </div>
 
               {/* Valid From Date */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Valid From Date & Time</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Valid From Date &amp; Time</label>
                 <input
                   type="datetime-local"
                   value={campaignSettings.valid_from}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, valid_from: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Valid Until Date */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Valid Until (End Date & Time)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Valid Until (End Date &amp; Time)</label>
                 <input
                   type="datetime-local"
                   value={campaignSettings.valid_until}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, valid_until: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold text-amber-300"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold text-amber-700 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Banner Message (English) */}
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Banner Message (English)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Banner Message (English)</label>
                 <input
                   type="text"
                   value={campaignSettings.banner_message_en}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, banner_message_en: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Banner Message (Gujarati) */}
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Banner Message (Gujarati)</label>
+                <label className="text-slate-600 font-bold uppercase text-[10px]">Banner Message (Gujarati)</label>
                 <input
                   type="text"
                   value={campaignSettings.banner_message_gu}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, banner_message_gu: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-gujarati"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-gujarati focus:bg-white focus:outline-none"
                 />
               </div>
             </div>
 
             {/* Status & Timer Controls */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Campaign Active Status</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
+                  <div className="font-bold text-slate-900">Campaign Active Status</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">
                     {campaignSettings.is_active ? 'Active on customer checkout & cart' : 'Paused by Owner'}
                   </div>
                 </div>
@@ -743,14 +743,14 @@ export default function AdminSettingsPage() {
                   type="checkbox"
                   checked={campaignSettings.is_active}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, is_active: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Show Countdown Timer on Header</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
+                  <div className="font-bold text-slate-900">Show Countdown Timer on Header</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">
                     Displays live ticking countdown clock on website header
                   </div>
                 </div>
@@ -758,7 +758,7 @@ export default function AdminSettingsPage() {
                   type="checkbox"
                   checked={campaignSettings.show_timer}
                   onChange={(e) => setCampaignSettings({ ...campaignSettings, show_timer: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
             </div>
@@ -776,7 +776,7 @@ export default function AdminSettingsPage() {
                   valid_until: campaignSettings.valid_until.length === 16 ? `${campaignSettings.valid_until}:00+05:30` : campaignSettings.valid_until,
                 })}
                 disabled={saving}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Campaign Settings</span>
@@ -788,46 +788,46 @@ export default function AdminSettingsPage() {
 
         {/* TAB 4: Delivery & Cutoff */}
         {activeTab === 'delivery' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Delivery Cutoff & Schedule</h3>
-              <p className="text-xs text-slate-400">Daily 8:00 PM cutoff rule and next-day morning delivery window.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Delivery Cutoff &amp; Schedule</h3>
+              <p className="text-xs text-slate-500">Daily 8:00 PM cutoff rule and next-day morning delivery window.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Daily Cutoff Time</label>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Daily Cutoff Time</label>
                 <input
                   type="time"
                   value={cutoffTime.slice(0, 5)}
                   onChange={(e) => setCutoffTime(`${e.target.value}:00`)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-lg font-bold"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono text-lg font-bold focus:outline-none"
                 />
                 <p className="text-[10px] text-slate-400">Orders before 8 PM $\rightarrow$ next-day; at/after $\rightarrow$ next-to-next-day.</p>
                 <button
                   type="button"
                   onClick={() => handleSaveSetting('cutoff_time', { time: cutoffTime, timezone: 'Asia/Kolkata' })}
                   disabled={saving}
-                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   Save Cutoff Time
                 </button>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Standard Delivery Window</label>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Standard Delivery Window</label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="time"
                     value={deliveryWindow.start?.slice(0, 5) || '10:00'}
                     onChange={(e) => setDeliveryWindow({ ...deliveryWindow, start: `${e.target.value}:00` })}
-                    className="bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-white font-mono text-xs"
+                    className="bg-white border border-slate-200 rounded-xl px-2 py-2 text-slate-900 font-mono text-xs focus:outline-none"
                   />
                   <input
                     type="time"
                     value={deliveryWindow.end?.slice(0, 5) || '13:00'}
                     onChange={(e) => setDeliveryWindow({ ...deliveryWindow, end: `${e.target.value}:00` })}
-                    className="bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-white font-mono text-xs"
+                    className="bg-white border border-slate-200 rounded-xl px-2 py-2 text-slate-900 font-mono text-xs focus:outline-none"
                   />
                 </div>
                 <p className="text-[10px] text-slate-400">10:00 AM - 1:00 PM standard fresh delivery slot.</p>
@@ -835,27 +835,27 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={() => handleSaveSetting('delivery_window', { ...deliveryWindow, timezone: 'Asia/Kolkata' })}
                   disabled={saving}
-                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   Save Delivery Window
                 </button>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Default Delivery Fee (₹)</label>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Default Delivery Fee (₹)</label>
                 <input
                   type="number"
                   min="0"
                   value={deliveryFee}
                   onChange={(e) => setDeliveryFee(Number(e.target.value))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-lg font-bold"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono text-lg font-bold focus:outline-none"
                 />
                 <p className="text-[10px] text-slate-400">Current MVP uses ₹0 free delivery across Halol zones.</p>
                 <button
                   type="button"
                   onClick={() => handleSaveSetting('delivery_fee', { amount: deliveryFee, currency: 'INR' })}
                   disabled={saving}
-                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                  className="mt-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   Save Delivery Fee
                 </button>
@@ -866,14 +866,14 @@ export default function AdminSettingsPage() {
 
         {/* TAB 5: Procurement Buffer */}
         {activeTab === 'procurement' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Mandi Procurement Buffer</h3>
-              <p className="text-xs text-slate-400">Buffer safety percentage added automatically to frozen customer demand.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Mandi Procurement Buffer</h3>
+              <p className="text-xs text-slate-500">Buffer safety percentage added automatically to frozen customer demand.</p>
             </div>
 
-            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3 text-xs max-w-md">
-              <label className="text-slate-400 font-bold uppercase text-[10px]">Default Safety Buffer %</label>
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-xs max-w-md">
+              <label className="text-slate-700 font-bold uppercase text-[10px]">Default Safety Buffer %</label>
               <input
                 type="number"
                 min="0"
@@ -881,16 +881,16 @@ export default function AdminSettingsPage() {
                 step="0.5"
                 value={procurementBufferPct}
                 onChange={(e) => setProcurementBufferPct(Number(e.target.value))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-lg font-bold"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono text-lg font-bold focus:outline-none"
               />
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 At 8 PM batch cutoff, suggested purchase quantity = Customer Demand × (1 + {procurementBufferPct}%).
               </p>
               <button
                 type="button"
                 onClick={() => handleSaveSetting('procurement_buffer_pct', { percentage: procurementBufferPct, is_active: true })}
                 disabled={saving}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
               >
                 Save Buffer Percentage
               </button>
@@ -900,19 +900,19 @@ export default function AdminSettingsPage() {
 
         {/* TAB 6: Thermal Printer */}
         {activeTab === 'printer' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Warehouse Thermal Printer & Stickers</h3>
-              <p className="text-xs text-slate-400">Configure sticker label size, auto-print toggles, and privacy masking.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Warehouse Thermal Printer &amp; Stickers</h3>
+              <p className="text-xs text-slate-500">Configure sticker label size, auto-print toggles, and privacy masking.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Label Sticker Size</label>
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Label Sticker Size</label>
                 <select
                   value={printerSettings.label_size}
                   onChange={(e) => setPrinterSettings({ ...printerSettings, label_size: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:outline-none"
                 >
                   <option value="100x150">100 × 150 mm (Standard Warehouse Shipping)</option>
                   <option value="80x50">80 × 50 mm (Compact Bag Sticker)</option>
@@ -921,40 +921,40 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold uppercase text-[10px]">Copies per Bag</label>
+                <label className="text-slate-700 font-bold uppercase text-[10px]">Copies per Bag</label>
                 <input
                   type="number"
                   min="1"
                   max="3"
                   value={printerSettings.copies_per_bag}
                   onChange={(e) => setPrinterSettings({ ...printerSettings, copies_per_bag: Number(e.target.value) })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-2xl">
                 <div>
-                  <div className="font-bold text-white">Show Vegetable Summary on Label</div>
-                  <div className="text-[10px] text-slate-400">List top vegetables on the customer bag sticker</div>
+                  <div className="font-bold text-slate-900">Show Vegetable Summary on Label</div>
+                  <div className="text-[10px] text-slate-500">List top vegetables on the customer bag sticker</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={printerSettings.show_product_summary}
                   onChange={(e) => setPrinterSettings({ ...printerSettings, show_product_summary: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-2xl">
                 <div>
-                  <div className="font-bold text-white">Mask Customer Mobile on Label</div>
-                  <div className="text-[10px] text-slate-400">Protect customer contact details on bags</div>
+                  <div className="font-bold text-slate-900">Mask Customer Mobile on Label</div>
+                  <div className="text-[10px] text-slate-500">Protect customer contact details on bags</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={printerSettings.masked_mobile}
                   onChange={(e) => setPrinterSettings({ ...printerSettings, masked_mobile: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
             </div>
@@ -964,7 +964,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={() => handleSaveSetting('printer_settings', printerSettings)}
                 disabled={saving}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Printer Settings</span>
@@ -975,62 +975,62 @@ export default function AdminSettingsPage() {
 
         {/* TAB 7: WhatsApp Notifications */}
         {activeTab === 'notifications' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">WhatsApp Channel Dispatches</h3>
-              <p className="text-xs text-slate-400">Toggle individual customer notifications and owner operational alerts.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">WhatsApp Channel Dispatches</h3>
+              <p className="text-xs text-slate-500">Toggle individual customer notifications and owner operational alerts.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Customer Order Confirmation</div>
-                  <div className="text-[10px] text-slate-400">Send bilingual confirmation after checkout</div>
+                  <div className="font-bold text-slate-900">Customer Order Confirmation</div>
+                  <div className="text-[10px] text-slate-500">Send bilingual confirmation after checkout</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={notificationPreferences.send_customer_order_confirmed}
                   onChange={(e) => setNotificationPreferences({ ...notificationPreferences, send_customer_order_confirmed: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Customer Out for Delivery</div>
-                  <div className="text-[10px] text-slate-400">Alert customer when driver starts route</div>
+                  <div className="font-bold text-slate-900">Customer Out for Delivery</div>
+                  <div className="text-[10px] text-slate-500">Alert customer when driver starts route</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={notificationPreferences.send_customer_out_for_delivery}
                   onChange={(e) => setNotificationPreferences({ ...notificationPreferences, send_customer_out_for_delivery: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Customer Delivered & Bill Receipt</div>
-                  <div className="text-[10px] text-slate-400">Send delivery confirmation and amount collected</div>
+                  <div className="font-bold text-slate-900">Customer Delivered &amp; Bill Receipt</div>
+                  <div className="text-[10px] text-slate-500">Send delivery confirmation and amount collected</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={notificationPreferences.send_customer_order_delivered}
                   onChange={(e) => setNotificationPreferences({ ...notificationPreferences, send_customer_order_delivered: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Owner 8 PM Procurement Report</div>
-                  <div className="text-[10px] text-slate-400">Send Mandi purchase requirement to Owner</div>
+                  <div className="font-bold text-slate-900">Owner 8 PM Procurement Report</div>
+                  <div className="text-[10px] text-slate-500">Send Mandi purchase requirement to Owner</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={notificationPreferences.send_owner_8pm_procurement}
                   onChange={(e) => setNotificationPreferences({ ...notificationPreferences, send_owner_8pm_procurement: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
             </div>
@@ -1040,7 +1040,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={() => handleSaveSetting('whatsapp_notification_preferences', notificationPreferences)}
                 disabled={saving}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Notification Preferences</span>
@@ -1051,18 +1051,18 @@ export default function AdminSettingsPage() {
 
         {/* TAB 8: Feature Flags */}
         {activeTab === 'flags' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Server-Authoritative Feature Flags</h3>
-              <p className="text-xs text-slate-400">Enable or disable major business features and operational modes.</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Server-Authoritative Feature Flags</h3>
+              <p className="text-xs text-slate-500">Enable or disable major business features and operational modes.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white flex items-center gap-2">
+                  <div className="font-bold text-slate-900 flex items-center gap-2">
                     <span>Online Payment Gateway (Prepaid)</span>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px]">Disabled for MVP</span>
+                    <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold">Disabled for MVP</span>
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">MVP uses Cash on Delivery (COD) only</div>
                 </div>
@@ -1070,46 +1070,46 @@ export default function AdminSettingsPage() {
                   type="checkbox"
                   checked={featureFlags.online_payments_enabled}
                   onChange={(e) => setFeatureFlags({ ...featureFlags, online_payments_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Pilot Launch Mode</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Restricts live ordering to Halol service zones</div>
+                  <div className="font-bold text-slate-900">Pilot Launch Mode</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Restricts live ordering to Halol service zones</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={featureFlags.pilot_mode_enabled}
                   onChange={(e) => setFeatureFlags({ ...featureFlags, pilot_mode_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">Direct Thermal Printing</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Enable direct godown print station labels</div>
+                  <div className="font-bold text-slate-900">Direct Thermal Printing</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Enable direct godown print station labels</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={featureFlags.direct_printing_enabled}
                   onChange={(e) => setFeatureFlags({ ...featureFlags, direct_printing_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white">WhatsApp Business Automation</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Enable Meta Cloud API message dispatches</div>
+                  <div className="font-bold text-slate-900">WhatsApp Business Automation</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Enable Meta Cloud API message dispatches</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={featureFlags.whatsapp_enabled}
                   onChange={(e) => setFeatureFlags({ ...featureFlags, whatsapp_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
                 />
               </div>
             </div>
@@ -1119,7 +1119,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={() => handleSaveSetting('feature_flags', featureFlags)}
                 disabled={saving}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Feature Flags</span>
@@ -1130,48 +1130,48 @@ export default function AdminSettingsPage() {
 
         {/* TAB 9: System Telemetry */}
         {activeTab === 'system' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">System Health & Telemetry</h3>
-                <p className="text-xs text-slate-400">Live operational status, database connectivity, and build reference.</p>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">System Health &amp; Telemetry</h3>
+                <p className="text-xs text-slate-500">Live operational status, database connectivity, and build reference.</p>
               </div>
-              <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-bold font-mono">
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold font-mono">
                 Production Release v1.0.0
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Web Application</span>
-                <div className="text-emerald-400 font-bold flex items-center gap-1.5 mt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <div className="text-emerald-700 font-bold flex items-center gap-1.5 mt-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                   <span>Operational (Next.js 16)</span>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Database Connectivity</span>
-                <div className="text-emerald-400 font-bold flex items-center gap-1.5 mt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <div className="text-emerald-700 font-bold flex items-center gap-1.5 mt-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                   <span>Connected (Supabase PostgreSQL)</span>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Primary Timezone</span>
-                <div className="text-white font-mono font-bold mt-1">Asia/Kolkata (IST)</div>
+                <div className="text-slate-900 font-mono font-bold mt-1">Asia/Kolkata (IST)</div>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2 text-xs">
-              <div className="font-bold text-white">Production Service Parameters</div>
-              <ul className="text-slate-400 space-y-1 font-mono text-[11px]">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs">
+              <div className="font-bold text-slate-900">Production Service Parameters</div>
+              <ul className="text-slate-600 space-y-1 font-mono text-[11px]">
                 <li>• Service Area: Halol Town, Halol GIDC, Baska, Pavagadh Bypass (Panchmahal, Gujarat)</li>
                 <li>• Payment Mode: Cash on Delivery (COD) Only</li>
                 <li>• Daily Delivery Slot: 10:00 AM – 1:00 PM IST</li>
                 <li>• 8 PM Procurement Batch Cutoff: 20:00:00 Asia/Kolkata</li>
-                <li>• System Health Endpoint: <a href="/api/health" target="_blank" className="text-emerald-400 underline">/api/health</a></li>
+                <li>• System Health Endpoint: <a href="/api/health" target="_blank" className="text-emerald-700 font-bold underline">/api/health</a></li>
               </ul>
             </div>
           </div>
@@ -1181,3 +1181,4 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+

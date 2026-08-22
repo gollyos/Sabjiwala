@@ -7,14 +7,9 @@
   --brand-strong: #075c34;
   --brand-soft: #e9f7ee;
   --accent: #f4a62a;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #07140f;
-    --foreground: #f4f8f5;
-  }
-}
 
 html {
   -webkit-tap-highlight-color: transparent;

@@ -66,8 +66,8 @@ export function NeedsAttentionSection({ items = [], className = '' }: NeedsAtten
               <div
                 className={`p-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer ${
                   isHigh
-                    ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/80 hover:bg-rose-100/70 hover:border-rose-300 text-rose-950 dark:text-rose-100'
-                    : 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/80 hover:bg-amber-100/70 hover:border-amber-300 text-amber-950 dark:text-amber-100'
+                    ? 'bg-rose-50 border-rose-200 hover:bg-rose-100 hover:border-rose-300 text-rose-950'
+                    : 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:border-amber-300 text-amber-950'
                 }`}
               >
                 <div className="min-w-0 flex-1">

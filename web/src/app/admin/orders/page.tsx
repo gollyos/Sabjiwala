@@ -145,40 +145,40 @@ export default function AdminOrdersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Top Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-slate-200 p-5 rounded-3xl shadow-xs">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Orders (ઓર્ડર્સ)
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono">
                 {totalCount} Total
               </span>
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 dark:bg-green-950/80 text-green-700 dark:text-green-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                 Live Realtime
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Showing live active order ledger for Halol deliveries
             </p>
           </div>
 
           {/* Quick Date Presets & Custom Dates & Export */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold gap-0.5">
+            <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl text-xs font-bold gap-0.5">
               <button
                 onClick={() => handleDatePreset('today')}
                 className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   startDate === endDate && startDate === new Date().toISOString().split('T')[0]
-                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-emerald-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Today
@@ -187,27 +187,27 @@ export default function AdminOrdersPage() {
                 onClick={() => handleDatePreset('tomorrow')}
                 className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                   startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
-                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-emerald-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Tomorrow
               </button>
               <button
                 onClick={() => handleDatePreset('this_week')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
               >
                 Week (અઠવાડિયું)
               </button>
               <button
                 onClick={() => handleDatePreset('this_month')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
               >
                 Month (મહિનો)
               </button>
               <button
                 onClick={() => handleDatePreset('7days')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
               >
                 7 Days
               </button>
@@ -219,7 +219,7 @@ export default function AdminOrdersPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-1.5 border border-slate-200 dark:border-slate-700 text-xs font-mono"
+                className="bg-slate-50 text-slate-900 rounded-xl px-2 py-1.5 border border-slate-200 text-xs font-mono focus:bg-white focus:outline-none"
                 title="Start Date"
               />
               <span className="text-slate-400">to</span>
@@ -227,7 +227,7 @@ export default function AdminOrdersPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-1.5 border border-slate-200 dark:border-slate-700 text-xs font-mono"
+                className="bg-slate-50 text-slate-900 rounded-xl px-2 py-1.5 border border-slate-200 text-xs font-mono focus:bg-white focus:outline-none"
                 title="End Date"
               />
             </div>
@@ -245,16 +245,16 @@ export default function AdminOrdersPage() {
             <button
               onClick={fetchOrders}
               disabled={loading}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer shadow-2xs"
               title="Refresh orders"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
             </button>
           </div>
         </div>
 
         {/* Filter Tabs & Search Bar */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xs space-y-3">
+        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs space-y-3">
           
           {/* Status Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
@@ -267,7 +267,7 @@ export default function AdminOrdersPage() {
                   className={`px-3.5 py-2 rounded-2xl whitespace-nowrap transition-all cursor-pointer ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   <span>{t.label}</span>
@@ -284,13 +284,13 @@ export default function AdminOrdersPage() {
               placeholder="Search by order # (SBJ-...), customer name, mobile, or area..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -300,30 +300,30 @@ export default function AdminOrdersPage() {
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-2xl text-rose-800 dark:text-rose-200 text-xs flex items-center gap-2">
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs flex items-center gap-2 font-semibold">
             <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* 5-COLUMN ORDER LIST / TABLE */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
           
           {loading ? (
             <div className="p-12 text-center text-xs text-slate-400">
-              <RefreshCw className="w-6 h-6 animate-spin text-emerald-500 mx-auto mb-2" />
+              <RefreshCw className="w-6 h-6 animate-spin text-emerald-600 mx-auto mb-2" />
               <span>Loading orders...</span>
             </div>
           ) : orders.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs space-y-1">
-              <ShoppingBag className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
-              <div className="font-bold text-slate-700 dark:text-slate-300">No orders found</div>
+              <ShoppingBag className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <div className="font-bold text-slate-700">No orders found</div>
               <div className="text-[11px] text-slate-500">
                 Try selecting a different date range or clearing search filters.
               </div>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-slate-100">
               {orders.map((o) => {
                 const totalAmount = Number(o.final_payable_amount || 0);
 
@@ -331,19 +331,19 @@ export default function AdminOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleRowClick(o)}
-                    className="p-4 sm:px-6 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    className="p-4 sm:px-6 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                   >
                     {/* Col 1 & 2: Order # and Customer */}
                     <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                      <div className="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-xl border border-emerald-100 dark:border-emerald-900/60 shrink-0">
+                      <div className="font-mono font-black text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">
                         {o.order_number}
                       </div>
 
                       <div className="min-w-0">
-                        <div className="font-bold text-slate-900 dark:text-white truncate">
+                        <div className="font-bold text-slate-900 truncate">
                           {o.customer_name_snapshot || 'Guest Customer'}
                         </div>
-                        <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 truncate">
                           <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                           <span className="truncate">{o.delivery_area_snapshot || 'Halol'}</span>
                           <span>&bull;</span>
@@ -354,7 +354,7 @@ export default function AdminOrdersPage() {
 
                     {/* Col 3: Amount */}
                     <div className="sm:text-right shrink-0">
-                      <div className="font-black text-slate-900 dark:text-white font-mono text-sm">
+                      <div className="font-black text-slate-900 font-mono text-sm">
                         ₹{totalAmount.toFixed(0)} <span className="text-[10px] font-sans font-bold text-slate-400 uppercase">{o.payment_method || 'COD'}</span>
                       </div>
                       <div className="text-[10px] text-slate-400">
@@ -363,8 +363,8 @@ export default function AdminOrdersPage() {
                     </div>
 
                     {/* Col 4: Delivery */}
-                    <div className="sm:text-right shrink-0 text-slate-600 dark:text-slate-400 text-[11px]">
-                      <div className="font-bold text-slate-700 dark:text-slate-300">
+                    <div className="sm:text-right shrink-0 text-slate-600 text-[11px]">
+                      <div className="font-bold text-slate-700">
                         {o.delivery_date}
                       </div>
                       <div className="text-[10px] text-slate-400">
@@ -400,9 +400,9 @@ export default function AdminOrdersPage() {
               <button
                 type="button"
                 onClick={() => setPrintStickerOrder(selectedOrder)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 shadow-2xs"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 shadow-2xs"
               >
-                <Printer className="w-4 h-4 text-emerald-500" />
+                <Printer className="w-4 h-4 text-emerald-600" />
                 <span>Thermal Sticker</span>
               </button>
 
@@ -423,13 +423,13 @@ export default function AdminOrdersPage() {
           <div className="space-y-6 text-xs">
             
             {/* Status & Key Amount Banner */}
-            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/80 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Total Payable</span>
-                <div className="text-2xl font-black text-emerald-950 dark:text-emerald-100 font-mono">
+                <span className="text-[10px] uppercase font-bold text-slate-500">Total Payable</span>
+                <div className="text-2xl font-black text-emerald-950 font-mono">
                   ₹{Number(selectedOrder.final_payable_amount || 0).toFixed(0)}
                 </div>
-                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                <span className="text-[11px] font-bold text-emerald-700">
                   {selectedOrder.payment_method === 'cod' ? 'Cash on Delivery (2% Disc Applied)' : 'Online Paid'}
                 </span>
               </div>
@@ -439,24 +439,24 @@ export default function AdminOrdersPage() {
 
             {/* Customer Details */}
             <div className="space-y-2">
-              <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
-                Customer & Delivery Address
+              <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-[11px]">
+                Customer &amp; Delivery Address
               </h4>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                  <div className="font-bold text-slate-900 text-sm">
                     {selectedOrder.customer_name_snapshot}
                   </div>
                   <a
                     href={`tel:${selectedOrder.customer_mobile_snapshot}`}
-                    className="p-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1 text-[11px]"
+                    className="p-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1 text-[11px]"
                   >
                     <Phone className="w-3 h-3" />
                     <span>{selectedOrder.customer_mobile_snapshot}</span>
                   </a>
                 </div>
 
-                <div className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                <div className="text-slate-600 leading-relaxed text-[11px]">
                   {selectedOrder.delivery_flat_house_snapshot && `${selectedOrder.delivery_flat_house_snapshot}, `}
                   {selectedOrder.delivery_society_street_snapshot}, {selectedOrder.delivery_area_snapshot}, Halol - {selectedOrder.delivery_pincode_snapshot || '389350'}
                 </div>
@@ -465,22 +465,22 @@ export default function AdminOrdersPage() {
 
             {/* Ordered Items List */}
             <div className="space-y-2">
-              <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+              <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-[11px]">
                 Items Ordered (શાકભાજી સૂચિ)
               </h4>
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-slate-900">
+              <div className="rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden bg-white">
                 {(selectedOrder.items || []).map((item: any, idx: number) => (
                   <div key={idx} className="p-3 flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-white">
+                      <div className="font-bold text-slate-900">
                         {item.name_gu || item.product_name_gu} <span className="font-normal text-slate-500">({item.name_en || item.product_name_en})</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="text-[11px] text-slate-500 font-mono">
                         {item.variant_name_gu || item.variant_name_en || item.unit_code} &times; {item.quantity}
                       </div>
                     </div>
 
-                    <div className="font-mono font-bold text-slate-900 dark:text-white">
+                    <div className="font-mono font-bold text-slate-900">
                       ₹{Number(item.line_total || item.selling_price * item.quantity || 0).toFixed(0)}
                     </div>
                   </div>
@@ -489,7 +489,7 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Bill Summary */}
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-1.5 text-xs font-mono">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs font-mono">
               <div className="flex justify-between text-slate-500">
                 <span>Gross Merchandise:</span>
                 <span>₹{Number(selectedOrder.gross_merchandise_amount || 0).toFixed(0)}</span>
@@ -510,7 +510,7 @@ export default function AdminOrdersPage() {
                 <span>Delivery:</span>
                 <span className="text-emerald-600 font-bold">FREE</span>
               </div>
-              <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-black text-sm text-slate-900 dark:text-white">
+              <div className="pt-2 border-t border-slate-200 flex justify-between font-black text-sm text-slate-900">
                 <span>Final Payable:</span>
                 <span>₹{Number(selectedOrder.final_payable_amount || 0).toFixed(0)}</span>
               </div>
@@ -522,15 +522,15 @@ export default function AdminOrdersPage() {
 
       {/* Thermal Sticker Modal */}
       {printStickerOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-sm w-full space-y-4 border border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-sm w-full space-y-4 border border-slate-200 shadow-2xl">
             <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+              <h3 className="font-extrabold text-sm text-slate-900">
                 Thermal Bag Sticker Preview
               </h3>
               <button
                 onClick={() => setPrintStickerOrder(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -538,7 +538,7 @@ export default function AdminOrdersPage() {
 
             <ThermalBagSticker
               payload={{
-                header: 'SABJIWALA HALOL',
+                header: 'TAAZATOKRA HALOL',
                 order_id: printStickerOrder.id,
                 order_number: printStickerOrder.order_number,
                 bag_id: `bag-${printStickerOrder.id}-1`,
@@ -555,7 +555,7 @@ export default function AdminOrdersPage() {
                 final_payable_amount: Number(printStickerOrder.final_payable_amount || 0),
                 collect_cash_text: `₹${Number(printStickerOrder.final_payable_amount || 0).toFixed(0)} COD`,
                 qr_token: printStickerOrder.qr_access_token || printStickerOrder.id,
-                qr_url: `https://sabjiwala.in/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
+                qr_url: `https://taazatokra.com/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
                 printed_at: new Date().toISOString(),
                 items_summary: (printStickerOrder.items || []).map((i: any) => ({
                   name_en: i.name_en || i.product_name_en || '',
@@ -570,7 +570,7 @@ export default function AdminOrdersPage() {
 
             <button
               onClick={() => window.print()}
-              className="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Printer className="w-4 h-4" />
               <span>Print Sticker (50 &times; 50mm)</span>

@@ -337,68 +337,68 @@ export default function GodownPackingStation() {
   const progressPercent = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Top Header: Operational Station & Progress */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs space-y-3">
+        <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
                   Godown Packing Station (પેકિંગ સ્ટેશન)
                 </span>
                 <span className="text-xs text-slate-400">&bull;</span>
-                <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
+                <span className="text-xs font-mono font-bold text-slate-600">
                   Staff: {staffName}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
-                Packing &bull; <span className="text-emerald-600 dark:text-emerald-400">{completedOrders} of {totalOrders} Completed</span> ({progressPercent}%)
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                Packing &bull; <span className="text-emerald-700">{completedOrders} of {totalOrders} Completed</span> ({progressPercent}%)
               </h1>
             </div>
 
             <button
               onClick={loadQueueData}
               disabled={isLoading}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-700 dark:text-slate-300 transition-all cursor-pointer self-start sm:self-auto"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer self-start sm:self-auto shadow-2xs"
               title="Refresh Queue"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
             </button>
           </div>
 
           {/* Large Clean Progress Bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
+          <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200">
             <div
-              className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
+              className="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
 
         {actionMessage && (
-          <div className={`p-4 rounded-2xl text-xs flex items-center gap-2 border ${
+          <div className={`p-4 rounded-2xl text-xs flex items-center gap-2 border font-semibold ${
             actionMessage.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-              : 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-rose-50 border-rose-200 text-rose-900'
           }`}>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{actionMessage.text}</span>
           </div>
         )}
 
         {/* 4 Tabs: Waiting, Packing, Problems, Ready */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white border border-slate-200 p-3 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-bold scrollbar-none">
             <button
               onClick={() => setStatusFilter('waiting')}
               className={`px-4 py-2 rounded-2xl transition-all cursor-pointer ${
                 statusFilter === 'waiting'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               Waiting ({stats?.orders?.waiting || 0})
@@ -408,7 +408,7 @@ export default function GodownPackingStation() {
               className={`px-4 py-2 rounded-2xl transition-all cursor-pointer ${
                 statusFilter === 'packing'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               Packing ({stats?.orders?.packing || 0})
@@ -418,7 +418,7 @@ export default function GodownPackingStation() {
               className={`px-4 py-2 rounded-2xl transition-all cursor-pointer ${
                 statusFilter === 'problem'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               Problems ({stats?.orders?.problem || 0})
@@ -428,7 +428,7 @@ export default function GodownPackingStation() {
               className={`px-4 py-2 rounded-2xl transition-all cursor-pointer ${
                 statusFilter === 'ready'
                   ? 'bg-teal-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               Ready ({stats?.orders?.packed || 0})
@@ -441,7 +441,7 @@ export default function GodownPackingStation() {
               placeholder="Filter order # or customer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100"
+              className="w-full sm:w-64 bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:bg-white focus:outline-none"
             />
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
@@ -449,9 +449,9 @@ export default function GodownPackingStation() {
 
         {/* ORDER CARDS QUEUE GRID */}
         {queue.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-xs text-slate-400 space-y-1">
-            <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-            <div className="font-bold text-slate-700 dark:text-slate-300">
+          <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center text-xs text-slate-400 space-y-1">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+            <div className="font-bold text-slate-700">
               {statusFilter === 'waiting' ? 'No orders waiting to be packed 🎉' : 'No orders in this queue'}
             </div>
           </div>
@@ -464,42 +464,42 @@ export default function GodownPackingStation() {
               return (
                 <div
                   key={order.order_id}
-                  className={`bg-white dark:bg-slate-900 border rounded-3xl p-5 shadow-xs flex flex-col justify-between space-y-4 transition-all ${
+                  className={`bg-white border rounded-3xl p-5 shadow-xs flex flex-col justify-between space-y-4 transition-all ${
                     isProblem
-                      ? 'border-rose-200 dark:border-rose-800/80 bg-rose-50/20'
+                      ? 'border-rose-200 bg-rose-50/20'
                       : isReady
-                      ? 'border-teal-200 dark:border-teal-800/80'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-emerald-300'
+                      ? 'border-teal-200 bg-teal-50/10'
+                      : 'border-slate-200 hover:border-emerald-300'
                   }`}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-xl border border-emerald-100 dark:border-emerald-900/60">
+                      <span className="font-mono font-black text-emerald-700 text-sm bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
                         {order.order_number}
                       </span>
                       <StatusChip status={order.packing_status} size="sm" />
                     </div>
 
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-white text-base">
+                      <div className="font-bold text-slate-900 text-base">
                         {order.customer_name_snapshot}
                       </div>
-                      <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" />
                         <span className="truncate">{order.delivery_area_snapshot}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2 text-xs font-bold text-slate-600 dark:text-slate-300 font-mono">
+                    <div className="flex items-center gap-3 pt-2 text-xs font-bold text-slate-600 font-mono">
                       <span>{order.total_items_count} Items</span>
                       <span>&bull;</span>
                       <span>{order.total_bags_count} Bags</span>
                       <span>&bull;</span>
-                      <span className="text-emerald-600">{order.confirmed_items_count}/{order.total_items_count} Checked</span>
+                      <span className="text-emerald-700">{order.confirmed_items_count}/{order.total_items_count} Checked</span>
                     </div>
 
                     {order.special_instructions && (
-                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-[11px]">
+                      <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
                         <strong>Note:</strong> {order.special_instructions}
                       </div>
                     )}
@@ -523,29 +523,29 @@ export default function GodownPackingStation() {
 
       {/* ACTIVE PACKING STATION MODAL (Touchscreen-optimized) */}
       {activeOrder && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">
+                  <span className="font-mono font-black text-emerald-700 text-lg">
                     {activeOrder.order_number}
                   </span>
                   <span className="text-slate-400">&bull;</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-base">
+                  <span className="font-bold text-slate-900 text-base">
                     {activeOrder.customer_name_snapshot}
                   </span>
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-500 mt-0.5">
                   {activeOrder.delivery_area_snapshot} &bull; Bag count: {activeOrder.total_bags_count}
                 </div>
               </div>
 
               <button
                 onClick={() => setActiveOrder(null)}
-                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -556,7 +556,7 @@ export default function GodownPackingStation() {
               
               <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
                 <span>Vegetable Items Checklist (શાકભાજી ચેકલિસ્ટ)</span>
-                <span className="text-emerald-600 font-mono">
+                <span className="text-emerald-700 font-mono">
                   {activeOrder.confirmed_items_count} of {activeOrder.total_items_count} Packed
                 </span>
               </div>
@@ -571,15 +571,15 @@ export default function GodownPackingStation() {
                       key={item.id}
                       className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                         isChecked
-                          ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800'
-                          : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+                          ? 'bg-emerald-50/80 border-emerald-200'
+                          : 'bg-slate-50 border-slate-200'
                       }`}
                     >
                       <div>
-                        <div className="font-extrabold text-slate-900 dark:text-white text-base">
+                        <div className="font-extrabold text-slate-900 text-base">
                           {item.name_gu} <span className="font-normal text-slate-500 text-xs">({item.name_en})</span>
                         </div>
-                        <div className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
+                        <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">
                           {item.variant_gu || item.variant_en} &times; {item.quantity} {item.unit_code}
                         </div>
                       </div>
@@ -590,7 +590,7 @@ export default function GodownPackingStation() {
                         className={`px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-xs ${
                           isChecked
                             ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:bg-slate-100'
+                            : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
                         }`}
                       >
                         <Check className="w-4 h-4 stroke-[3]" />
@@ -602,20 +602,20 @@ export default function GodownPackingStation() {
               </div>
 
               {/* Bag Count Adjustment */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-600 dark:text-slate-300">Total Bags Used:</span>
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-600">Total Bags Used:</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleSetBagCount(activeOrder.total_bags_count - 1)}
                     disabled={activeOrder.total_bags_count <= 1}
-                    className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                    className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-200 cursor-pointer"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="font-mono font-black text-sm px-2">{activeOrder.total_bags_count}</span>
+                  <span className="font-mono font-black text-sm px-2 text-slate-900">{activeOrder.total_bags_count}</span>
                   <button
                     onClick={() => handleSetBagCount(activeOrder.total_bags_count + 1)}
-                    className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                    className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-200 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -625,13 +625,13 @@ export default function GodownPackingStation() {
             </div>
 
             {/* Modal Action Footer */}
-            <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex flex-wrap items-center justify-between gap-3">
+            <div className="p-5 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setShowProblemModal(true)}
-                className="px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-rose-100"
               >
-                <AlertTriangle className="w-4 h-4" />
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
                 <span>Report Problem</span>
               </button>
 
@@ -640,10 +640,10 @@ export default function GodownPackingStation() {
                   type="button"
                   onClick={handlePrintStickers}
                   disabled={isPrinting}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs hover:bg-slate-50"
                   title="Print stickers or normal invoice slip"
                 >
-                  <Printer className="w-4 h-4 text-emerald-500" />
+                  <Printer className="w-4 h-4 text-emerald-600" />
                   <span>Print Slip / Stickers</span>
                 </button>
 
@@ -654,7 +654,7 @@ export default function GodownPackingStation() {
                   title="Mark all items confirmed & complete packing in 1 click"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>1-Click Complete & Ready (પેકિંગ પૂર્ણ ✓)</span>
+                  <span>1-Click Complete &amp; Ready (પેકિંગ પૂર્ણ ✓)</span>
                 </button>
               </div>
             </div>
@@ -665,9 +665,9 @@ export default function GodownPackingStation() {
 
       {/* Problem Report Modal */}
       {showProblemModal && activeOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 space-y-4">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl">
+            <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-500" />
               <span>Report Packing Issue &bull; #{activeOrder.order_number}</span>
             </h3>
@@ -678,7 +678,7 @@ export default function GodownPackingStation() {
                 <select
                   value={problemType}
                   onChange={(e) => setProblemType(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
                 >
                   <option value="item_shortage">Item Shortage / Out of Stock</option>
                   <option value="damaged_vegetable">Damaged Quality Vegetable</option>
@@ -694,7 +694,7 @@ export default function GodownPackingStation() {
                   placeholder="Describe the issue for the owner..."
                   value={problemNotes}
                   onChange={(e) => setProblemNotes(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
                   required
                 />
               </div>
@@ -703,13 +703,13 @@ export default function GodownPackingStation() {
                 <button
                   type="button"
                   onClick={() => setShowProblemModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold"
+                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer shadow-xs"
                 >
                   Flag Order
                 </button>

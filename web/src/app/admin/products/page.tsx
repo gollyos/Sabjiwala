@@ -409,22 +409,22 @@ export default function AdminProductsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Header Banner */}
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
+            <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
               <Package className="w-4 h-4" />
-              <span>Catalog & Inventory Controller</span>
+              <span>Catalog &amp; Inventory Controller</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Fruits &amp; Vegetables Catalog (ફળ અને શાકભાજી કેટલોગ)
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               1-click toggle product visibility, stock status, adjust daily pack prices, and add new items.
             </p>
           </div>
@@ -435,7 +435,7 @@ export default function AdminProductsPage() {
               className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-extrabold rounded-2xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Add New Vegetable</span>
+              <span>+ Add New Product</span>
             </button>
           </div>
         </div>
@@ -444,8 +444,8 @@ export default function AdminProductsPage() {
         {statusMsg && (
           <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center gap-3 border ${
             statusMsg.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800'
-              : 'bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-200 dark:border-rose-800'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
           }`}>
             {statusMsg.type === 'success' ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -457,14 +457,14 @@ export default function AdminProductsPage() {
         )}
 
         {/* Filter & Search Bar */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Search vegetable by Gujarati or English name..."
+              placeholder="Search vegetable or fruit by Gujarati or English name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none"
             />
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
@@ -472,10 +472,10 @@ export default function AdminProductsPage() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             <button
               onClick={() => setSelectedCategoryFilter('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategoryFilter === 'all'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               All ({products.length})
@@ -485,10 +485,10 @@ export default function AdminProductsPage() {
               <button
                 key={c.id}
                 onClick={() => setSelectedCategoryFilter(c.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategoryFilter === c.id
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
                 {c.name_gu}
@@ -502,10 +502,10 @@ export default function AdminProductsPage() {
           {loading ? (
             <div className="col-span-full py-16 text-center text-slate-400">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-emerald-600" />
-              <span>Loading vegetables catalog...</span>
+              <span>Loading fruits &amp; vegetables catalog...</span>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="col-span-full py-16 text-center bg-white dark:bg-slate-900 rounded-3xl p-8 text-slate-400 border border-slate-200 dark:border-slate-800">
+            <div className="col-span-full py-16 text-center bg-white rounded-3xl p-8 text-slate-400 border border-slate-200">
               No products found matching your search.
             </div>
           ) : (
@@ -517,18 +517,18 @@ export default function AdminProductsPage() {
               return (
                 <div
                   key={prod.id}
-                  className={`bg-white dark:bg-slate-900 rounded-3xl border shadow-xs p-5 flex flex-col justify-between transition-all ${
+                  className={`bg-white rounded-3xl border shadow-xs p-5 flex flex-col justify-between transition-all ${
                     !isVisible
-                      ? 'border-slate-200 dark:border-slate-800 opacity-60 bg-slate-50/50 dark:bg-slate-950/40'
+                      ? 'border-slate-200 opacity-60 bg-slate-50/50'
                       : !prod.is_in_stock
-                      ? 'border-amber-200 dark:border-amber-800/60 bg-amber-50/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-emerald-300'
+                      ? 'border-amber-200 bg-amber-50/20'
+                      : 'border-slate-200 hover:border-emerald-300'
                   }`}
                 >
                   <div>
                     {/* Top Row: Image, Info, and Controls */}
                     <div className="flex items-start gap-3.5 mb-3">
-                      <div className="relative w-18 h-18 rounded-2xl bg-slate-100 dark:bg-slate-950 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800">
+                      <div className="relative w-18 h-18 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                         {prod.image_url ? (
                           <Image
                             src={prod.image_url}
@@ -546,7 +546,7 @@ export default function AdminProductsPage() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
                             {category?.name_gu || category?.name_en || 'General'}
                           </span>
                           {prod.is_seasonal && (
@@ -561,14 +561,14 @@ export default function AdminProductsPage() {
                           )}
                         </div>
 
-                        <h3 className="font-black text-base text-slate-900 dark:text-white leading-tight mt-1">
+                        <h3 className="font-black text-base text-slate-900 leading-tight mt-1">
                           {prod.name_gu} <span className="text-slate-500 font-normal text-xs">({prod.name_en})</span>
                         </h3>
                       </div>
 
                       <button
                         onClick={() => openEditProductModal(prod)}
-                        className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                        className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer"
                         title="Edit Details"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -576,7 +576,7 @@ export default function AdminProductsPage() {
                     </div>
 
                     {/* Quick Toggle Controls (Storefront Switch & In-Stock Switch) */}
-                    <div className="grid grid-cols-2 gap-2 p-2 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 mb-3 text-xs font-bold">
+                    <div className="grid grid-cols-2 gap-2 p-2 rounded-2xl bg-slate-50 border border-slate-200 mb-3 text-xs font-bold">
                       {/* Toggle 1: Visible on Store */}
                       <button
                         type="button"
@@ -584,7 +584,7 @@ export default function AdminProductsPage() {
                         className={`py-1.5 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           isVisible
                             ? 'bg-emerald-600 text-white shadow-2xs'
-                            : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
                         }`}
                       >
                         {isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -609,10 +609,10 @@ export default function AdminProductsPage() {
                     {/* Variants & Pack Sizes List */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase">
-                        <span>Pack Sizes & Rates</span>
+                        <span>Pack Sizes &amp; Rates</span>
                         <button
                           onClick={() => openAddVariantModal(prod)}
-                          className="text-emerald-600 font-bold hover:underline"
+                          className="text-emerald-700 font-bold hover:underline cursor-pointer"
                         >
                           + Add Pack
                         </button>
@@ -622,10 +622,10 @@ export default function AdminProductsPage() {
                         {variants.map((v) => (
                           <div
                             key={v.id}
-                            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs text-xs flex flex-col justify-between"
+                            className="p-2.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-xs flex flex-col justify-between"
                           >
                             <div>
-                              <div className="font-extrabold text-slate-900 dark:text-white">
+                              <div className="font-extrabold text-slate-900">
                                 {v.variant_name_gu || v.variant_name_en}
                               </div>
                               <div className="text-[10px] text-slate-400">
@@ -633,14 +633,14 @@ export default function AdminProductsPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-                              <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">
+                            <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100">
+                              <span className="font-mono font-black text-emerald-700">
                                 ₹{Number(v.selling_price).toFixed(0)}
                               </span>
                               <div className="flex items-center space-x-1">
                                 <button
                                   onClick={() => openEditVariantModal(prod, v)}
-                                  className="text-slate-400 hover:text-emerald-600 p-1 cursor-pointer"
+                                  className="text-slate-400 hover:text-emerald-700 p-1 cursor-pointer"
                                   title="Edit Pack Size & Rate"
                                 >
                                   <Edit2 className="w-3 h-3" />
@@ -670,11 +670,11 @@ export default function AdminProductsPage() {
 
       {/* ADD / EDIT PRODUCT MODAL */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 shadow-2xl">
             
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900">
                 {editingProductId ? 'Edit Product (ઉત્પાદન વિગત)' : 'Add New Product (+ નવું ઉત્પાદન)'}
               </h3>
               <button onClick={() => setIsProductModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -694,7 +694,7 @@ export default function AdminProductsPage() {
                     value={prodNameGu}
                     onChange={(e) => setProdNameGu(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   />
                 </div>
 
@@ -706,7 +706,7 @@ export default function AdminProductsPage() {
                     value={prodNameEn}
                     onChange={(e) => setProdNameEn(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   />
                 </div>
               </div>
@@ -719,7 +719,7 @@ export default function AdminProductsPage() {
                     value={prodCategoryId}
                     onChange={(e) => setProdCategoryId(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -735,7 +735,7 @@ export default function AdminProductsPage() {
                     value={prodBaseUnitId}
                     onChange={(e) => setProdBaseUnitId(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   >
                     {units.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -748,9 +748,9 @@ export default function AdminProductsPage() {
 
               {/* Fast Add Packs Option (Only for new products) */}
               {!editingProductId && (
-                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 space-y-2">
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="font-extrabold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5 cursor-pointer">
+                    <label className="font-extrabold text-emerald-900 flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isFastAdd}
@@ -762,14 +762,14 @@ export default function AdminProductsPage() {
                   </div>
                   {isFastAdd && (
                     <div className="flex items-center gap-2 pt-1">
-                      <span className="text-emerald-800 dark:text-emerald-300 font-medium">1 kg Price (₹):</span>
+                      <span className="text-emerald-800 font-medium">1 kg Price (₹):</span>
                       <input
                         type="number"
                         value={fastAddPrice1kg}
                         onChange={(e) => setFastAddPrice1kg(Number(e.target.value))}
-                        className="w-24 bg-white dark:bg-slate-900 border border-emerald-300 rounded-xl p-1.5 font-mono font-bold text-emerald-700 dark:text-emerald-300"
+                        className="w-24 bg-white border border-emerald-300 rounded-xl p-1.5 font-mono font-bold text-emerald-800 focus:outline-none"
                       />
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                      <span className="text-[10px] text-emerald-700">
                         (500g = ₹{Math.round(fastAddPrice1kg * 0.52)}, 250g = ₹{Math.round(fastAddPrice1kg * 0.28)})
                       </span>
                     </div>
@@ -781,7 +781,7 @@ export default function AdminProductsPage() {
               <div className="space-y-1.5">
                 <label className="block text-slate-500 font-bold">Product Image (ફોટો)</label>
                 <div className="flex items-center gap-3">
-                  <div className="relative w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                  <div className="relative w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
                     {prodImageUrl ? (
                       <Image src={prodImageUrl} alt="Product preview" fill sizes="64px" className="object-cover" />
                     ) : (
@@ -790,7 +790,7 @@ export default function AdminProductsPage() {
                   </div>
 
                   <div className="flex-1 space-y-1">
-                    <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold cursor-pointer transition-all">
+                    <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer transition-all">
                       <Upload className="w-3.5 h-3.5" />
                       <span>{uploadingImage ? 'Uploading...' : 'Upload from Device'}</span>
                       <input
@@ -806,7 +806,7 @@ export default function AdminProductsPage() {
                       placeholder="Or paste image URL..."
                       value={prodImageUrl}
                       onChange={(e) => setProdImageUrl(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-[11px] text-slate-600 dark:text-slate-400"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-[11px] text-slate-600 focus:bg-white focus:outline-none"
                     />
                   </div>
                 </div>
@@ -821,16 +821,16 @@ export default function AdminProductsPage() {
                   onChange={(e) => setProdIsSeasonal(e.target.checked)}
                   className="rounded-md w-4 h-4 text-emerald-600 cursor-pointer"
                 />
-                <label htmlFor="seasonal_checkbox" className="font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <label htmlFor="seasonal_checkbox" className="font-bold text-slate-700 cursor-pointer">
                   Mark as Seasonal Special (સીઝનલ સ્પેશિયલ)
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
-                  className="px-4 py-2.5 text-slate-500 font-bold cursor-pointer"
+                  className="px-4 py-2.5 text-slate-500 font-bold hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -851,18 +851,18 @@ export default function AdminProductsPage() {
 
       {/* ADD / EDIT VARIANT MODAL */}
       {isVariantModalOpen && targetProduct && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-[10px] font-bold text-emerald-600 uppercase">{targetProduct.name_gu} ({targetProduct.name_en})</span>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">{targetProduct.name_gu} ({targetProduct.name_en})</span>
+                <h3 className="font-extrabold text-base text-slate-900">
                   {editingVariantId ? 'Edit Pack Size & Rate (પેક અને ભાવ)' : '+ Add Custom Pack Size (નવો પેક)'}
                 </h3>
               </div>
               <button onClick={() => setIsVariantModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -887,7 +887,7 @@ export default function AdminProductsPage() {
                       setVarNameGu(preset.gu);
                       setVarMultiplier(preset.mult);
                     }}
-                    className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/80 hover:text-emerald-600 text-slate-700 dark:text-slate-300 font-bold text-[10px] border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-bold text-[10px] border border-slate-200 transition-all cursor-pointer"
                   >
                     {preset.label}
                   </button>
@@ -906,7 +906,7 @@ export default function AdminProductsPage() {
                     value={varNameGu}
                     onChange={(e) => setVarNameGu(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div>
@@ -917,7 +917,7 @@ export default function AdminProductsPage() {
                     value={varNameEn}
                     onChange={(e) => setVarNameEn(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900 focus:bg-white focus:outline-none"
                   />
                 </div>
               </div>
@@ -930,7 +930,7 @@ export default function AdminProductsPage() {
                     value={varSellingPrice}
                     onChange={(e) => setVarSellingPrice(Number(e.target.value))}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono font-black text-emerald-600 text-sm"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono font-black text-emerald-700 text-sm focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div>
@@ -941,18 +941,18 @@ export default function AdminProductsPage() {
                     value={varMultiplier}
                     onChange={(e) => setVarMultiplier(Number(e.target.value))}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono text-slate-900 focus:bg-white focus:outline-none"
                   />
                   <span className="text-[10px] text-slate-400">250g=0.25, 500g=0.5, 1kg=1</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 {editingVariantId ? (
                   <button
                     type="button"
                     onClick={() => handleDeleteVariant(editingVariantId, varNameEn || varNameGu)}
-                    className="px-3 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-bold rounded-xl text-xs flex items-center gap-1 cursor-pointer transition-all"
+                    className="px-3 py-2 text-rose-600 hover:bg-rose-50 font-bold rounded-xl text-xs flex items-center gap-1 cursor-pointer transition-all"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Pack (હટાવો)</span>
@@ -963,7 +963,7 @@ export default function AdminProductsPage() {
                   <button
                     type="button"
                     onClick={() => setIsVariantModalOpen(false)}
-                    className="px-3.5 py-2 text-slate-500 font-bold cursor-pointer"
+                    className="px-3.5 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-xl cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -985,3 +985,4 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+
