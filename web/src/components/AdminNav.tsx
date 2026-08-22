@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, Boxes, Layers, Truck, BarChart3, Settings, Tag, Users, Bell, Store, ChevronDown, Menu, X, LogOut } from 'lucide-react';
+import { Home, ShoppingBag, Boxes, Layers, Truck, BarChart3, Settings, Tag, Users, Bell, Store, ChevronDown, Menu, X, LogOut, IndianRupee } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAdminRole, type StaffRole } from '@/context/AdminRoleContext';
 interface NavItem {
@@ -24,6 +24,7 @@ export function AdminNav() {
   const primaryItems: NavItem[] = [
     { name: 'Dashboard', nameGu: 'ડેશબોર્ડ', href: '/admin/dashboard', icon: Home, roles: ['owner', 'manager'] },
     { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag, roles: ['owner', 'manager'] },
+    { name: 'Mandi Rates', nameGu: 'મંડી ભાવ', href: '/admin/mandi-rates', icon: IndianRupee, roles: ['owner', 'manager'] },
     { name: 'Mandi Purchases', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes, roles: ['owner', 'manager'] },
     { name: 'Pricing', nameGu: 'ભાવ નક્કી', href: '/admin/pricing', icon: Tag, roles: ['owner', 'manager'] },
     { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers, roles: ['owner', 'manager', 'packing'] },

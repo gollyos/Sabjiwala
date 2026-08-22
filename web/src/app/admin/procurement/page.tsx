@@ -1,7 +1,7 @@
 'use client';
 
 import { getErrorMessage } from '@/lib/errors';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Lock, CheckCircle2, AlertCircle, Check, Share2, PlusCircle } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
@@ -116,6 +116,36 @@ export default function ProcurementDashboard() {
     purchase_date: todayIST(),
     notes: '',
   });
+
+  // Mandi rates saved on the Mandi Rates screen for the selected purchase
+  // date, used to auto-fill the purchase rate. Keyed by product id.
+  const [mandiRateMap, setMandiRateMap] = useState<Record<string, number>>({});
+  const [rateHint, setRateHint] = useState<string | null>(null);
+  // Last value we auto-filled, so switching products replaces the suggestion
+  // but never clobbers a rate the user typed manually.
+  const autoFilledRateRef = useRef('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase.rpc('get_daily_mandi_rates', {
+          p_rate_date: purchaseForm.purchase_date,
+        });
+        if (cancelled) return;
+        const map: Record<string, number> = {};
+        ((data as { product_id: string; purchase_rate_per_kg: number }[]) || []).forEach((r) => {
+          map[r.product_id] = Number(r.purchase_rate_per_kg);
+        });
+        setMandiRateMap(map);
+      } catch (err) {
+        // Rates storage not set up yet (migration pending) — prefill simply
+        // stays unavailable; manual rate entry always works.
+        console.warn('Daily mandi rates unavailable for auto-fill:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [supabase, purchaseForm.purchase_date]);
 
   // Fetch batches list
   const loadBatches = useCallback(async () => {
@@ -265,6 +295,8 @@ export default function ProcurementDashboard() {
       if (json.success) {
         setActionMessage({ text: `Recorded purchase: ${qty} ${purchaseForm.unit_code} of ${purchaseForm.product_name} at ₹${rate}/kg (Total: ₹${totalCost})`, type: 'success' });
         setShowQuickPurchaseModal(false);
+        autoFilledRateRef.current = '';
+        setRateHint(null);
         setPurchaseForm({
           product_id: '',
           product_name: '',
@@ -513,17 +545,24 @@ export default function ProcurementDashboard() {
                           <button
                             type="button"
                             onClick={() => {
+                              const dailyRate = mandiRateMap[p.product_id];
                               setPurchaseForm({
                                 product_id: p.product_id,
                                 product_name: `${p.product_name_gu} (${p.product_name_en})`,
                                 purchased_qty: String(p.suggested_procurement_qty || p.required_qty || ''),
                                 unit_code: p.base_unit_code || 'kg',
-                                rate_per_unit: String(p.latest_mandi_rate || ''),
+                                // Today's saved mandi rate wins; fall back to
+                                // the item's last known rate.
+                                rate_per_unit: String(dailyRate ?? p.latest_mandi_rate ?? ''),
                                 supplier_name: p.preferred_supplier_name || 'Halol APMC Mandi',
                                 bill_no: '',
                                 purchase_date: todayIST(),
                                 notes: '',
                               });
+                              autoFilledRateRef.current = dailyRate !== undefined ? String(dailyRate) : '';
+                              setRateHint(dailyRate !== undefined
+                                ? `Auto-filled from Mandi Rates screen (${todayIST()}) — ₹${dailyRate}/kg`
+                                : null);
                               setShowQuickPurchaseModal(true);
                             }}
                             className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
@@ -658,11 +697,24 @@ export default function ProcurementDashboard() {
                   onChange={(e) => {
                     const selId = e.target.value;
                     const prod = catalogProducts.find((p) => p.id === selId);
+                    const dailyRate = selId ? mandiRateMap[selId] : undefined;
+                    // Replace a previous auto-fill (or empty box) with this
+                    // product's saved mandi rate; keep manually typed rates.
+                    const rateIsAuto = purchaseForm.rate_per_unit === ''
+                      || purchaseForm.rate_per_unit === autoFilledRateRef.current;
+                    const nextRate = rateIsAuto && dailyRate !== undefined
+                      ? String(dailyRate)
+                      : (rateIsAuto ? '' : purchaseForm.rate_per_unit);
+                    autoFilledRateRef.current = rateIsAuto && dailyRate !== undefined ? nextRate : '';
+                    setRateHint(rateIsAuto && dailyRate !== undefined
+                      ? `Auto-filled from Mandi Rates screen (${purchaseForm.purchase_date}) — ₹${dailyRate}/kg`
+                      : null);
                     setPurchaseForm({
                       ...purchaseForm,
                       product_id: selId,
                       product_name: prod ? `${prod.name_gu} (${prod.name_en})` : '',
                       unit_code: prod?.base_unit_code || 'kg',
+                      rate_per_unit: nextRate,
                     });
                   }}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
@@ -705,10 +757,17 @@ export default function ProcurementDashboard() {
                     min="0"
                     placeholder="e.g. 22"
                     value={purchaseForm.rate_per_unit}
-                    onChange={(e) => setPurchaseForm({ ...purchaseForm, rate_per_unit: e.target.value })}
+                    onChange={(e) => {
+                      autoFilledRateRef.current = '';
+                      setRateHint(null);
+                      setPurchaseForm({ ...purchaseForm, rate_per_unit: e.target.value });
+                    }}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold font-mono focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     required
                   />
+                  {rateHint && (
+                    <p className="text-[10px] text-emerald-600 font-bold mt-1">{rateHint}</p>
+                  )}
                 </div>
               </div>
 
