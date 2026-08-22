@@ -31,7 +31,7 @@ export default function HorizontalBarChart({
 
   if (!items || items.length === 0) {
     return (
-      <div className="h-64 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center p-6 text-slate-500 text-xs italic">
+      <div className="h-64 rounded-3xl bg-slate-50 border border-slate-200 flex items-center justify-center p-6 text-slate-400 text-xs italic">
         No product data available for this period.
       </div>
     );
@@ -69,21 +69,21 @@ export default function HorizontalBarChart({
   const maxVal = Math.max(...sortedItems.map(getValue), 1);
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+    <div className="w-full bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
       {/* Header with Metric Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-        <h3 className="text-sm font-extrabold text-white tracking-wider uppercase flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <h3 className="text-xs font-bold text-slate-700 tracking-wider uppercase flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span>{title}</span>
         </h3>
 
         {/* Metric Selector Pills */}
-        <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[10px] font-bold">
+        <div className="flex items-center space-x-1 bg-white p-1 rounded-xl border border-slate-200 text-[10px] font-bold shadow-2xs">
           <button
             type="button"
             onClick={() => setActiveMetric('revenue')}
             className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-              activeMetric === 'revenue' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              activeMetric === 'revenue' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Revenue
@@ -92,7 +92,7 @@ export default function HorizontalBarChart({
             type="button"
             onClick={() => setActiveMetric('quantity')}
             className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-              activeMetric === 'quantity' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              activeMetric === 'quantity' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Quantity
@@ -101,7 +101,7 @@ export default function HorizontalBarChart({
             type="button"
             onClick={() => setActiveMetric('contribution')}
             className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-              activeMetric === 'contribution' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              activeMetric === 'contribution' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Contribution
@@ -110,7 +110,7 @@ export default function HorizontalBarChart({
             type="button"
             onClick={() => setActiveMetric('orders')}
             className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-              activeMetric === 'orders' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              activeMetric === 'orders' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Orders
@@ -129,25 +129,25 @@ export default function HorizontalBarChart({
               key={item.id || idx}
               onClick={() => onItemClick?.(item)}
               className={`group p-2.5 rounded-2xl transition-all ${
-                onItemClick ? 'cursor-pointer hover:bg-slate-800/60' : ''
+                onItemClick ? 'cursor-pointer hover:bg-white hover:shadow-xs' : ''
               }`}
             >
               <div className="flex items-center justify-between text-xs mb-1.5">
-                <div className="flex items-center space-x-2 font-bold text-white">
-                  <span className="w-5 h-5 rounded-lg bg-slate-800 text-slate-300 font-mono text-[10px] flex items-center justify-center">
+                <div className="flex items-center space-x-2 font-bold text-slate-800">
+                  <span className="w-5 h-5 rounded-lg bg-slate-200 text-slate-700 font-mono text-[10px] flex items-center justify-center">
                     {idx + 1}
                   </span>
                   <span className="truncate max-w-[140px] sm:max-w-[200px]">{item.name_en}</span>
                   <span className="text-slate-400 text-[11px] font-normal truncate">({item.name_gu})</span>
                 </div>
 
-                <div className="font-mono font-extrabold text-emerald-400 text-xs">
+                <div className="font-mono font-extrabold text-emerald-700 text-xs">
                   {formatValue(item, val)}
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800/60">
+              <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-linear-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-500"
                   style={{ width: `${pct}%` }}

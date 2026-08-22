@@ -323,6 +323,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Case A: Cash on Delivery (Immediate confirmation)
       if (paymentMethod === 'cod') {
+        // Trigger n8n webhook immediately in background
+        if (orderResult?.order_id) {
+          fetch('/api/automation/n8n-trigger', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderResult.order_id }),
+          }).catch((err) => console.error('Failed to trigger n8n order webhook:', err));
+        }
+
         clearCart();
         setCartDrawerOpen(false);
         setOrderSuccessData(orderResult);
@@ -388,6 +397,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   delivery_slot: verifyData.data.delivery_slot || '10:00 AM – 01:00 PM',
                   is_before_cutoff: verifyData.data.is_before_cutoff,
                 };
+                // Trigger n8n webhook immediately in background
+                if (orderResult?.order_id) {
+                  fetch('/api/automation/n8n-trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderResult.order_id }),
+                  }).catch((err) => console.error('Failed to trigger n8n order webhook:', err));
+                }
+
                 clearCart();
                 setCartDrawerOpen(false);
                 setOrderSuccessData(confirmedResult);

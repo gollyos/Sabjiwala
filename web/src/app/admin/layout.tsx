@@ -385,7 +385,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   if (!currentRole) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="light bg-slate-50 text-slate-900 font-sans min-h-screen">
       <AdminRoleProvider role={currentRole}>{children}</AdminRoleProvider>
     </div>
   );

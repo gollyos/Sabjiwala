@@ -2,10 +2,20 @@
 node_modules/
 .pnpm-store/
 
-# Environment variables
+# Environment variables & secrets
 .env
 .env.local
 .env.*.local
+*.env
+*.env.*
+*.pem
+*.key
+*.cert
+
+# Utility scripts & scratch
+scripts/
+web/scripts/
+scratch/
 
 # AI Agent / Workspace files
 .agents/
@@ -20,6 +30,8 @@ build/
 .next/
 out/
 .cache/
+*.tsbuildinfo
+next-env.d.ts
 
 # OS and Logs
 .DS_Store
@@ -28,3 +40,4 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+

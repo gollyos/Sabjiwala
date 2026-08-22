@@ -42,16 +42,16 @@ export function SlideOverDrawer({
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-        <div className={`w-screen ${widthClass} bg-white dark:bg-slate-900 shadow-2xl flex flex-col justify-between border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-200`}>
+        <div className={`w-screen ${widthClass} bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-200`}>
           
           {/* Header */}
-          <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
             <div>
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">
+              <h3 className="font-extrabold text-slate-900 text-lg tracking-tight">
                 {title}
               </h3>
               {subtitle && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
                   {subtitle}
                 </p>
               )}
@@ -59,7 +59,7 @@ export function SlideOverDrawer({
 
             <button
               onClick={onClose}
-              className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -72,7 +72,7 @@ export function SlideOverDrawer({
 
           {/* Optional Footer */}
           {footer && (
-            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/80">
               {footer}
             </div>
           )}

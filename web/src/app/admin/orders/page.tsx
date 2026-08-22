@@ -14,6 +14,8 @@ import { StatusChip } from '@/components/ui/StatusChip';
 import { SlideOverDrawer } from '@/components/ui/SlideOverDrawer';
 import ThermalBagSticker from '@/components/ThermalBagSticker';
 
+import { createClient } from '@/lib/supabase/client';
+
 type OrderTab = 'all' | 'new' | 'confirmed' | 'packing' | 'out_for_delivery' | 'delivered' | 'issues';
 
 export default function AdminOrdersPage() {
@@ -72,14 +74,30 @@ export default function AdminOrdersPage() {
     }
   }, [startDate, endDate, activeTab, search]);
 
-  // Supabase Realtime Live Channel for instant order sync
+  // Supabase Realtime Live Channel for instant order sync + fallback polling
   useEffect(() => {
-    // Polling backup every 10s or instant on postgres changes
+    fetchOrders();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel('admin_orders_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => {
+          fetchOrders();
+        }
+      )
+      .subscribe();
+
     const interval = setInterval(() => {
       fetchOrders();
-    }, 12000);
+    }, 15000);
 
-    return () => clearInterval(interval);
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [fetchOrders]);
 
   const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '7days') => {

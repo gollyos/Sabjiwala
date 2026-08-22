@@ -85,26 +85,56 @@ export default function SalesReportPage() {
     discounts: Number(d.first500_discount || 0) + Number(d.cod_discount || 0),
   }));
 
+  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '30days') => {
+    const now = new Date();
+    const format = (d: Date) => d.toISOString().split('T')[0];
+
+    if (preset === 'today') {
+      const today = format(now);
+      setStartDate(today);
+      setEndDate(today);
+    } else if (preset === 'tomorrow') {
+      const tom = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const tomStr = format(tom);
+      setStartDate(tomStr);
+      setEndDate(tomStr);
+    } else if (preset === 'this_week') {
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diff));
+      setStartDate(format(monday));
+      setEndDate(format(new Date()));
+    } else if (preset === 'this_month') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      setStartDate(format(firstDay));
+      setEndDate(format(new Date()));
+    } else if (preset === '30days') {
+      const past = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
+      setStartDate(format(past));
+      setEndDate(format(new Date()));
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {error && (
-          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+          <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
             {error}
           </div>
         )}
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-3xl shadow-xs">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-emerald-400" />
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+              <TrendingUp className="w-6 h-6 text-emerald-600" />
               <span>Sales & Financial Analytics (વેચાણ અને આવક રિપોર્ટ)</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              GMV, FIRST500 & COD discount burn, procurement costs, and authoritative gross contribution.
+            <p className="text-xs text-slate-500 mt-1">
+              Gross sales (GMV), FIRST500 &amp; COD discounts, estimated procurement cost, and gross contribution margin.
             </p>
           </div>
 
@@ -113,16 +143,17 @@ export default function SalesReportPage() {
               type="button"
               onClick={fetchSalesData}
               disabled={loading}
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
+              title="Refresh report data"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
             </button>
 
             <button
               type="button"
               onClick={handleExportCsv}
               disabled={exporting || dailyBreakdown.length === 0}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               <span>{exporting ? 'Exporting...' : 'Export Excel CSV'}</span>
@@ -130,26 +161,76 @@ export default function SalesReportPage() {
           </div>
         </div>
 
-        {/* Date Filters */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl flex flex-wrap items-center gap-4 text-xs">
-          <div className="flex items-center space-x-2">
-            <label className="text-slate-400 font-bold uppercase text-[10px]">From:</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-            />
+        {/* Date Filter & Presets Bar */}
+        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+          {/* Quick Presets */}
+          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl gap-0.5 font-bold">
+            <button
+              type="button"
+              onClick={() => handleDatePreset('today')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                startDate === endDate && startDate === new Date().toISOString().split('T')[0]
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('tomorrow')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('this_week')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              This Week
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('this_month')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              This Month (મહિનો)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('30days')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              Last 30 Days
+            </button>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <label className="text-slate-400 font-bold uppercase text-[10px]">To:</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-            />
+          {/* Custom Date Pickers */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-2">
+              <label className="text-slate-500 font-bold uppercase text-[10px]">From:</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <label className="text-slate-500 font-bold uppercase text-[10px]">To:</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 
@@ -172,38 +253,46 @@ export default function SalesReportPage() {
         />
 
         {/* Daily Breakdown Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-            <span>Daily Financial Ledger ({dailyBreakdown.length} days)</span>
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
+            <span>Daily Financial Breakdown ({dailyBreakdown.length} days recorded)</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 text-[10px] uppercase font-mono">
+              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-[10px] uppercase font-bold">
                 <tr>
-                  <th className="p-3.5">Delivery Date</th>
-                  <th className="p-3.5 text-right">Gross Sales (GMV ₹)</th>
-                  <th className="p-3.5 text-right">FIRST500 Disc (₹)</th>
-                  <th className="p-3.5 text-right">COD Disc (₹)</th>
-                  <th className="p-3.5 text-right">Total Disc (₹)</th>
-                  <th className="p-3.5 text-right font-bold text-emerald-400">Net Customer Revenue (₹)</th>
+                  <th className="p-4">Delivery Date</th>
+                  <th className="p-4 text-right">Gross Sales (GMV ₹)</th>
+                  <th className="p-4 text-right">FIRST500 Disc (₹)</th>
+                  <th className="p-4 text-right">COD Disc (₹)</th>
+                  <th className="p-4 text-right">Total Disc (₹)</th>
+                  <th className="p-4 text-right font-black text-emerald-800">Net Customer Revenue (₹)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 font-mono">
-                {dailyBreakdown.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/30">
-                    <td className="p-3.5 font-bold text-white font-sans">{row.label} ({row.delivery_date})</td>
-                    <td className="p-3.5 text-right text-slate-300">₹{Number(row.gross_sales).toFixed(2)}</td>
-                    <td className="p-3.5 text-right text-amber-400">₹{Number(row.first500_discount).toFixed(2)}</td>
-                    <td className="p-3.5 text-right text-amber-400">₹{Number(row.cod_discount).toFixed(2)}</td>
-                    <td className="p-3.5 text-right text-amber-300 font-bold">
-                      -₹{(Number(row.first500_discount) + Number(row.cod_discount)).toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-right font-black text-emerald-400 text-sm">
-                      ₹{Number(row.net_revenue).toFixed(2)}
+              <tbody className="divide-y divide-slate-100 font-mono">
+                {dailyBreakdown.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-slate-400 font-sans italic text-xs">
+                      No sales records found for this selected period. Try choosing &quot;Today&quot; or &quot;This Month&quot;.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  dailyBreakdown.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="p-4 font-bold text-slate-900 font-sans">{row.label} ({row.delivery_date})</td>
+                      <td className="p-4 text-right text-slate-700">₹{Number(row.gross_sales).toFixed(2)}</td>
+                      <td className="p-4 text-right text-amber-700">₹{Number(row.first500_discount).toFixed(2)}</td>
+                      <td className="p-4 text-right text-amber-700">₹{Number(row.cod_discount).toFixed(2)}</td>
+                      <td className="p-4 text-right text-amber-800 font-bold">
+                        -₹{(Number(row.first500_discount) + Number(row.cod_discount)).toFixed(2)}
+                      </td>
+                      <td className="p-4 text-right font-black text-emerald-700 text-sm">
+                        ₹{Number(row.net_revenue).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

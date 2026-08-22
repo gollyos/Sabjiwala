@@ -21,17 +21,17 @@ export function NeedsAttentionSection({ items = [], className = '' }: NeedsAtten
   const hasIssues = items && items.length > 0;
 
   return (
-    <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs ${className}`}>
-      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
+    <div className={`bg-white border border-slate-200 rounded-3xl p-6 shadow-xs ${className}`}>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-xl ${hasIssues ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'}`}>
+          <div className={`p-1.5 rounded-xl ${hasIssues ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
             {hasIssues ? <ShieldAlert className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
           </div>
-          <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
             Needs Attention (ધ્યાન આપવાની જરૂર છે)
           </h3>
           {hasIssues && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-mono">
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 font-mono">
               {items.length} {items.length === 1 ? 'issue' : 'issues'}
             </span>
           )}
@@ -43,19 +43,19 @@ export function NeedsAttentionSection({ items = [], className = '' }: NeedsAtten
       </div>
 
       {!hasIssues ? (
-        <div className="py-5 px-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between gap-3">
+        <div className="py-4 px-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
-              <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
+              <div className="text-xs font-bold text-emerald-950">
                 All good. No urgent issues. (બધું બરાબર છે)
               </div>
-              <div className="text-[11px] text-emerald-700/80 dark:text-emerald-400">
+              <div className="text-[11px] text-emerald-800">
                 No packing problems, delivery failures, or COD cash discrepancies detected.
               </div>
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">🎉 OK</span>
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">🎉 OK</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">

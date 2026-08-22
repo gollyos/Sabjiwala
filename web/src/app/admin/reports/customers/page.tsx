@@ -86,25 +86,55 @@ export default function CustomerReportingPage() {
     return c.full_name?.toLowerCase().includes(q) || c.mobile?.includes(q);
   });
 
+  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '30days') => {
+    const now = new Date();
+    const format = (d: Date) => d.toISOString().split('T')[0];
+
+    if (preset === 'today') {
+      const today = format(now);
+      setStartDate(today);
+      setEndDate(today);
+    } else if (preset === 'tomorrow') {
+      const tom = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const tomStr = format(tom);
+      setStartDate(tomStr);
+      setEndDate(tomStr);
+    } else if (preset === 'this_week') {
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diff));
+      setStartDate(format(monday));
+      setEndDate(format(new Date()));
+    } else if (preset === 'this_month') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      setStartDate(format(firstDay));
+      setEndDate(format(new Date()));
+    } else if (preset === '30days') {
+      const past = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
+      setStartDate(format(past));
+      setEndDate(format(new Date()));
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
       <AdminNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {error && (
-          <div role="alert" className="rounded-2xl border border-rose-800 bg-rose-950/70 px-4 py-3 text-sm font-semibold text-rose-200">
+          <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
             {error}
           </div>
         )}
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-3xl shadow-xs">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-              <Users className="w-6 h-6 text-amber-400" />
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+              <Users className="w-6 h-6 text-amber-600" />
               <span>Customer Insights & FIRST500 Campaign (ગ્રાહક વિશ્લેષણ)</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Customer cohort retention, verified sequence numbers, and strict 500-customer promotional burn tracker.
             </p>
           </div>
@@ -114,16 +144,17 @@ export default function CustomerReportingPage() {
               type="button"
               onClick={fetchCustomerData}
               disabled={loading}
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              className="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
+              title="Refresh report data"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-600' : 'text-slate-500'}`} />
             </button>
 
             <button
               type="button"
               onClick={handleExportCsv}
               disabled={exporting || rawCustomers.length === 0}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               <span>{exporting ? 'Exporting...' : 'Export Excel CSV'}</span>
@@ -131,120 +162,170 @@ export default function CustomerReportingPage() {
           </div>
         </div>
 
-        {/* Date Filter & Search */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-          <div className="space-y-1">
-            <label className="text-slate-400 font-bold uppercase text-[10px]">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-            />
+        {/* Date Filter & Presets Bar */}
+        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+          {/* Quick Presets */}
+          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl gap-0.5 font-bold">
+            <button
+              type="button"
+              onClick={() => handleDatePreset('today')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                startDate === endDate && startDate === new Date().toISOString().split('T')[0]
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('tomorrow')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('this_week')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              This Week
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('this_month')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              This Month (મહિનો)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDatePreset('30days')}
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              Last 30 Days
+            </button>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-slate-400 font-bold uppercase text-[10px]">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-slate-400 font-bold uppercase text-[10px]">Search Customer</label>
-            <div className="relative">
+          {/* Custom Date Pickers */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-2">
+              <label className="text-slate-500 font-bold uppercase text-[10px]">From:</label>
               <input
-                type="text"
-                placeholder="Search name or mobile..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-white"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
               />
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
             </div>
+
+            <div className="flex items-center space-x-2">
+              <label className="text-slate-500 font-bold uppercase text-[10px]">To:</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Customer Search Bar */}
+        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs text-xs">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search customer by name or phone number..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-slate-900 focus:bg-white focus:outline-none font-semibold text-xs"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
         {/* Cohort KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
+            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
               Total Registered Customers
             </div>
-            <div className="text-3xl font-black text-white font-mono">
+            <div className="text-3xl font-black text-slate-900 font-mono">
               {metrics.total_customers || 0}
             </div>
-            <div className="text-[11px] text-slate-500 mt-2">Active customer database in Halol</div>
+            <div className="text-[11px] text-slate-400 mt-2">Active customer database in Halol</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
+            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
               New Ordering Customers
             </div>
-            <div className="text-3xl font-black text-emerald-400 font-mono">
+            <div className="text-3xl font-black text-emerald-700 font-mono">
               {metrics.new_customers || 0}
             </div>
-            <div className="text-[11px] text-slate-500 mt-2">First order placed in this period</div>
+            <div className="text-[11px] text-slate-400 mt-2">First order placed in this period</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
+            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
               Repeat Ordering Customers
             </div>
-            <div className="text-3xl font-black text-blue-400 font-mono">
+            <div className="text-3xl font-black text-blue-700 font-mono">
               {metrics.repeat_customers || 0}
             </div>
-            <div className="text-[11px] text-slate-500 mt-2">Returning customer orders in this period</div>
+            <div className="text-[11px] text-slate-400 mt-2">Returning customer orders in this period</div>
           </div>
         </div>
 
         {/* FIRST500 Campaign Status Box */}
-        <div className="bg-slate-900 border border-amber-800/50 rounded-3xl p-5 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-extrabold text-white tracking-wider uppercase flex items-center gap-2">
-              <Gift className="w-4 h-4 text-amber-400" />
+        <div className="bg-amber-50/60 border border-amber-200 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+            <h3 className="text-xs font-extrabold text-amber-950 tracking-wider uppercase flex items-center gap-2">
+              <Gift className="w-4 h-4 text-amber-700" />
               <span>FIRST500 Campaign Performance (પ્રથમ ૫૦૦ ગ્રાહક યોજના)</span>
             </h3>
-            <span className="text-xs font-mono font-bold text-amber-400">
+            <span className="text-xs font-mono font-bold text-amber-800 bg-white px-2.5 py-1 rounded-lg border border-amber-200">
               500 Quota Cap
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Consumed Coupons</div>
-              <div className="text-xl font-black text-emerald-400 font-mono">
+            <div className="p-4 bg-white border border-amber-100 rounded-2xl space-y-1 shadow-2xs">
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Consumed Coupons</div>
+              <div className="text-xl font-black text-emerald-700 font-mono">
                 {first500.consumed_count || 0} / 500
               </div>
-              <div className="text-[10px] text-slate-500">Completed & delivered</div>
+              <div className="text-[10px] text-slate-400">Completed &amp; delivered</div>
             </div>
 
-            <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Reserved (Pending)</div>
-              <div className="text-xl font-black text-amber-400 font-mono">
+            <div className="p-4 bg-white border border-amber-100 rounded-2xl space-y-1 shadow-2xs">
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Reserved (Pending)</div>
+              <div className="text-xl font-black text-amber-700 font-mono">
                 {first500.reserved_count || 0}
               </div>
-              <div className="text-[10px] text-slate-500">In-flight active orders</div>
+              <div className="text-[10px] text-slate-400">In-flight active orders</div>
             </div>
 
-            <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Remaining Eligible</div>
-              <div className="text-xl font-black text-white font-mono">
+            <div className="p-4 bg-white border border-amber-100 rounded-2xl space-y-1 shadow-2xs">
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Remaining Eligible</div>
+              <div className="text-xl font-black text-slate-900 font-mono">
                 {first500.remaining_eligible || 0}
               </div>
-              <div className="text-[10px] text-slate-500">Unused coupons remaining</div>
+              <div className="text-[10px] text-slate-400">Unused coupons remaining</div>
             </div>
 
-            <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-              <div className="text-[10px] text-slate-400 font-bold uppercase">Total Discount Burn</div>
-              <div className="text-xl font-black text-amber-300 font-mono">
+            <div className="p-4 bg-white border border-amber-100 rounded-2xl space-y-1 shadow-2xs">
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Total Discount Burn</div>
+              <div className="text-xl font-black text-amber-800 font-mono">
                 ₹{Number(first500.total_discount_given || 0).toLocaleString('en-IN')}
               </div>
               <div className="text-[10px] text-slate-400">
-                Revenue Gen: ₹{Number(first500.revenue_from_first500 || 0).toLocaleString('en-IN')}
+                Revenue: ₹{Number(first500.revenue_from_first500 || 0).toLocaleString('en-IN')}
               </div>
             </div>
           </div>
@@ -252,49 +333,49 @@ export default function CustomerReportingPage() {
 
         {/* Selected Customer Drilldown Drawer */}
         {selectedCustomer && (
-          <div className="bg-slate-900 border border-amber-500/60 rounded-3xl p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="bg-white border border-amber-300 rounded-3xl p-6 shadow-md space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                <span className="font-extrabold text-sm text-white">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span className="font-extrabold text-sm text-slate-900">
                   Customer Profile: {selectedCustomer.full_name}
                 </span>
-                <span className="text-xs font-mono bg-slate-950 text-slate-400 px-2 py-0.5 rounded-md border border-slate-800">
+                <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
                   Seq #{selectedCustomer.verified_sequence || '—'}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedCustomer(null)}
-                className="text-xs text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
+                className="text-xs text-amber-700 hover:text-amber-900 font-bold cursor-pointer bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200"
               >
                 Close ✕
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Mobile</span>
-                <div className="font-mono font-bold text-white mt-1">{selectedCustomer.mobile}</div>
+                <div className="font-mono font-bold text-slate-900 mt-1">{selectedCustomer.mobile}</div>
               </div>
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Total Orders</span>
-                <div className="font-mono font-bold text-white mt-1">{selectedCustomer.total_orders}</div>
+                <div className="font-mono font-bold text-slate-900 mt-1">{selectedCustomer.total_orders}</div>
               </div>
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Lifetime Spend</span>
-                <div className="font-mono font-bold text-emerald-400 mt-1">₹{Number(selectedCustomer.lifetime_spend).toFixed(2)}</div>
+                <div className="font-mono font-bold text-emerald-700 mt-1">₹{Number(selectedCustomer.lifetime_spend).toFixed(2)}</div>
               </div>
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Average Order Value</span>
-                <div className="font-mono font-bold text-white mt-1">₹{Number(selectedCustomer.average_order_value).toFixed(2)}</div>
+                <div className="font-mono font-bold text-slate-900 mt-1">₹{Number(selectedCustomer.average_order_value).toFixed(2)}</div>
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <Link
                 href={`/admin/reports/orders?search=${selectedCustomer.mobile}`}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-xs"
               >
                 <span>View All Orders for this Customer</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -304,62 +385,70 @@ export default function CustomerReportingPage() {
         )}
 
         {/* Customer Rankings Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
             <span>Customer Lifetime Value (LTV) Ranking</span>
-            <span>{filteredCustomers.length} Customers • Click row to inspect profile</span>
+            <span className="text-[11px] text-slate-400 font-normal">{filteredCustomers.length} Customers • Click row to inspect profile</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 text-[10px] uppercase font-mono">
+              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-[10px] uppercase font-bold">
                 <tr>
-                  <th className="p-3.5">Seq #</th>
-                  <th className="p-3.5">Customer Name</th>
-                  <th className="p-3.5">Mobile</th>
-                  <th className="p-3.5 text-right">Total Orders</th>
-                  <th className="p-3.5 text-right font-bold text-emerald-400">Lifetime Spend (₹)</th>
-                  <th className="p-3.5 text-right">Average Order Value (₹)</th>
-                  <th className="p-3.5">Last Order Date</th>
-                  <th className="p-3.5 text-center">FIRST500</th>
+                  <th className="p-4">Seq #</th>
+                  <th className="p-4">Customer Name</th>
+                  <th className="p-4">Mobile</th>
+                  <th className="p-4 text-right">Total Orders</th>
+                  <th className="p-4 text-right font-black text-emerald-800">Lifetime Spend (₹)</th>
+                  <th className="p-4 text-right">Average Order Value (₹)</th>
+                  <th className="p-4">Last Order Date</th>
+                  <th className="p-4 text-center">FIRST500</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 font-mono">
-                {filteredCustomers.map((c) => {
-                  const isSelected = selectedCustomer?.customer_id === c.customer_id;
-                  return (
-                    <tr
-                      key={c.customer_id}
-                      onClick={() => setSelectedCustomer(isSelected ? null : c)}
-                      className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-amber-950/40 font-bold' : 'hover:bg-slate-800/40'
-                      }`}
-                    >
-                      <td className="p-3.5 text-slate-400">#{c.verified_sequence || '—'}</td>
-                      <td className="p-3.5 font-sans font-bold text-white">{c.full_name}</td>
-                      <td className="p-3.5 text-slate-300 flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-slate-500" /> {c.mobile}
-                      </td>
-                      <td className="p-3.5 text-right font-bold text-white">{c.total_orders}</td>
-                      <td className="p-3.5 text-right font-black text-emerald-400 text-sm">
-                        ₹{Number(c.lifetime_spend).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                      </td>
-                      <td className="p-3.5 text-right text-slate-300">
-                        ₹{Number(c.average_order_value).toFixed(2)}
-                      </td>
-                      <td className="p-3.5 text-slate-400">{c.last_order_date || 'No orders'}</td>
-                      <td className="p-3.5 text-center">
-                        {c.first500_consumed ? (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold uppercase">
-                            Used
-                          </span>
-                        ) : (
-                          <span className="text-slate-600 text-[10px]">Unused</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody className="divide-y divide-slate-100 font-mono">
+                {filteredCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-slate-400 font-sans italic text-xs">
+                      No customers found matching the search filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCustomers.map((c) => {
+                    const isSelected = selectedCustomer?.customer_id === c.customer_id;
+                    return (
+                      <tr
+                        key={c.customer_id}
+                        onClick={() => setSelectedCustomer(isSelected ? null : c)}
+                        className={`cursor-pointer transition-colors ${
+                          isSelected ? 'bg-amber-50 font-bold' : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        <td className="p-4 text-slate-500">#{c.verified_sequence || '—'}</td>
+                        <td className="p-4 font-sans font-bold text-slate-900">{c.full_name}</td>
+                        <td className="p-4 text-slate-600 flex items-center gap-1">
+                          <Phone className="w-3 h-3 text-slate-400" /> {c.mobile}
+                        </td>
+                        <td className="p-4 text-right font-bold text-slate-900">{c.total_orders}</td>
+                        <td className="p-4 text-right font-black text-emerald-700 text-sm">
+                          ₹{Number(c.lifetime_spend).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </td>
+                        <td className="p-4 text-right text-slate-700">
+                          ₹{Number(c.average_order_value).toFixed(2)}
+                        </td>
+                        <td className="p-4 text-slate-500">{c.last_order_date || 'No orders'}</td>
+                        <td className="p-4 text-center">
+                          {c.first500_consumed ? (
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase">
+                              Used
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[10px]">Unused</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>

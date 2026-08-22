@@ -29,7 +29,7 @@ export default function AreaTrendChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 rounded-2xl bg-slate-950 border border-slate-800/80 flex flex-col items-center justify-center p-6 text-slate-500 text-xs italic">
+      <div className="h-64 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center p-6 text-slate-400 text-xs italic">
         No trend data available for this selected date range.
       </div>
     );
@@ -69,13 +69,13 @@ export default function AreaTrendChart({
       : `${pathD} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl relative">
+    <div className="w-full bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-xs relative">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-extrabold text-white tracking-wider uppercase flex items-center gap-2">
+        <h3 className="text-xs font-bold text-slate-700 tracking-wider uppercase flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span>{title}</span>
         </h3>
-        <span className="text-[11px] font-mono text-slate-400">
+        <span className="text-[11px] font-mono text-slate-500 font-bold">
           Peak: {metricKey === 'total_orders' ? `${maxValue} orders` : `₹${maxValue.toLocaleString('en-IN')}`}
         </span>
       </div>
@@ -87,7 +87,7 @@ export default function AreaTrendChart({
         >
           <defs>
             <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#10b981" stopOpacity="0.00" />
             </linearGradient>
           </defs>
@@ -103,7 +103,7 @@ export default function AreaTrendChart({
                   y1={y}
                   x2={width - paddingX}
                   y2={y}
-                  stroke="#1e293b"
+                  stroke="#e2e8f0"
                   strokeDasharray="4 4"
                   strokeWidth="1"
                 />
@@ -111,7 +111,7 @@ export default function AreaTrendChart({
                   x={paddingX - 8}
                   y={y + 4}
                   textAnchor="end"
-                  className="fill-slate-500 font-mono text-[10px]"
+                  className="fill-slate-400 font-mono text-[10px]"
                 >
                   {metricKey === 'total_orders' ? labelVal : `₹${labelVal >= 1000 ? `${(labelVal / 1000).toFixed(1)}k` : labelVal}`}
                 </text>
@@ -126,7 +126,7 @@ export default function AreaTrendChart({
           <path
             d={pathD}
             fill="none"
-            stroke="#10b981"
+            stroke="#059669"
             strokeWidth="3"
             strokeLinecap="round"
           />

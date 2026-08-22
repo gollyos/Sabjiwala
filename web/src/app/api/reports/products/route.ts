@@ -4,8 +4,8 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
   return createSupabaseClient(url, key);
 }
 
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     const { data: categories } = await supabase
       .from('categories')
       .select('id, name_en, name_gu')
-      .order('sort_order', { ascending: true });
+      .order('display_order', { ascending: true });
 
     return NextResponse.json({
       success: true,

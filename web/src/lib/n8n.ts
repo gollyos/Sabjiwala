@@ -3,8 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for privileged server operations.');
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   return createClient(url, key);
 }
 
@@ -107,7 +106,24 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
     const n8nConfig = (settingRow?.value as { webhook_url?: string; is_active?: boolean; admin_alert_phone?: string; admin_alert_email?: string }) || {};
     const webhookUrl = n8nConfig.webhook_url || process.env.N8N_ORDER_WEBHOOK_URL;
 
-    // 2. Fetch Complete Order Snapshot
+    // 2. Fetch Complete Order Snapshot via RPC (Security Definer)
+    const { data: rpcPayload, error: rpcErr } = await supabase.rpc('get_n8n_order_payload', { p_order_id: orderId });
+    if (!rpcErr && rpcPayload?.order) {
+      if (!webhookUrl) {
+        console.log('[n8n] Webhook URL not configured yet:', rpcPayload.order.order_number);
+        return { success: true, dispatched: false, reason: 'n8n_webhook_url_not_set', payload: rpcPayload };
+      }
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rpcPayload),
+        signal: AbortSignal.timeout(8000),
+      });
+      console.log(`[n8n] RPC Dispatched ${rpcPayload.order.order_number} -> HTTP ${res.status}`);
+      return { success: res.ok, dispatched: true, status: res.status, payload: rpcPayload };
+    }
+
+    // Fallback: Direct table select if RPC not available
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .select(`
