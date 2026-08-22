@@ -8,11 +8,12 @@ import { getErrorMessage } from '@/lib/errors';
 
 
 import { useState, useCallback, useEffect } from 'react';
-import { Printer, ShoppingBag, Search, Download, RefreshCw, Phone, MapPin, AlertCircle, ExternalLink, ChevronRight, X } from 'lucide-react';
+import { Printer, ShoppingBag, Search, Download, RefreshCw, Phone, MapPin, AlertCircle, ExternalLink, ChevronRight, X, Plus } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { SlideOverDrawer } from '@/components/ui/SlideOverDrawer';
 import ThermalBagSticker from '@/components/ThermalBagSticker';
+import { AdminAddOrderModal } from '@/components/AdminAddOrderModal';
 
 import { createClient } from '@/lib/supabase/client';
 import { todayIST, toISTDateString } from '@/lib/istDate';
@@ -29,6 +30,7 @@ export default function AdminOrdersPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [addOrderModalOpen, setAddOrderModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [printStickerOrder, setPrintStickerOrder] = useState<any | null>(null);
 
@@ -233,13 +235,22 @@ export default function AdminOrdersPage() {
               />
             </div>
 
+            <button
+              onClick={() => setAddOrderModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              title="Add Phone / Manual Order directly"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Add Phone Order (ઓર્ડર ઉમેરો)</span>
+            </button>
+
             <a
               href={`/api/reports/export?type=orders&start_date=${startDate}&end_date=${endDate}`}
               download
-              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-200 cursor-pointer"
               title="Download orders in Excel/CSV"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-slate-600" />
               <span>Excel</span>
             </a>
 
@@ -539,24 +550,34 @@ export default function AdminOrdersPage() {
 
             <ThermalBagSticker
               payload={{
-                header: 'TAAZATOKRA HALOL',
+                header: 'SABJIWALA HALOL',
                 order_id: printStickerOrder.id,
                 order_number: printStickerOrder.order_number,
+                order_date: printStickerOrder.created_at,
                 bag_id: `bag-${printStickerOrder.id}-1`,
                 bag_barcode: `SBJ-BAG-${printStickerOrder.order_number}-01`,
                 bag_sequence: 1,
                 total_bags: 1,
                 customer_name: printStickerOrder.customer_name_snapshot,
+                customer_mobile: printStickerOrder.customer_mobile_snapshot || '',
                 customer_mobile_masked: printStickerOrder.customer_mobile_snapshot || '',
                 delivery_date: printStickerOrder.delivery_date,
                 delivery_slot: '10:00 AM - 01:00 PM',
                 delivery_area: printStickerOrder.delivery_area_snapshot,
                 delivery_society_street: printStickerOrder.delivery_society_street_snapshot,
+                delivery_flat_house: printStickerOrder.delivery_flat_house_snapshot,
+                delivery_landmark: printStickerOrder.delivery_landmark_snapshot,
                 payment_method: printStickerOrder.payment_method || 'COD',
+                payment_status: printStickerOrder.payment_status || 'PENDING',
+                subtotal_amount: Number(printStickerOrder.subtotal_amount || 0),
+                discount_amount: Number(printStickerOrder.first500_discount_amount || 0) + Number(printStickerOrder.cod_discount_amount || 0),
+                promo_discount: Number(printStickerOrder.first500_discount_amount || 0),
+                cod_discount: Number(printStickerOrder.cod_discount_amount || 0),
+                delivery_charge: Number(printStickerOrder.delivery_charge || 0),
                 final_payable_amount: Number(printStickerOrder.final_payable_amount || 0),
                 collect_cash_text: `₹${Number(printStickerOrder.final_payable_amount || 0).toFixed(0)} COD`,
                 qr_token: printStickerOrder.qr_access_token || printStickerOrder.id,
-                qr_url: `https://taazatokra.com/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
+                qr_url: `https://sabjiwala.in/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
                 printed_at: new Date().toISOString(),
                 items_summary: (printStickerOrder.items || []).map((i: any) => ({
                   name_en: i.name_en || i.product_name_en || '',
@@ -565,20 +586,31 @@ export default function AdminOrdersPage() {
                   variant_gu: i.variant_name_gu || '',
                   qty: Number(i.quantity || 1),
                   unit: i.unit_code || 'kg',
+                  unit_price: Number(i.selling_price || 0),
+                  line_total: Number(i.final_amount || (Number(i.selling_price || 0) * Number(i.quantity || 1))),
                 })),
               }}
             />
 
             <button
               onClick={() => window.print()}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Printer className="w-4 h-4" />
-              <span>Print Sticker (50 &times; 50mm)</span>
+              <span>Print Retail Bill / પહોંચ (Thermal Receipt)</span>
             </button>
           </div>
         </div>
       )}
+
+      {/* Direct Phone / Manual Add Order Modal */}
+      <AdminAddOrderModal
+        isOpen={addOrderModalOpen}
+        onClose={() => setAddOrderModalOpen(false)}
+        onOrderCreated={() => {
+          fetchOrders();
+        }}
+      />
 
     </div>
   );

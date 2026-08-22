@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: queueErr.message }, { status: 500 });
     }
 
-    // 3. Fetch Order Snapshot
+    // 3. Fetch Order Snapshot with Financials
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .select('*')
@@ -84,10 +84,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
-    // 4. Fetch Order Items
+    // 4. Fetch Order Items with Prices & Totals
     const { data: items } = await supabase
       .from('order_items')
-      .select('product_name_en_snapshot, product_name_gu_snapshot, variant_name_en_snapshot, variant_name_gu_snapshot, quantity, unit_code_snapshot')
+      .select('product_name_en_snapshot, product_name_gu_snapshot, variant_name_en_snapshot, variant_name_gu_snapshot, quantity, unit_code_snapshot, selling_price_snapshot, line_total')
       .eq('order_id', order_id);
 
     const itemsSummary = (items || []).map((it) => ({
@@ -95,39 +95,50 @@ export async function POST(req: NextRequest) {
       name_gu: it.product_name_gu_snapshot,
       variant_en: it.variant_name_en_snapshot,
       variant_gu: it.variant_name_gu_snapshot,
-      qty: it.quantity,
+      qty: Number(it.quantity || 1),
       unit: it.unit_code_snapshot,
+      unit_price: Number(it.selling_price_snapshot || 0),
+      line_total: Number(it.line_total || (Number(it.selling_price_snapshot || 0) * Number(it.quantity || 1))),
     }));
 
-    // Format Masked Phone
     const phone = order.customer_mobile_snapshot || '';
-    const maskedPhone = phone.length >= 10 ? '******' + phone.slice(-4) : phone;
 
     // Filter target bags
     const targetBags = bag_id ? bags.filter((b) => b.id === bag_id) : bags;
 
-    // 5. Generate Print Payloads with Barcode & QR SVGs
+    // 5. Generate Print Payloads with Full Bill Details, Barcode & QR SVGs
     const stickers = await Promise.all(
       targetBags.map(async (bag) => {
-        const barcodeSvg = generateCode128Svg(bag.bag_barcode, { height: 45, barWidth: 2, showText: true });
-        const qrSvg = await generateQrCodeSvg(`https://sabjiwala.in/b/${bag.qr_token}`, { width: 90, margin: 0 });
+        const barcodeSvg = generateCode128Svg(bag.bag_barcode, { height: 40, barWidth: 2, showText: true });
+        const qrSvg = await generateQrCodeSvg(`https://sabjiwala.in/b/${bag.qr_token}`, { width: 80, margin: 0 });
 
         return {
           header: 'SABJIWALA',
           order_id: order.id,
           order_number: order.order_number,
+          order_date: order.created_at || order.placed_at,
           bag_id: bag.id,
           bag_barcode: bag.bag_barcode,
           bag_sequence: bag.bag_sequence,
           total_bags: bag.total_bags_snapshot || targetBags.length,
           customer_name: order.customer_name_snapshot,
-          customer_mobile_masked: maskedPhone,
+          customer_mobile: phone,
+          customer_mobile_masked: phone,
           delivery_date: order.delivery_date,
           delivery_slot: '10:00 AM - 01:00 PM',
           delivery_area: order.delivery_area_snapshot,
           delivery_society_street: order.delivery_society_street_snapshot,
-          payment_method: String(order.payment_method).toUpperCase(),
-          final_payable_amount: order.final_payable_amount,
+          delivery_flat_house: order.delivery_flat_house_snapshot,
+          delivery_landmark: order.delivery_landmark_snapshot,
+          payment_method: String(order.payment_method || 'COD').toUpperCase(),
+          payment_status: String(order.payment_status || 'PENDING').toUpperCase(),
+          subtotal_amount: Number(order.subtotal_amount || 0),
+          promo_discount: Number(order.promo_discount || 0),
+          first_order_discount: Number(order.first_order_discount || 0),
+          cod_discount: Number(order.cod_discount || 0),
+          discount_amount: Number(order.promo_discount || 0) + Number(order.first_order_discount || 0) + Number(order.cod_discount || 0),
+          delivery_charge: Number(order.delivery_charge || 0),
+          final_payable_amount: Number(order.final_payable_amount || 0),
           collect_cash_text: `COLLECT ₹${Number(order.final_payable_amount).toFixed(2)}`,
           qr_token: bag.qr_token,
           qr_url: `https://sabjiwala.in/b/${bag.qr_token}`,

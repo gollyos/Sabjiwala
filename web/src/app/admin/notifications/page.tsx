@@ -14,6 +14,30 @@ export default function AdminNotificationCenterPage() {
   const [search, setSearch] = useState('');
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  const handleSendTelegramReport = async () => {
+    try {
+      setSendingTest(true);
+      setTestResult(null);
+      const res = await fetch('/api/workers/telegram-owner-report?force=true', { method: 'POST' });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Report failed');
+      if (json.sent) {
+        setTestResult({
+          type: 'success',
+          text: `Telegram par bhej diya (delivery ${json.delivery_date}) — ${json.stats.totalOrders} orders, ${json.stats.totalItems} items, ₹${json.stats.orderValue}.`,
+        });
+      } else {
+        setTestResult({ type: 'info', text: `Is delivery date ka report pehle hi bheja ja chuka hai (${json.delivery_date}).` });
+      }
+    } catch (err) {
+      setTestResult({ type: 'error', text: getErrorMessage(err) || 'Report send failed.' });
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -107,6 +131,42 @@ export default function AdminNotificationCenterPage() {
           </div>
         )}
         
+        {/* Owner Telegram nightly report */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-sky-200 p-5 rounded-3xl shadow-xs">
+          <div>
+            <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+              <Send className="w-4 h-4 text-sky-600" />
+              <span>Owner Telegram Report — Daily 8:00 PM (માલિકનો રિપોર્ટ)</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Roz raat 8 baje owner ke Telegram par kal ki delivery ka procurement list (kg/item) + order value
+              auto-message jaata hai. 7:50 PM cutoff ke baad ke orders day-after-tomorrow me count hote hain.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-2">
+            {testResult && (
+              <span className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border ${
+                testResult.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : testResult.type === 'info'
+                    ? 'bg-sky-50 text-sky-800 border-sky-200'
+                    : 'bg-rose-50 text-rose-800 border-rose-200'
+              }`}>
+                {testResult.text}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleSendTelegramReport}
+              disabled={sendingTest}
+              className="px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-extrabold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Send className={`w-3.5 h-3.5 ${sendingTest ? 'animate-pulse' : ''}`} />
+              <span>{sendingTest ? 'Sending…' : 'Send Test Report Now'}</span>
+            </button>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-5 rounded-3xl shadow-xs">
           <div>

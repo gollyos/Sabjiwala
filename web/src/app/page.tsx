@@ -195,7 +195,7 @@ export default function HomePage() {
   const isFruitProduct = React.useCallback((p: Product) => {
     const cat = categories.find((c) => c.id === p.category_id);
     const slug = cat?.slug || '';
-    return slug.includes('fruit') || p.slug.includes('apple') || p.slug.includes('banana') || p.slug.includes('dadam') || p.slug.includes('mosambi') || p.slug.includes('orange') || p.slug.includes('papaya') || p.slug.includes('guava') || p.slug.includes('watermelon') || p.slug.includes('dragon');
+    return slug.includes('fruit') || p.slug.includes('apple') || p.slug.includes('banana') || p.slug.includes('dadam') || p.slug.includes('pomegranate') || p.slug.includes('mosambi') || p.slug.includes('orange') || p.slug.includes('papaya') || p.slug.includes('guava') || p.slug.includes('watermelon') || p.slug.includes('chiku') || p.slug.includes('dragon');
   }, [categories]);
 
   // Filter Products with Smart Search & Modules + Stock-First Sorting

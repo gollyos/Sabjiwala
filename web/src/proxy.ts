@@ -21,6 +21,11 @@ const API_ROLE_RULES: Array<{ prefix: string; roles: ReadonlySet<StaffRole> }> =
   { prefix: '/api/notifications/retry', roles: new Set(['owner', 'manager']) },
 ];
 
+// Self-authorized automation endpoints: these routes verify their own worker
+// secrets (timing-safe) or staff sessions internally, so the role middleware
+// must let cron / n8n callers through without a Supabase session.
+const SELF_AUTHORIZED_API_PATHS = ['/api/procurement/lock-batch'];
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -45,9 +50,15 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const matchingRule = API_ROLE_RULES.find(({ prefix }) =>
-    request.nextUrl.pathname.startsWith(prefix)
+  const isSelfAuthorized = SELF_AUTHORIZED_API_PATHS.some((path) =>
+    request.nextUrl.pathname === path
   );
+
+  const matchingRule = isSelfAuthorized
+    ? undefined
+    : API_ROLE_RULES.find(({ prefix }) =>
+        request.nextUrl.pathname.startsWith(prefix)
+      );
 
   if (matchingRule) {
     if (!user) {

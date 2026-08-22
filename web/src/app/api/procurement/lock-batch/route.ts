@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
@@ -8,6 +9,12 @@ function getServiceSupabase() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
   return createSupabaseClient(url, key);
+}
+
+function secretsMatch(received: string, expected: string): boolean {
+  const a = Buffer.from(received);
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +33,7 @@ export async function POST(req: NextRequest) {
         .single();
 
       const validSecret = settingData?.value?.secret || process.env.PROCUREMENT_LOCK_SECRET;
-      if (validSecret && secretHeader === validSecret) {
+      if (validSecret && secretsMatch(secretHeader, validSecret)) {
         isAuthorized = true;
       }
     }

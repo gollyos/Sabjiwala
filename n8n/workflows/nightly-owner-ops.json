@@ -1,0 +1,164 @@
+{
+  "name": "Sabjiwala - Nightly Owner Ops: 7:55 PM Batch Lock + 8:00 PM Telegram Report",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Nightly Owner Operations\n\n**Cron 1 (7:55 PM IST):** Locks tomorrow's procurement batch (freezes purchase requirements after the 7:50 PM order cutoff). Idempotent — safe to re-run.\n\n**Cron 2 (8:00 PM IST):** Sends the owner's Telegram report — tomorrow's delivery: total orders, value, and the full kg/item procurement list.\n\n### Required n8n Environment Variables\n- `SABJIWALA_API_BASE_URL` — e.g. https://sabjiwala.store\n- `SABJIWALA_INTERNAL_SECRET` — same value as the app's INTERNAL_WORKER_SECRET\n- `SABJIWALA_PROCUREMENT_LOCK_SECRET` — app's PROCUREMENT_LOCK_SECRET (or the `procurement_lock_secret` value in app_settings)\n- `SABJIWALA_TELEGRAM_REPORT_CHAT_ID` (optional) — override report chat id\n\n### App Environment Variables (Supabase/Vercel/host)\n- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_CHAT_ID`\n\n**Timezone:** set the n8n instance timezone to Asia/Kolkata (Workflow Settings → Timezone) so the cron expressions fire at IST times.",
+        "height": 420,
+        "width": 460
+      },
+      "name": "Sticky Note: Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-320, 180]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "55 19 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Cron: Daily 7:55 PM Procurement Batch Lock",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [100, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/procurement/lock-batch",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-procurement-secret",
+              "value": "={{ $env.SABJIWALA_PROCUREMENT_LOCK_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "name": "HTTP: Lock Tomorrow's Procurement Batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 240]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 20 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Cron: Daily 8:00 PM Owner Telegram Report",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [100, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/workers/telegram-owner-report",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-worker-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ force: false }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "name": "HTTP: Send Owner Telegram Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log the nightly outcome for n8n execution history.\nconst lock = $input.first()?.json || {};\nconst report = $input.last()?.json || {};\n\nreturn [{\n  json: {\n    locked: lock.success === true,\n    lock_status: lock.data?.lock_status?.status || lock.status || null,\n    report_sent: report.sent === true,\n    report_skipped: report.skipped || null,\n    delivery_date: report.delivery_date || null,\n    ran_at: new Date().toISOString()\n  }\n}];"
+      },
+      "name": "Code: Log Nightly Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 360]
+    }
+  ],
+  "connections": {
+    "Cron: Daily 7:55 PM Procurement Batch Lock": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Lock Tomorrow's Procurement Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Lock Tomorrow's Procurement Batch": {
+      "main": [
+        [
+          {
+            "node": "Code: Log Nightly Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron: Daily 8:00 PM Owner Telegram Report": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Send Owner Telegram Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Send Owner Telegram Report": {
+      "main": [
+        [
+          {
+            "node": "Code: Log Nightly Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Asia/Kolkata"
+  }
+}

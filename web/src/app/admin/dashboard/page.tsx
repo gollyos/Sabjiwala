@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { AttentionItem, NeedsAttentionSection } from '@/components/ui/NeedsAttentionSection';
 import AreaTrendChart, { AreaDataPoint } from '@/components/charts/AreaTrendChart';
 import HorizontalBarChart, { BarItem } from '@/components/charts/HorizontalBarChart';
-import { TrendingUp, ShoppingBag, DollarSign, Truck, RefreshCw, Tag, Layers, Boxes, ArrowRight, AlertCircle, BarChart3 } from 'lucide-react';
+import { TrendingUp, ShoppingBag, DollarSign, Truck, RefreshCw, Tag, Layers, Boxes, ArrowRight, AlertCircle, BarChart3, IndianRupee, Phone, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { AdminNav } from '@/components/AdminNav';
 import { StatCard } from '@/components/ui/StatCard';
 import { FlowProgressStrip } from '@/components/ui/FlowProgressStrip';
+import { AdminAddOrderModal } from '@/components/AdminAddOrderModal';
 
 interface DashboardProduct extends BarItem {
   product_id: string;
@@ -37,6 +38,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [addOrderModalOpen, setAddOrderModalOpen] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -258,64 +260,115 @@ export default function AdminDashboardPage() {
         />
 
         {/* 4. CONTEXTUAL QUICK ACTIONS */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3.5 flex items-center justify-between">
-            <span>Quick Actions (ઝડપી કામગીરી)</span>
-            <span className="text-[11px] text-slate-400 font-normal">Context-aware shortcuts</span>
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <span>Quick Operations &amp; Shortcuts (ઝડપી કામગીરી)</span>
+            </span>
+            <span className="text-[11px] text-slate-400 font-normal">Essential Daily Tools</span>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            {/* Action 1: Daily Mandi Rates */}
             <Link
-              href="/admin/pricing"
-              className="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs text-slate-700"
+              href="/admin/mandi-rates"
+              className="p-4 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-950 transition-all flex flex-col justify-between group shadow-2xs cursor-pointer"
             >
-              <Tag className="w-4 h-4 text-emerald-600" />
-              <span>Update Today&apos;s Prices (ભાવ બદલો)</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                  <IndianRupee className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-emerald-200 text-emerald-900 rounded-full">
+                  Date-Wise Rates
+                </span>
+              </div>
+              <div>
+                <div className="font-black text-slate-900 text-sm group-hover:text-emerald-800 transition-colors">
+                  Daily Mandi Rates (મંડી ભાવ)
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                  Set buying rate ₹/kg &amp; selling price for all packs
+                </div>
+              </div>
             </Link>
 
-            <Link
-              href="/admin/orders"
-              className="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:text-blue-800 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs text-slate-700"
+            {/* Action 2: Add Phone Order */}
+            <button
+              type="button"
+              onClick={() => setAddOrderModalOpen(true)}
+              className="p-4 rounded-2xl bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200/80 text-blue-950 transition-all flex flex-col justify-between group text-left shadow-2xs cursor-pointer"
             >
-              <ShoppingBag className="w-4 h-4 text-blue-600" />
-              <span>View Orders (ઓર્ડર્સ જુઓ)</span>
-            </Link>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-blue-200 text-blue-900 rounded-full flex items-center gap-1">
+                  <Plus className="w-2.5 h-2.5" />
+                  Manual Entry
+                </span>
+              </div>
+              <div>
+                <div className="font-black text-slate-900 text-sm group-hover:text-blue-800 transition-colors">
+                  + Add Phone Order (ઓર્ડર ઉમેરો)
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                  Book direct orders for phone calls &amp; WhatsApp
+                </div>
+              </div>
+            </button>
 
+            {/* Action 3: Mandi Purchases */}
             <Link
               href="/admin/procurement"
-              className={`px-4 py-2.5 rounded-2xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
+              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between group shadow-2xs cursor-pointer ${
                 isNightProcurementTime
-                  ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700 shadow-sm'
-                  : 'bg-slate-50 hover:bg-purple-50 hover:text-purple-800 text-slate-700 border-slate-200'
+                  ? 'bg-purple-600 text-white border-purple-700 shadow-sm'
+                  : 'bg-purple-50/80 hover:bg-purple-100/80 border-purple-200/80 text-purple-950'
               }`}
             >
-              <Boxes className={`w-4 h-4 ${isNightProcurementTime ? 'text-white' : 'text-purple-600'}`} />
-              <span>
-                {isNightProcurementTime ? "View Tonight's Procurement (8 PM Batch)" : 'Mandi Purchases (ખરીદી સંચાલન)'}
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xs ${isNightProcurementTime ? 'bg-white/20 text-white' : 'bg-purple-600 text-white'}`}>
+                  <Boxes className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${isNightProcurementTime ? 'bg-white/20 text-white' : 'bg-purple-200 text-purple-900'}`}>
+                  8 PM Cutoff
+                </span>
+              </div>
+              <div>
+                <div className={`font-black text-sm transition-colors ${isNightProcurementTime ? 'text-white' : 'text-slate-900 group-hover:text-purple-800'}`}>
+                  Mandi Purchases (ખરીદી)
+                </div>
+                <div className={`text-[11px] mt-0.5 font-medium ${isNightProcurementTime ? 'text-purple-100' : 'text-slate-500'}`}>
+                  Night APMC buying list &amp; batch weight
+                </div>
+              </div>
             </Link>
 
+            {/* Action 4: Price Revision */}
             <Link
-              href="/admin/packing"
-              className={`px-4 py-2.5 rounded-2xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
-                isMorningPackingTime
-                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm'
-                  : 'bg-slate-50 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 border-slate-200'
-              }`}
+              href="/admin/pricing"
+              className="p-4 rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 text-amber-950 transition-all flex flex-col justify-between group shadow-2xs cursor-pointer"
             >
-              <Layers className={`w-4 h-4 ${isMorningPackingTime ? 'text-white' : 'text-emerald-600'}`} />
-              <span>
-                {isMorningPackingTime ? 'Start Morning Packing (પેકિંગ શરૂ કરો)' : 'Godown Packing'}
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-xs">
+                  <Tag className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-amber-200 text-amber-900 rounded-full">
+                  Fast Table
+                </span>
+              </div>
+              <div>
+                <div className="font-black text-slate-900 text-sm group-hover:text-amber-800 transition-colors">
+                  Daily Pricing (ભાવ નક્કી)
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                  Quick bulk selling price adjustment table
+                </div>
+              </div>
             </Link>
 
-            <Link
-              href="/admin/delivery"
-              className="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-cyan-50 hover:text-cyan-800 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs text-slate-700"
-            >
-              <Truck className="w-4 h-4 text-cyan-600" />
-              <span>Manage Delivery & Driver COD</span>
-            </Link>
           </div>
         </div>
 
@@ -383,6 +436,15 @@ export default function AdminDashboardPage() {
         </div>
 
       </main>
+
+      {/* Direct Phone / Manual Add Order Modal */}
+      <AdminAddOrderModal
+        isOpen={addOrderModalOpen}
+        onClose={() => setAddOrderModalOpen(false)}
+        onOrderCreated={() => {
+          fetchDashboardData();
+        }}
+      />
     </div>
   );
 }

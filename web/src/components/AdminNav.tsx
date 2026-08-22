@@ -82,7 +82,7 @@ export function AdminNav() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1 text-xs">
+          <nav className="hidden lg:flex items-center space-x-1 text-xs">
             {primaryNav.map((item) => {
               const Icon = item.icon;
               const isActive = 
@@ -94,13 +94,13 @@ export function AdminNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-2.5 xl:px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 whitespace-nowrap transition-all ${
                     isActive
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -111,7 +111,7 @@ export function AdminNav() {
               <button
                 type="button"
                 onClick={() => setManageOpen(!manageOpen)}
-                className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2.5 xl:px-3 py-2 rounded-xl font-bold flex items-center gap-1 whitespace-nowrap transition-all cursor-pointer ${
                   isSecondaryActive
                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -152,7 +152,7 @@ export function AdminNav() {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="ml-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="ml-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               title="Logout from Admin HQ"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -161,7 +161,7 @@ export function AdminNav() {
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
@@ -176,8 +176,8 @@ export function AdminNav() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
-          <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+        <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bold">
             {primaryNav.map((item) => {
               const Icon = item.icon;
               const isActive = 
@@ -190,14 +190,21 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`p-3 rounded-xl flex items-center gap-2 transition-all ${
+                  className={`p-3 rounded-xl flex items-center justify-between transition-all ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-2xs font-extrabold'
                       : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </div>
+                  {item.nameGu && (
+                    <span className={`text-[11px] font-normal ${isActive ? 'text-emerald-100' : 'text-slate-400'}`}>
+                      {item.nameGu}
+                    </span>
+                  )}
                 </Link>
               );
             })}
