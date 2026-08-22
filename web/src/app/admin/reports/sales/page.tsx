@@ -6,8 +6,10 @@ import { TrendingUp, Download, RefreshCw } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import FinancialWaterfallChart from '@/components/charts/FinancialWaterfallChart';
 import AreaTrendChart, { AreaDataPoint } from '@/components/charts/AreaTrendChart';
+import { ReportDatePresetsBar, computePresetDates, DatePresetType } from '@/components/admin/ReportDatePresetsBar';
 
 export default function SalesReportPage() {
+  const [activePreset, setActivePreset] = useState<DatePresetType>('30days');
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 29);
@@ -29,15 +31,17 @@ export default function SalesReportPage() {
       params.set('end_date', endDate);
 
       const res = await fetch(`/api/reports/sales?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch sales analytics');
+      }
       const json = await res.json();
-
       if (!json.success) {
         throw new Error(json.error || 'Failed to fetch sales analytics');
       }
 
       setData(json.data);
     } catch (err) {
-      setError(getErrorMessage(err) || 'Error fetching sales data');
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -56,7 +60,9 @@ export default function SalesReportPage() {
       params.set('end_date', endDate);
 
       const res = await fetch(`/api/reports/export?${params.toString()}`);
-      if (!res.ok) throw new Error('Export failed');
+      if (!res.ok) {
+        throw new Error('Export failed');
+      }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -85,34 +91,11 @@ export default function SalesReportPage() {
     discounts: Number(d.first500_discount || 0) + Number(d.cod_discount || 0),
   }));
 
-  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '30days') => {
-    const now = new Date();
-    const format = (d: Date) => d.toISOString().split('T')[0];
-
-    if (preset === 'today') {
-      const today = format(now);
-      setStartDate(today);
-      setEndDate(today);
-    } else if (preset === 'tomorrow') {
-      const tom = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const tomStr = format(tom);
-      setStartDate(tomStr);
-      setEndDate(tomStr);
-    } else if (preset === 'this_week') {
-      const day = now.getDay();
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(now.setDate(diff));
-      setStartDate(format(monday));
-      setEndDate(format(new Date()));
-    } else if (preset === 'this_month') {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      setStartDate(format(firstDay));
-      setEndDate(format(new Date()));
-    } else if (preset === '30days') {
-      const past = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
-      setStartDate(format(past));
-      setEndDate(format(new Date()));
-    }
+  const handlePresetChange = (preset: DatePresetType) => {
+    setActivePreset(preset);
+    const { startDate: s, endDate: e } = computePresetDates(preset);
+    setStartDate(s);
+    setEndDate(e);
   };
 
   return (
@@ -162,77 +145,20 @@ export default function SalesReportPage() {
         </div>
 
         {/* Date Filter & Presets Bar */}
-        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-          {/* Quick Presets */}
-          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl gap-0.5 font-bold">
-            <button
-              type="button"
-              onClick={() => handleDatePreset('today')}
-              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                startDate === endDate && startDate === new Date().toISOString().split('T')[0]
-                  ? 'bg-white text-emerald-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('tomorrow')}
-              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
-                  ? 'bg-white text-emerald-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Tomorrow
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('this_week')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              This Week
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('this_month')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              This Month (મહિનો)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('30days')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              Last 30 Days
-            </button>
-          </div>
-
-          {/* Custom Date Pickers */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center space-x-2">
-              <label className="text-slate-500 font-bold uppercase text-[10px]">From:</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <label className="text-slate-500 font-bold uppercase text-[10px]">To:</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
-              />
-            </div>
-          </div>
-        </div>
+        <ReportDatePresetsBar
+          startDate={startDate}
+          endDate={endDate}
+          activePreset={activePreset}
+          onPresetChange={handlePresetChange}
+          onStartDateChange={(val) => {
+            setStartDate(val);
+            setActivePreset('custom');
+          }}
+          onEndDateChange={(val) => {
+            setEndDate(val);
+            setActivePreset('custom');
+          }}
+        />
 
         {/* Financial Step-Down Waterfall */}
         <FinancialWaterfallChart

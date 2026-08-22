@@ -4,8 +4,10 @@ import { getErrorMessage } from '@/lib/errors';
 import { useState, useCallback, useEffect } from 'react';
 import { ShoppingBag, Search, Download, RefreshCw, ChevronDown, ChevronUp, MapPin, Phone } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
+import { ReportDatePresetsBar, computePresetDates, DatePresetType } from '@/components/admin/ReportDatePresetsBar';
 
 export default function OrdersReportPage() {
+  const [activePreset, setActivePreset] = useState<DatePresetType>('this_week');
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 6);
@@ -85,34 +87,11 @@ export default function OrdersReportPage() {
     }
   };
 
-  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '30days') => {
-    const now = new Date();
-    const format = (d: Date) => d.toISOString().split('T')[0];
-
-    if (preset === 'today') {
-      const today = format(now);
-      setStartDate(today);
-      setEndDate(today);
-    } else if (preset === 'tomorrow') {
-      const tom = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const tomStr = format(tom);
-      setStartDate(tomStr);
-      setEndDate(tomStr);
-    } else if (preset === 'this_week') {
-      const day = now.getDay();
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(now.setDate(diff));
-      setStartDate(format(monday));
-      setEndDate(format(new Date()));
-    } else if (preset === 'this_month') {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      setStartDate(format(firstDay));
-      setEndDate(format(new Date()));
-    } else if (preset === '30days') {
-      const past = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
-      setStartDate(format(past));
-      setEndDate(format(new Date()));
-    }
+  const handlePresetChange = (preset: DatePresetType) => {
+    setActivePreset(preset);
+    const { startDate: s, endDate: e } = computePresetDates(preset);
+    setStartDate(s);
+    setEndDate(e);
   };
 
   return (
@@ -162,77 +141,21 @@ export default function OrdersReportPage() {
         </div>
 
         {/* Date Filter & Presets Bar */}
-        <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-          {/* Quick Presets */}
-          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl gap-0.5 font-bold">
-            <button
-              type="button"
-              onClick={() => handleDatePreset('today')}
-              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                startDate === endDate && startDate === new Date().toISOString().split('T')[0]
-                  ? 'bg-white text-emerald-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('tomorrow')}
-              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
-                  ? 'bg-white text-emerald-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Tomorrow
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('this_week')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              This Week
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('this_month')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              This Month (મહિનો)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDatePreset('30days')}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-            >
-              Last 30 Days
-            </button>
-          </div>
+        <ReportDatePresetsBar
+          startDate={startDate}
+          endDate={endDate}
+          activePreset={activePreset}
+          onPresetChange={handlePresetChange}
+          onStartDateChange={(val) => {
+            setStartDate(val);
+            setActivePreset('custom');
+          }}
+          onEndDateChange={(val) => {
+            setEndDate(val);
+            setActivePreset('custom');
+          }}
+        />
 
-          {/* Custom Date Pickers */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center space-x-2">
-              <label className="text-slate-500 font-bold uppercase text-[10px]">From:</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <label className="text-slate-500 font-bold uppercase text-[10px]">To:</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono text-xs focus:bg-white focus:outline-none"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Secondary Filters Bar: Status, Area & Search */}
         <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
