@@ -90,6 +90,7 @@ interface CartContextType {
   openCartDrawer: () => void;
   closeCartDrawer: () => void;
   setSpecialInstructions: (notes: string) => void;
+  mergeCartItems: (items: CartItem[]) => void;
   refreshQuote: () => Promise<void>;
   dismissPriceChangeAlert: () => void;
   placeOrder: () => Promise<{ success: boolean; data?: OrderResult; error?: string }>;
@@ -119,6 +120,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [priceChangeAlert, setPriceChangeAlert] = useState<string | null>(null);
   const [orderSuccessData, setOrderSuccessData] = useState<OrderResult | null>(null);
   const prevQuoteTotalRef = useRef<number | null>(null);
+  // One idempotency key per logical checkout attempt. It survives retries
+  // (a network drop after order creation resumes the SAME pending order
+  // instead of creating a duplicate) and only regenerates when the cart or
+  // payment method changes. Cleared after a definitive success.
+  const checkoutKeyRef = useRef<string | null>(null);
+  const checkoutSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {
     try {
@@ -231,6 +238,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) => prev.filter((item) => item.variant.id !== variantId));
   };
 
+  // Merge externally-built items (e.g. Repeat Order) into the live cart.
+  // Going through context — instead of writing localStorage directly — keeps
+  // the provider state, persistence, and quote refresh in sync.
+  const mergeCartItems = useCallback((items: CartItem[]) => {
+    setCart((prev) => {
+      const merged = [...prev];
+      items.forEach((incoming) => {
+        const quantity = Math.min(99, Math.max(1, Math.round(Number(incoming.quantity) || 1)));
+        const idx = merged.findIndex((item) => item.variant.id === incoming.variant.id);
+        if (idx > -1) {
+          merged[idx] = { ...merged[idx], quantity: Math.min(99, merged[idx].quantity + quantity) };
+        } else {
+          merged.push({ ...incoming, quantity });
+        }
+      });
+      return merged;
+    });
+  }, []);
+
   const clearCart = () => {
     setCart([]);
     setServerQuote(null);
@@ -289,7 +315,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setOrderError(null);
 
     try {
-      const idempotencyKey = `web-${paymentMethod}-${customer.id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      // Reuse the key across retries of the same cart/payment combination so
+      // the server-side idempotency check returns the original pending order.
+      const signature = `${paymentMethod}|${cart
+        .map((item) => `${item.variant.id}:${item.quantity}`)
+        .sort()
+        .join(',')}`;
+      if (!checkoutKeyRef.current || checkoutSignatureRef.current !== signature) {
+        checkoutKeyRef.current = `web-${paymentMethod}-${customer.id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        checkoutSignatureRef.current = signature;
+      }
+      const idempotencyKey = checkoutKeyRef.current;
       
       const itemsPayload = cart.map((item) => ({
         variant_id: item.variant.id,
@@ -323,6 +359,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Case A: Cash on Delivery (Immediate confirmation)
       if (paymentMethod === 'cod') {
+        checkoutKeyRef.current = null;
         // Trigger n8n webhook immediately in background
         if (orderResult?.order_id) {
           fetch('/api/automation/n8n-trigger', {
@@ -388,6 +425,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
               const verifyData = await verifyRes.json();
               if (verifyRes.ok && verifyData.success) {
+                checkoutKeyRef.current = null;
                 const confirmedResult: OrderResult = {
                   ...orderResult,
                   order_status: 'confirmed',
@@ -440,6 +478,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const msg = err instanceof Error ? getErrorMessage(err) : 'Failed to place order';
       console.error('Unexpected order placement error:', err);
       setOrderError(msg);
+      // The online path returns a pending promise while the Razorpay modal is
+      // open (it resets itself in its own callbacks), so reset here too —
+      // otherwise the checkout button stays disabled forever when payment
+      // initialization fails before the modal opens.
+      setIsPlacingOrder(false);
       return { success: false, error: msg };
     } finally {
       if (paymentMethod === 'cod') {
@@ -473,6 +516,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         hasUnavailableItems,
         specialInstructions,
         setPaymentMethod,
+        mergeCartItems,
         addToCart,
         updateQuantity,
         removeFromCart,

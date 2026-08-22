@@ -1,0 +1,217 @@
+{
+  "name": "Sabjiwala - Workflow 7: Promotional Scheme & Offer Broadcast Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabjiwala-scheme-broadcast",
+        "options": {}
+      },
+      "name": "Webhook: Trigger Scheme Broadcast",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Cron: Daily 8:00 AM Morning Mandi Broadcast",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [100, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare campaign parameters from Webhook or Default Morning Schedule\nconst input = $input.first()?.json || {};\nconst body = input.body || {};\n\nconst campaignTitle = body.title || \"TaazaTokra: Aaj Ki Taaza Mandi Deals!\";\nconst discountCode = body.discount_code || \"TAAZA50\";\nconst discountText = body.discount_text || \"Flat ₹50 OFF on your order\";\nconst customMessage = body.custom_message || null;\nconst targetSegment = body.target_segment || \"all\"; // 'all' | 'inactive_7_days' | 'repeat_buyers'\n\nreturn [{\n  json: {\n    campaignTitle,\n    discountCode,\n    discountText,\n    customMessage,\n    targetSegment,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "name": "Code: Initialize Campaign Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [360, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/broadcast-audience",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ segment: $json.targetSegment }) }}"
+      },
+      "name": "HTTP: Fetch Target Audience from Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const audience = $input.first()?.json?.customers || [];\nconst campaign = $('Code: Initialize Campaign Context').first().json;\n\n// Format customized messages per customer\nreturn audience.map(cust => {\n  const name = cust.name || 'Customer';\n  const mobile = String(cust.mobile || '').replace(/[^0-9]/g, '').slice(-10);\n  \n  let message = campaign.customMessage;\n  if (!message) {\n    message = `TaazaTokra: Namaste ${name}! 🥦 Aaj khet se taaza sabziyan aayi hain. Use code ${campaign.discountCode} to get ${campaign.discountText}! Order now: https://taazatokra.com`;\n  }\n  \n  return {\n    json: {\n      customer_id: cust.id,\n      name,\n      mobile,\n      message,\n      campaign_id: campaign.campaignTitle\n    }\n  };\n}).filter(item => item.json.mobile.length === 10);"
+      },
+      "name": "Code: Format SMS & WhatsApp Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 400]
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {
+          "reset": false
+        }
+      },
+      "name": "Split In Batches (Rate Limiter)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1080, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.fast2sms.com/dev/bulkV2",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "authorization",
+              "value": "={{ $env.FAST2SMS_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  route: 'q',\n  message: $json.message,\n  flash: 0,\n  numbers: $json.mobile\n}) }}"
+      },
+      "name": "HTTP: Send Batch via Fast2SMS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1320, 400]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "name": "Wait (Anti-Spam Delay)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1560, 400]
+    }
+  ],
+  "connections": {
+    "Webhook: Trigger Scheme Broadcast": {
+      "main": [
+        [
+          {
+            "node": "Code: Initialize Campaign Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron: Daily 8:00 AM Morning Mandi Broadcast": {
+      "main": [
+        [
+          {
+            "node": "Code: Initialize Campaign Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Initialize Campaign Context": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Fetch Target Audience from Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Fetch Target Audience from Database": {
+      "main": [
+        [
+          {
+            "node": "Code: Format SMS & WhatsApp Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Format SMS & WhatsApp Messages": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches (Rate Limiter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches (Rate Limiter)": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Send Batch via Fast2SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Send Batch via Fast2SMS": {
+      "main": [
+        [
+          {
+            "node": "Wait (Anti-Spam Delay)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Anti-Spam Delay)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches (Rate Limiter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

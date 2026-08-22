@@ -11,6 +11,8 @@ const API_ROLE_RULES: Array<{ prefix: string; roles: ReadonlySet<StaffRole> }> =
   { prefix: '/api/procurement/', roles: new Set(['owner', 'manager']) },
   { prefix: '/api/packing/', roles: new Set(['owner', 'manager', 'packing']) },
   { prefix: '/api/delivery/admin-summary', roles: new Set(['owner', 'manager']) },
+  // Drivers start their own runs; batch creation stays owner/manager below.
+  { prefix: '/api/delivery/batch/start', roles: new Set(['owner', 'manager', 'delivery']) },
   { prefix: '/api/delivery/batch/', roles: new Set(['owner', 'manager']) },
   { prefix: '/api/delivery/settlement/verify', roles: new Set(['owner', 'manager']) },
   { prefix: '/api/delivery/', roles: new Set(['owner', 'manager', 'delivery']) },

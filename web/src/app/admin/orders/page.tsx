@@ -15,13 +15,14 @@ import { SlideOverDrawer } from '@/components/ui/SlideOverDrawer';
 import ThermalBagSticker from '@/components/ThermalBagSticker';
 
 import { createClient } from '@/lib/supabase/client';
+import { todayIST, toISTDateString } from '@/lib/istDate';
 
 type OrderTab = 'all' | 'new' | 'confirmed' | 'packing' | 'out_for_delivery' | 'delivered' | 'issues';
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState<OrderTab>('all');
-  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(() => todayIST());
+  const [endDate, setEndDate] = useState(() => todayIST());
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
@@ -102,7 +103,7 @@ export default function AdminOrdersPage() {
 
   const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '7days') => {
     const now = new Date();
-    const format = (d: Date) => d.toISOString().split('T')[0];
+    const format = (d: Date) => toISTDateString(d);
 
     if (preset === 'today') {
       const today = format(now);
@@ -176,7 +177,7 @@ export default function AdminOrdersPage() {
               <button
                 onClick={() => handleDatePreset('today')}
                 className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
-                  startDate === endDate && startDate === new Date().toISOString().split('T')[0]
+                  startDate === endDate && startDate === todayIST()
                     ? 'bg-white text-emerald-700 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
@@ -186,7 +187,7 @@ export default function AdminOrdersPage() {
               <button
                 onClick={() => handleDatePreset('tomorrow')}
                 className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
-                  startDate === endDate && startDate !== new Date().toISOString().split('T')[0]
+                  startDate === endDate && startDate !== todayIST()
                     ? 'bg-white text-emerald-700 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}

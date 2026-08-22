@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { todayIST } from '@/lib/istDate';
 
 export async function GET(req: NextRequest) {
   try {
@@ -60,7 +61,6 @@ export async function POST(req: NextRequest) {
       purchased_qty,
       unit_code,
       rate_per_unit,
-      total_cost,
       supplier_name,
       mandi_lot_or_bill_no,
       purchase_date,
@@ -69,7 +69,8 @@ export async function POST(req: NextRequest) {
 
     const qty = parseFloat(purchased_qty);
     const rate = parseFloat(rate_per_unit);
-    const calculatedTotal = total_cost ? parseFloat(total_cost) : (qty * rate);
+    // Money is always computed server-side; a client-sent total is never trusted.
+    const calculatedTotal = Math.round(qty * rate * 100) / 100;
 
     if (!product_id || isNaN(qty) || qty <= 0 || isNaN(rate) || rate < 0) {
       return NextResponse.json(
@@ -78,9 +79,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Get or create today's procurement batch for this purchase
-    const todayStr = purchase_date || new Date().toISOString().split('T')[0];
-    
+    // 1. Get or create the procurement batch for the purchase date (IST day).
+    const todayStr = purchase_date || todayIST();
+    if (typeof todayStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(todayStr)) {
+      return NextResponse.json(
+        { success: false, error: 'purchase_date must be a valid date (YYYY-MM-DD).' },
+        { status: 400 }
+      );
+    }
+
     let { data: batch } = await supabase
       .from('procurement_batches')
       .select('id')
@@ -99,49 +106,60 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (batchErr) {
-        // Fallback: search any recent batch
-        const { data: fallbackBatch } = await supabase
+        // Most insert failures here are a unique-constraint race (another
+        // request created the same-date batch first). Re-read the same date
+        // once; NEVER fall back to a different date's batch, or the purchase
+        // is silently attributed to the wrong day.
+        const { data: raceBatch } = await supabase
           .from('procurement_batches')
           .select('id')
-          .order('created_at', { ascending: false })
-          .limit(1)
+          .eq('batch_date', todayStr)
           .maybeSingle();
-        batch = fallbackBatch;
+        batch = raceBatch;
       } else {
         batch = newBatch;
       }
     }
 
-    const batchId = batch?.id;
+    if (!batch?.id) {
+      return NextResponse.json(
+        { success: false, error: `Could not resolve the procurement batch for ${todayStr}. Please retry.` },
+        { status: 502 }
+      );
+    }
 
     // 2. Get or create procurement item row for this product in the batch
-    let procurementItemId = null;
-    if (batchId) {
-      const { data: pItem } = await supabase
-        .from('procurement_items')
-        .select('id')
-        .eq('batch_id', batchId)
-        .eq('product_id', product_id)
-        .maybeSingle();
+    let procurementItemId: string | null = null;
+    const { data: pItem } = await supabase
+      .from('procurement_items')
+      .select('id')
+      .eq('batch_id', batch.id)
+      .eq('product_id', product_id)
+      .maybeSingle();
 
-      if (pItem) {
-        procurementItemId = pItem.id;
-      } else {
-        const { data: newPItem } = await supabase
-          .from('procurement_items')
-          .insert({
-            batch_id: batchId,
-            product_id: product_id,
-            required_qty: qty,
-            suggested_procurement_qty: qty,
-            procured_qty: qty,
-            latest_mandi_rate: rate,
-            total_procurement_cost: calculatedTotal,
-          })
-          .select('id')
-          .single();
-        procurementItemId = newPItem?.id;
+    if (pItem) {
+      procurementItemId = pItem.id;
+    } else {
+      const { data: newPItem, error: pItemErr } = await supabase
+        .from('procurement_items')
+        .insert({
+          batch_id: batch.id,
+          product_id: product_id,
+          required_qty: qty,
+          suggested_procurement_qty: qty,
+          procured_qty: qty,
+          latest_mandi_rate: rate,
+          total_procurement_cost: calculatedTotal,
+        })
+        .select('id')
+        .single();
+      if (pItemErr || !newPItem?.id) {
+        return NextResponse.json(
+          { success: false, error: pItemErr?.message || 'Failed to create procurement item for this purchase.' },
+          { status: 500 }
+        );
       }
+      procurementItemId = newPItem.id;
     }
 
     // 3. Insert into procurement_purchase_lines
@@ -163,6 +181,47 @@ export async function POST(req: NextRequest) {
       console.error('Error inserting purchase line:', insertErr);
       return NextResponse.json({ success: false, error: insertErr.message }, { status: 500 });
     }
+
+    // 4. Recalculate item + batch totals from the purchase lines (mirrors
+    // record_procurement_purchase_line) so dashboards stay consistent when a
+    // product is purchased more than once in the same batch.
+    const { data: itemTotals } = await supabase
+      .from('procurement_purchase_lines')
+      .select('purchased_qty, total_cost')
+      .eq('procurement_item_id', procurementItemId);
+
+    const totals = (itemTotals || []).reduce(
+      (acc, line) => {
+        acc.qty += Number(line.purchased_qty) || 0;
+        acc.cost += Number(line.total_cost) || 0;
+        return acc;
+      },
+      { qty: 0, cost: 0 }
+    );
+
+    await supabase
+      .from('procurement_items')
+      .update({
+        procured_qty: Math.round(totals.qty * 1000) / 1000,
+        total_procurement_cost: Math.round(totals.cost * 100) / 100,
+        latest_mandi_rate: rate,
+      })
+      .eq('id', procurementItemId);
+
+    const { data: batchItems } = await supabase
+      .from('procurement_items')
+      .select('total_procurement_cost')
+      .eq('batch_id', batch.id);
+
+    const batchTotal = (batchItems || []).reduce(
+      (sum, item) => sum + (Number(item.total_procurement_cost) || 0),
+      0
+    );
+
+    await supabase
+      .from('procurement_batches')
+      .update({ total_procurement_cost: Math.round(batchTotal * 100) / 100 })
+      .eq('id', batch.id);
 
     return NextResponse.json({
       success: true,

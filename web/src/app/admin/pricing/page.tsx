@@ -40,7 +40,12 @@ export default function DailyPricingPage() {
 
       if (prodErr) throw prodErr;
 
-      const prods = (prodData || []) as Product[];
+      // PostgREST nests the relation under `product_variants`; map it onto the
+      // `variants` field the price editor iterates (same as products page).
+      const prods = ((prodData || []) as (Product & { product_variants?: Product['variants'] })[]).map((p) => ({
+        ...p,
+        variants: p.product_variants || [],
+      }));
 
       const rows: PriceRow[] = [];
       prods.forEach((p) => {

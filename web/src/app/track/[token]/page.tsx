@@ -9,10 +9,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, MapPin, ShoppingBag, MessageCircle, RefreshCw, AlertCircle, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
 export default function OrderTrackingPage() {
   const params = useParams();
   const router = useRouter();
+  const { mergeCartItems } = useCart();
   const token = params?.token as string;
   const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
   const supportUrl = supportPhone
@@ -354,8 +356,11 @@ export default function OrderTrackingPage() {
                           variant: i.variant,
                           quantity: i.quantity,
                         }));
+                      // Merge through cart context so provider state, persistence,
+                      // and the price quote all update together. Writing
+                      // localStorage directly is ignored by the mounted provider.
                       if (validItems.length > 0) {
-                        localStorage.setItem('sabjiwala_cart', JSON.stringify(validItems));
+                        mergeCartItems(validItems);
                       }
                     }
                     router.push('/?open_cart=true');

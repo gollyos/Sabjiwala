@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { getStaffSession, hasAnyRole } from '@/lib/staffAuth';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -11,22 +12,51 @@ function getServiceSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { order_id, failure_reason, notes, driver_user_id } = body;
+    const session = await getStaffSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+    if (!hasAnyRole(session, 'delivery', 'manager', 'owner')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Only delivery or administrative staff can report delivery failures' }, { status: 403 });
+    }
 
-    if (!order_id || !failure_reason) {
+    const body = await req.json();
+    const { order_id, delivery_id, failure_reason, notes } = body;
+
+    if ((!order_id && !delivery_id) || !failure_reason) {
       return NextResponse.json(
-        { success: false, error: 'Missing order_id or failure_reason' },
+        { success: false, error: 'Missing order_id (or delivery_id) or failure_reason' },
         { status: 400 }
       );
     }
 
+    // The driver app sends delivery_id; resolve it to the order when needed.
+    let effectiveOrderId = order_id as string | undefined;
     const supabase = getServiceSupabase();
+    if (!effectiveOrderId && delivery_id) {
+      const { data: deliveryRow } = await supabase
+        .from('deliveries')
+        .select('order_id')
+        .eq('id', delivery_id)
+        .maybeSingle();
+      if (!deliveryRow?.order_id) {
+        return NextResponse.json({ success: false, error: 'Delivery assignment not found' }, { status: 404 });
+      }
+      effectiveOrderId = deliveryRow.order_id as string;
+    }
+
+    // Driver identity always comes from the verified session. Owner/manager
+    // may attribute the failure to another driver; drivers are forced to
+    // themselves so the audit trail cannot be forged.
+    const effectiveDriverId = hasAnyRole(session, 'owner', 'manager')
+      ? (body.driver_user_id || session.userId)
+      : session.userId;
+
     const { data: result, error } = await supabase.rpc('record_delivery_failure', {
-      p_order_id: order_id,
+      p_order_id: effectiveOrderId,
       p_failure_reason: failure_reason,
       p_notes: notes || null,
-      p_driver_user_id: driver_user_id || null,
+      p_driver_user_id: effectiveDriverId,
     });
 
     if (error) {

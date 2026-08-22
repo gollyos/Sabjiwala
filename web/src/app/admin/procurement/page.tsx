@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Lock, CheckCircle2, AlertCircle, Check, Share2, PlusCircle } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { todayIST } from '@/lib/istDate';
 
 interface BatchSummary {
   id?: string;
@@ -112,7 +113,7 @@ export default function ProcurementDashboard() {
     rate_per_unit: '',
     supplier_name: 'Halol APMC Mandi',
     bill_no: '',
-    purchase_date: new Date().toISOString().split('T')[0],
+    purchase_date: todayIST(),
     notes: '',
   });
 
@@ -272,7 +273,7 @@ export default function ProcurementDashboard() {
           rate_per_unit: '',
           supplier_name: 'Halol APMC Mandi',
           bill_no: '',
-          purchase_date: new Date().toISOString().split('T')[0],
+          purchase_date: todayIST(),
           notes: '',
         });
         loadRecentPurchases();
@@ -520,7 +521,7 @@ export default function ProcurementDashboard() {
                                 rate_per_unit: String(p.latest_mandi_rate || ''),
                                 supplier_name: p.preferred_supplier_name || 'Halol APMC Mandi',
                                 bill_no: '',
-                                purchase_date: new Date().toISOString().split('T')[0],
+                                purchase_date: todayIST(),
                                 notes: '',
                               });
                               setShowQuickPurchaseModal(true);

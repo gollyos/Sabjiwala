@@ -5,15 +5,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { TrendingUp, Package, Search, Download, RefreshCw } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { ReportDatePresetsBar, computePresetDates, DatePresetType } from '@/components/admin/ReportDatePresetsBar';
+import { addDaysIST, todayIST } from '@/lib/istDate';
 
 export default function ProductReportingPage() {
   const [activePreset, setActivePreset] = useState<DatePresetType>('30days');
   const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 29);
-    return d.toISOString().split('T')[0];
+    return addDaysIST(-29);
   });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => todayIST());
   const [categoryId, setCategoryId] = useState<string>('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

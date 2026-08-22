@@ -5,6 +5,7 @@ import { Truck, CheckCircle2, DollarSign, User, Plus, RefreshCw, X, Clock } from
 import { AdminNav } from '@/components/AdminNav';
 import { StatCard } from '@/components/ui/StatCard';
 import { StatusChip } from '@/components/ui/StatusChip';
+import { todayIST } from '@/lib/istDate';
 interface DriverOption {
   id: string;
   full_name: string;
@@ -64,7 +65,7 @@ interface AdminDeliveryMetrics {
 }
 
 export default function AdminDeliveryPage() {
-  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(() => todayIST());
   const [metrics, setMetrics] = useState<AdminDeliveryMetrics | null>(null);
   const [batches, setBatches] = useState<AdminBatch[]>([]);
   const [settlements, setSettlements] = useState<CashSettlement[]>([]);

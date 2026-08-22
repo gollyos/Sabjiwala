@@ -5,6 +5,7 @@ import ThermalBagSticker, { StickerPayload } from '@/components/ThermalBagSticke
 import { CheckCircle2, Printer, RefreshCw, Search, MapPin, X, Check, Plus, Minus, AlertTriangle, Play } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
+import { todayIST } from '@/lib/istDate';
 
 interface QueueItem {
   id: string;
@@ -77,7 +78,7 @@ interface DashboardStats {
 }
 
 export default function GodownPackingStation() {
-  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(() => todayIST());
   const [statusFilter, setStatusFilter] = useState<'all' | 'waiting' | 'packing' | 'problem' | 'ready'>('waiting');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const staffName = 'Godown Worker 1';
@@ -98,6 +99,13 @@ export default function GodownPackingStation() {
   const [problemNotes, setProblemNotes] = useState<string>('');
 
   const scanInputRef = useRef<HTMLInputElement>(null);
+  // Read the open order inside fetch callbacks without listing it in the
+  // callback deps — otherwise every refresh creates a new activeOrder object,
+  // re-triggers the effect, and refetches in an endless loop.
+  const activeOrderRef = useRef<QueueOrder | null>(null);
+  useEffect(() => {
+    activeOrderRef.current = activeOrder;
+  }, [activeOrder]);
 
   // Fetch Queue Data
   const loadQueueData = useCallback(async () => {
@@ -118,8 +126,9 @@ export default function GodownPackingStation() {
         }
 
         // Update active order if open
-        if (activeOrder) {
-          const updated = json.data.queue.find((o: QueueOrder) => o.order_id === activeOrder.order_id);
+        const currentActive = activeOrderRef.current;
+        if (currentActive) {
+          const updated = json.data.queue.find((o: QueueOrder) => o.order_id === currentActive.order_id);
           if (updated) setActiveOrder(updated);
         }
       }
@@ -128,7 +137,7 @@ export default function GodownPackingStation() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedDate, statusFilter, searchTerm, activeOrder]);
+  }, [selectedDate, statusFilter, searchTerm]);
 
   useEffect(() => {
     loadQueueData();

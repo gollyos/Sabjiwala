@@ -2,31 +2,35 @@
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
+import { toISTDate, toISTDateString } from '@/lib/istDate';
 
 export type DatePresetType = 'today' | 'tomorrow' | 'this_week' | 'this_month' | '30days' | 'custom';
 
 export function computePresetDates(preset: DatePresetType): { startDate: string; endDate: string } {
-  const now = new Date();
-  const format = (d: Date) => d.toISOString().split('T')[0];
+  // All calendar math runs on the IST-shifted date so presets match India's
+  // day boundaries instead of the browser/server timezone.
+  const now = toISTDate();
+  const format = (d: Date) => toISTDateString(d);
 
   if (preset === 'today') {
     const today = format(now);
     return { startDate: today, endDate: today };
   } else if (preset === 'tomorrow') {
-    const tom = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const tomStr = format(tom);
+    const tomStr = format(new Date(now.getTime() + 24 * 60 * 60 * 1000));
     return { startDate: tomStr, endDate: tomStr };
   } else if (preset === 'this_week') {
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(new Date().setDate(diff));
-    return { startDate: format(monday), endDate: format(new Date()) };
+    const day = now.getUTCDay();
+    const diff = now.getUTCDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.getTime());
+    monday.setUTCDate(diff);
+    return { startDate: format(monday), endDate: format(now) };
   } else if (preset === 'this_month') {
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    return { startDate: format(firstDay), endDate: format(new Date()) };
+    const firstDay = new Date(now.getTime());
+    firstDay.setUTCDate(1);
+    return { startDate: format(firstDay), endDate: format(now) };
   } else if (preset === '30days') {
     const past = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
-    return { startDate: format(past), endDate: format(new Date()) };
+    return { startDate: format(past), endDate: format(now) };
   }
   return { startDate: format(now), endDate: format(now) };
 }

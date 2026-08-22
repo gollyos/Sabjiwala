@@ -7,15 +7,14 @@ import { AdminNav } from '@/components/AdminNav';
 import FinancialWaterfallChart from '@/components/charts/FinancialWaterfallChart';
 import AreaTrendChart, { AreaDataPoint } from '@/components/charts/AreaTrendChart';
 import { ReportDatePresetsBar, computePresetDates, DatePresetType } from '@/components/admin/ReportDatePresetsBar';
+import { addDaysIST, todayIST } from '@/lib/istDate';
 
 export default function SalesReportPage() {
   const [activePreset, setActivePreset] = useState<DatePresetType>('30days');
   const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 29);
-    return d.toISOString().split('T')[0];
+    return addDaysIST(-29);
   });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => todayIST());
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [data, setData] = useState<any>(null);

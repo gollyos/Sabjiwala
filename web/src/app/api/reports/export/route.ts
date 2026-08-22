@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { todayIST } from '@/lib/istDate';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -28,8 +29,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unsupported report type.' }, { status: 400 });
     }
     const type = requestedType;
-    const startDate = searchParams.get('start_date') || new Date().toISOString().split('T')[0];
-    const endDate = searchParams.get('end_date') || new Date().toISOString().split('T')[0];
+    const startDate = searchParams.get('start_date') || todayIST();
+    const endDate = searchParams.get('end_date') || todayIST();
 
     const supabase = getServiceSupabase();
     let csvHeader = '';

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Navigation, Truck, CheckCircle2, Phone, MapPin, Check, X, RefreshCw, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { StatusChip } from '@/components/ui/StatusChip';
+import { todayIST } from '@/lib/istDate';
 
 interface DriverBag {
   id: string;
@@ -71,7 +72,7 @@ export default function DriverMobileScreen() {
   const [driverId, setDriverId] = useState<string>('');
   const [driverName, setDriverName] = useState<string>('');
   const [driversList, setDriversList] = useState<{ id: string; full_name: string; mobile: string }[]>([]);
-  const [selectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate] = useState<string>(() => todayIST());
   const [batch, setBatch] = useState<DriverBatch | null>(null);
   const [deliveries, setDeliveries] = useState<DriverDelivery[]>([]);
   const [metrics, setMetrics] = useState<DriverMetrics | null>(null);
@@ -240,7 +241,7 @@ export default function DriverMobileScreen() {
 
       const json = await res.json();
       if (json.success) {
-        setScanStatusMsg({ text: `✅ Bag ${json.bag_sequence}/${json.total_bags} verified!`, type: 'success' });
+        setScanStatusMsg({ text: `✅ Bag ${json.verified_bag_sequence}/${json.total_bags} verified!`, type: 'success' });
         loadDriverDeliveries();
       } else {
         setScanStatusMsg({ text: `❌ ${json.message || json.error}`, type: 'error' });

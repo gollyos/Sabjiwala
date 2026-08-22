@@ -136,10 +136,11 @@ export async function GET(
       );
     }
 
-    // Mask customer mobile for privacy (e.g. +91 98765 ****0)
+    // Mask customer mobile for privacy (e.g. ******3210) — tracking links are
+    // forwarded on WhatsApp, so only the last 4 digits may be exposed.
     const rawMobile = order.customer_mobile_snapshot || '';
     const maskedMobile = rawMobile.length >= 10
-      ? `${rawMobile.slice(0, -4)}****`
+      ? `******${rawMobile.slice(-4)}`
       : rawMobile;
 
     return NextResponse.json({

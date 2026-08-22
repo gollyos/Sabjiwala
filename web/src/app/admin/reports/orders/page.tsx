@@ -5,15 +5,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { ShoppingBag, Search, Download, RefreshCw, ChevronDown, ChevronUp, MapPin, Phone } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { ReportDatePresetsBar, computePresetDates, DatePresetType } from '@/components/admin/ReportDatePresetsBar';
+import { addDaysIST, todayIST } from '@/lib/istDate';
 
 export default function OrdersReportPage() {
   const [activePreset, setActivePreset] = useState<DatePresetType>('this_week');
   const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 6);
-    return d.toISOString().split('T')[0];
+    return addDaysIST(-6);
   });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => todayIST());
   const [status, setStatus] = useState<string>('');
   const [area, setArea] = useState<string>('');
   const [search, setSearch] = useState<string>('');
