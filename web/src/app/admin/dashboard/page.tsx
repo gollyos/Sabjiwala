@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AttentionItem, NeedsAttentionSection } from '@/components/ui/NeedsAttentionSection';
 import AreaTrendChart, { AreaDataPoint } from '@/components/charts/AreaTrendChart';
 import HorizontalBarChart, { BarItem } from '@/components/charts/HorizontalBarChart';
-import { TrendingUp, ShoppingBag, DollarSign, Truck, RefreshCw, Tag, Layers, Boxes, ArrowRight, AlertCircle, BarChart3, IndianRupee, Phone, Plus } from 'lucide-react';
+import { TrendingUp, ShoppingBag, DollarSign, Truck, RefreshCw, Tag, Boxes, ArrowRight, AlertCircle, BarChart3, IndianRupee, Phone, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { AdminNav } from '@/components/AdminNav';
 import { StatCard } from '@/components/ui/StatCard';
@@ -132,7 +132,6 @@ export default function AdminDashboardPage() {
   // Contextual Quick Actions depending on time of day
   const currentHour = new Date().getHours();
   const isNightProcurementTime = currentHour >= 19 || currentHour <= 2;
-  const isMorningPackingTime = currentHour >= 4 && currentHour <= 10;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">

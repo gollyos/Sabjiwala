@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, Search, MessageCircle, ShoppingBag } from 'lucide-react';
+import { Search, MessageCircle, ShoppingBag } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
 export default function NotFound() {

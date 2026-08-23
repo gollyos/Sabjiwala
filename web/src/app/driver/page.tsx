@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Navigation, Truck, CheckCircle2, Phone, MapPin, Check, X, RefreshCw, Lock, ArrowLeft } from 'lucide-react';
+import { Navigation, Truck, CheckCircle2, Phone, MapPin, Check, X, RefreshCw, Lock, ArrowLeft, IndianRupee } from 'lucide-react';
 import Link from 'next/link';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { todayIST } from '@/lib/istDate';
@@ -63,6 +63,15 @@ interface DriverMetrics {
   total_collected: number;
 }
 
+interface CashSettlement {
+  id: string;
+  handed_over_cash_amount: number;
+  collected_cash_amount: number;
+  difference_amount: number;
+  status: string;
+  handed_over_at: string;
+}
+
 export default function DriverMobileScreen() {
   const [supabase] = useState(() => createClient());
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -92,6 +101,13 @@ export default function DriverMobileScreen() {
   const [showFailureModal, setShowFailureModal] = useState<boolean>(false);
   const [failureReason, setFailureReason] = useState<string>('customer_unavailable');
   const [failureNotes, setFailureNotes] = useState<string>('');
+
+  // End-of-run cash settlement state
+  const [todaySettlement, setTodaySettlement] = useState<CashSettlement | null>(null);
+  const [showSettlementForm, setShowSettlementForm] = useState<boolean>(false);
+  const [handedOverCash, setHandedOverCash] = useState<string>('');
+  const [settlementNotes, setSettlementNotes] = useState<string>('');
+  const [submittingSettlement, setSubmittingSettlement] = useState<boolean>(false);
 
   // 1. Authenticate Driver Session
   useEffect(() => {
@@ -171,13 +187,24 @@ export default function DriverMobileScreen() {
           const updated = (json.data.deliveries || []).find((d: DriverDelivery) => d.delivery_id === activeDelivery.delivery_id);
           if (updated) setActiveDelivery(updated);
         }
+
+        // Has today's cash already been handed over? RLS lets a driver read
+        // only their own settlement rows, so this is safe straight from the client.
+        const { data: settlementRows } = await supabase
+          .from('driver_cash_settlements')
+          .select('id, handed_over_cash_amount, collected_cash_amount, difference_amount, status, handed_over_at')
+          .eq('driver_user_id', driverId)
+          .eq('delivery_date', json.data.delivery_date || selectedDate)
+          .order('handed_over_at', { ascending: false })
+          .limit(1);
+        setTodaySettlement((settlementRows && settlementRows[0]) || null);
       }
     } catch (err) {
       console.error('Error loading driver deliveries:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [driverId, selectedDate, activeDelivery]);
+  }, [driverId, selectedDate, activeDelivery, supabase]);
 
   useEffect(() => {
     if (isAuthorized && driverId) {
@@ -283,6 +310,53 @@ export default function DriverMobileScreen() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Open the end-of-run cash settlement form, pre-filled with cash collected today
+  const handleOpenSettlementForm = () => {
+    setHandedOverCash(String(metrics?.cash_collected ?? 0));
+    setSettlementNotes('');
+    setShowSettlementForm(true);
+  };
+
+  // Submit End-of-Run Cash Settlement
+  const handleSubmitSettlement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!batch || submittingSettlement) return;
+
+    const amount = parseFloat(handedOverCash);
+    if (isNaN(amount) || amount < 0) {
+      alert('Please enter a valid handed-over cash amount.');
+      return;
+    }
+
+    try {
+      setSubmittingSettlement(true);
+      const res = await fetch('/api/delivery/settlement/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          delivery_batch_id: batch.id,
+          driver_user_id: driverId,
+          handed_over_cash: amount,
+          notes: settlementNotes.trim() || null,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setShowSettlementForm(false);
+        setActionMessage({ text: `💰 Cash settlement of ₹${amount.toFixed(0)} submitted!`, type: 'success' });
+        loadDriverDeliveries();
+      } else {
+        alert(json.message || json.error || 'Failed to submit cash settlement');
+      }
+    } catch (err) {
+      console.error('Error submitting settlement:', err);
+      alert('Error submitting cash settlement');
+    } finally {
+      setSubmittingSettlement(false);
     }
   };
 
@@ -393,6 +467,35 @@ export default function DriverMobileScreen() {
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
             <span>{actionMessage.text}</span>
           </div>
+        )}
+
+        {/* End-of-Run Cash Settlement */}
+        {batch && deliveries.length > 0 && pendingStops === 0 && (
+          todaySettlement ? (
+            <div className="p-4 rounded-3xl bg-emerald-950/40 border border-emerald-800 text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 text-emerald-300 font-bold uppercase text-[10px] tracking-wider">
+                <IndianRupee className="w-3.5 h-3.5" />
+                <span>Cash Settlement Submitted</span>
+              </div>
+              <div className="text-white font-mono font-black text-lg">
+                ₹{Number(todaySettlement.handed_over_cash_amount).toFixed(0)} handed over
+              </div>
+              {Number(todaySettlement.difference_amount) !== 0 && (
+                <div className={`text-[11px] font-bold ${Number(todaySettlement.difference_amount) < 0 ? 'text-rose-400' : 'text-amber-400'}`}>
+                  Difference vs collected: {Number(todaySettlement.difference_amount) > 0 ? '+' : ''}₹{Number(todaySettlement.difference_amount).toFixed(0)}
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenSettlementForm}
+              className="w-full p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer min-h-[52px] transition-all"
+            >
+              <IndianRupee className="w-4 h-4" />
+              <span>Submit End-of-Run Cash Settlement (₹{(metrics?.cash_collected || 0).toFixed(0)})</span>
+            </button>
+          )
         )}
 
         {/* Deliveries Stop List */}
@@ -621,6 +724,62 @@ export default function DriverMobileScreen() {
                 </button>
                 <button type="submit" className="px-4 py-2 bg-rose-600 text-white font-bold rounded-xl min-h-[36px] cursor-pointer">
                   Flag as Failed
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* End-of-Run Cash Settlement Modal */}
+      {showSettlementForm && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4">
+            <h3 className="font-extrabold text-white text-base flex items-center gap-2">
+              <IndianRupee className="w-5 h-5 text-amber-400" />
+              <span>Submit Cash Settlement</span>
+            </h3>
+
+            <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-1">
+              <div className="flex justify-between text-slate-400">
+                <span>Cash Collected Today</span>
+                <span className="font-mono font-bold text-emerald-400">₹{(metrics?.cash_collected || 0).toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>UPI Collected Today</span>
+                <span className="font-mono font-bold text-cyan-400">₹{(metrics?.upi_collected || 0).toFixed(0)}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmitSettlement} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-400 font-bold mb-1">Cash Actually Handed Over (₹)</label>
+                <input
+                  type="number"
+                  value={handedOverCash}
+                  onChange={(e) => setHandedOverCash(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-base font-black text-white min-h-[44px]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-bold mb-1">Notes (optional)</label>
+                <textarea
+                  rows={2}
+                  value={settlementNotes}
+                  onChange={(e) => setSettlementNotes(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
+                  placeholder="Any discrepancy explanation..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowSettlementForm(false)} className="px-3 py-2 text-slate-400 min-h-[36px] cursor-pointer">
+                  Cancel
+                </button>
+                <button type="submit" disabled={submittingSettlement} className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl min-h-[36px] cursor-pointer disabled:opacity-50">
+                  {submittingSettlement ? 'Submitting...' : 'Submit Settlement'}
                 </button>
               </div>
             </form>

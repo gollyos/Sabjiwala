@@ -5,7 +5,15 @@ import { Truck, CheckCircle2, DollarSign, User, Plus, RefreshCw, X, Clock } from
 import { AdminNav } from '@/components/AdminNav';
 import { StatCard } from '@/components/ui/StatCard';
 import { StatusChip } from '@/components/ui/StatusChip';
-import { todayIST } from '@/lib/istDate';
+import { todayIST, addDaysIST } from '@/lib/istDate';
+
+const FAILURE_REASON_LABELS: Record<string, string> = {
+  customer_unavailable: 'Customer Not Available / House Locked',
+  phone_unreachable: 'Phone Switched Off / No Answer',
+  wrong_address: 'Wrong Address / Unable to Locate',
+  customer_refused: 'Customer Refused Delivery',
+};
+
 interface DriverOption {
   id: string;
   full_name: string;
@@ -51,6 +59,17 @@ interface CashSettlement {
   notes?: string;
 }
 
+interface FailedDelivery {
+  delivery_id: string;
+  order_id: string;
+  order_number: string;
+  customer_name_snapshot: string;
+  customer_mobile_snapshot?: string;
+  delivery_area_snapshot: string;
+  failure_reason: string;
+  failed_at: string;
+}
+
 interface AdminDeliveryMetrics {
   total_assigned: number;
   out_for_delivery: number;
@@ -71,11 +90,18 @@ export default function AdminDeliveryPage() {
   const [settlements, setSettlements] = useState<CashSettlement[]>([]);
   const [eligibleOrders, setEligibleOrders] = useState<EligibleOrder[]>([]);
   const [drivers, setDrivers] = useState<DriverOption[]>([]);
+  const [failedDeliveries, setFailedDeliveries] = useState<FailedDelivery[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
   // Active view tab
-  const [activeTab, setActiveTab] = useState<'batches' | 'settlements'>('batches');
+  const [activeTab, setActiveTab] = useState<'batches' | 'settlements' | 'failed'>('batches');
+
+  // Reschedule modal state
+  const [reschedulingOrder, setReschedulingOrder] = useState<FailedDelivery | null>(null);
+  const [newDeliveryDate, setNewDeliveryDate] = useState<string>('');
+  const [rescheduleReason, setRescheduleReason] = useState<string>('');
+  const [submittingReschedule, setSubmittingReschedule] = useState<boolean>(false);
 
   // Batch creation modal state
   const [showBatchModal, setShowBatchModal] = useState<boolean>(false);
@@ -104,6 +130,7 @@ export default function AdminDeliveryPage() {
         setSettlements(json.data.settlements || []);
         setEligibleOrders(json.data.eligible_unassigned_orders || []);
         setDrivers(json.data.drivers || []);
+        setFailedDeliveries(json.data.failed_deliveries || []);
         if (!selectedDate && json.data.delivery_date) {
           setSelectedDate(json.data.delivery_date);
         }
@@ -208,6 +235,48 @@ export default function AdminDeliveryPage() {
       }
     } catch (err) {
       console.error('Error verifying settlement:', err);
+    }
+  };
+
+  // Open Reschedule Modal
+  const handleOpenReschedule = (fd: FailedDelivery) => {
+    setReschedulingOrder(fd);
+    setNewDeliveryDate(addDaysIST(1));
+    setRescheduleReason('');
+  };
+
+  // Reschedule Failed Delivery
+  const handleReschedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reschedulingOrder || !newDeliveryDate || submittingReschedule) return;
+
+    try {
+      setSubmittingReschedule(true);
+      const res = await fetch('/api/delivery/reschedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: reschedulingOrder.order_id,
+          new_delivery_date: newDeliveryDate,
+          reason: rescheduleReason.trim() || null,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setReschedulingOrder(null);
+        setActionMessage({
+          text: `Order ${reschedulingOrder.order_number} rescheduled to ${newDeliveryDate}.`,
+          type: 'success',
+        });
+        loadDashboardData();
+      } else {
+        alert(json.message || json.error || 'Failed to reschedule delivery');
+      }
+    } catch (err) {
+      console.error('Error rescheduling delivery:', err);
+    } finally {
+      setSubmittingReschedule(false);
     }
   };
 
@@ -325,6 +394,16 @@ export default function AdminDeliveryPage() {
           >
             Driver Cash Settlements ({settlements.length})
           </button>
+          <button
+            onClick={() => setActiveTab('failed')}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'failed'
+                ? 'bg-rose-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            Failed Deliveries ({failedDeliveries.length})
+          </button>
         </div>
 
         {/* BATCHES TAB */}
@@ -433,6 +512,46 @@ export default function AdminDeliveryPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FAILED DELIVERIES TAB */}
+        {activeTab === 'failed' && (
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 text-xs font-bold text-slate-700">
+              Failed Delivery Stops &mdash; Reschedule to a New Date
+            </div>
+
+            {failedDeliveries.length === 0 ? (
+              <div className="p-12 text-center text-xs text-slate-400">
+                No failed deliveries for this date. 🎉
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {failedDeliveries.map((fd) => (
+                  <div key={fd.delivery_id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-slate-900 text-sm">{fd.order_number}</span>
+                        <span className="text-slate-400">&bull;</span>
+                        <span className="font-bold text-slate-800">{fd.customer_name_snapshot}</span>
+                      </div>
+                      <div className="text-slate-500 mt-0.5">{fd.delivery_area_snapshot}</div>
+                      <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[11px]">
+                        {FAILURE_REASON_LABELS[fd.failure_reason] || fd.failure_reason}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleOpenReschedule(fd)}
+                      className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl cursor-pointer shrink-0"
+                    >
+                      Reschedule &rarr;
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -598,6 +717,66 @@ export default function AdminDeliveryPage() {
                   className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer shadow-xs"
                 >
                   Save Verification
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESCHEDULE DELIVERY MODAL */}
+      {reschedulingOrder && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl">
+            <h3 className="font-extrabold text-slate-900 text-base">
+              Reschedule &bull; {reschedulingOrder.order_number}
+            </h3>
+
+            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs space-y-1">
+              <div className="font-bold text-slate-800">{reschedulingOrder.customer_name_snapshot} &bull; {reschedulingOrder.delivery_area_snapshot}</div>
+              <div className="text-rose-700 font-semibold">
+                {FAILURE_REASON_LABELS[reschedulingOrder.failure_reason] || reschedulingOrder.failure_reason}
+              </div>
+            </div>
+
+            <form onSubmit={handleReschedule} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-500 font-bold mb-1">New Delivery Date</label>
+                <input
+                  type="date"
+                  value={newDeliveryDate}
+                  min={todayIST()}
+                  onChange={(e) => setNewDeliveryDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:bg-white focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-500 font-bold mb-1">Reason / Notes (optional)</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Customer requested tomorrow evening"
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setReschedulingOrder(null)}
+                  className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReschedule}
+                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {submittingReschedule ? 'Rescheduling...' : 'Confirm Reschedule'}
                 </button>
               </div>
             </form>

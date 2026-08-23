@@ -83,7 +83,6 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getServiceSupabase();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let body: any;
     try {
       body = rawBody ? JSON.parse(rawBody) : {};

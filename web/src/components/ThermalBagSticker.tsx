@@ -51,17 +51,13 @@ export interface StickerPayload {
 
 interface ThermalBagStickerProps {
   payload: StickerPayload;
-  size?: '100x150' | '100x75' | 'auto';
   showItems?: boolean;
 }
 
 export default function ThermalBagSticker({
   payload,
-  size = '100x150',
   showItems = true,
 }: ThermalBagStickerProps) {
-  const isCompact = size === '100x75';
-  
   // Compute calculated subtotal and discounts if not provided
   const items = payload.items_summary || [];
   const itemsCalculatedSubtotal = items.reduce(

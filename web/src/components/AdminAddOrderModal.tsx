@@ -12,7 +12,6 @@ import {
   MapPin,
   Calendar,
   Clock,
-  IndianRupee,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -21,7 +20,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { todayIST, toISTDateString } from '@/lib/istDate';
+import { toISTDateString } from '@/lib/istDate';
 import ThermalBagSticker from '@/components/ThermalBagSticker';
 
 interface VariantOption {

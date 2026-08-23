@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const segment = body.segment || 'all';
 
-    let query = supabase
+    const query = supabase
       .from('customers')
       .select('id, full_name, mobile, is_active, created_at')
       .eq('is_active', true);

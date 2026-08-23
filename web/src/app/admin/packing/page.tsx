@@ -7,6 +7,13 @@ import { AdminNav } from '@/components/AdminNav';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { todayIST } from '@/lib/istDate';
 
+const PROBLEM_TYPE_LABELS: Record<string, string> = {
+  item_shortage: 'Item Shortage / Out of Stock',
+  damaged_vegetable: 'Damaged Quality Vegetable',
+  customer_special_req: 'Special Request Clarification',
+  weight_variance: 'Significant Weight Variance',
+};
+
 interface QueueItem {
   id: string;
   product_id: string;
@@ -105,6 +112,12 @@ export default function GodownPackingStation() {
   const [showProblemModal, setShowProblemModal] = useState<boolean>(false);
   const [problemType, setProblemType] = useState<string>('item_shortage');
   const [problemNotes, setProblemNotes] = useState<string>('');
+
+  // Resolve Problem Modal
+  const [showResolveModal, setShowResolveModal] = useState<boolean>(false);
+  const [resolveNotes, setResolveNotes] = useState<string>('');
+  const [resolveTargetStatus, setResolveTargetStatus] = useState<'packing' | 'packed'>('packing');
+  const [resolvingProblem, setResolvingProblem] = useState<boolean>(false);
 
   // Read the open order inside fetch callbacks without listing it in the
   // callback deps — otherwise every refresh creates a new activeOrder object,
@@ -357,6 +370,40 @@ export default function GodownPackingStation() {
     }
   };
 
+  // Resolve a flagged Problem order, moving it back into the packing flow
+  const handleResolveProblem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeOrder || resolvingProblem) return;
+
+    try {
+      setResolvingProblem(true);
+      const res = await fetch('/api/packing/resolve-problem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: activeOrder.order_id,
+          resolution_notes: resolveNotes.trim() || 'Problem resolved by manager.',
+          resolved_status: resolveTargetStatus,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setShowResolveModal(false);
+        setResolveNotes('');
+        setActiveOrder(null);
+        setActionMessage({ text: `Problem resolved on ${activeOrder.order_number}. Order moved back into the flow.`, type: 'success' });
+        loadQueueData();
+      } else {
+        alert(json.message || json.error || 'Failed to resolve problem');
+      }
+    } catch (err) {
+      console.error('Error resolving problem:', err);
+    } finally {
+      setResolvingProblem(false);
+    }
+  };
+
   const totalOrders = stats?.orders?.total || 0;
   const completedOrders = (stats?.orders?.packed || 0) + (stats?.orders?.verified || 0);
   const progressPercent = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
@@ -528,15 +575,23 @@ export default function GodownPackingStation() {
                         <strong>Note:</strong> {order.special_instructions}
                       </div>
                     )}
+
+                    {isProblem && order.packing_problem_notes && (
+                      <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-[11px]">
+                        <strong>{PROBLEM_TYPE_LABELS[order.packing_problem_type || ''] || 'Problem'}:</strong> {order.packing_problem_notes}
+                      </div>
+                    )}
                   </div>
 
                   <button
                     type="button"
                     onClick={() => handleOpenPacking(order)}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all"
+                    className={`w-full py-3 active:scale-98 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all ${
+                      isProblem ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                    }`}
                   >
                     <Play className="w-4 h-4 fill-white" />
-                    <span>{order.packing_status === 'packing' ? 'Resume Packing' : 'Start Packing'}</span>
+                    <span>{isProblem ? 'Resolve & Resume' : order.packing_status === 'packing' ? 'Resume Packing' : 'Start Packing'}</span>
                   </button>
                 </div>
               );
@@ -578,7 +633,19 @@ export default function GodownPackingStation() {
 
             {/* Modal Checklist Content */}
             <div className="p-5 sm:p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              
+
+              {activeOrder.packing_status === 'problem' && (
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs space-y-1">
+                  <div className="font-black text-rose-800 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>{PROBLEM_TYPE_LABELS[activeOrder.packing_problem_type || ''] || 'Flagged Problem'}</span>
+                  </div>
+                  {activeOrder.packing_problem_notes && (
+                    <p className="text-rose-700">{activeOrder.packing_problem_notes}</p>
+                  )}
+                </div>
+              )}
+
               <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
                 <span>Vegetable Items Checklist (શાકભાજી ચેકલિસ્ટ)</span>
                 <span className="text-emerald-700 font-mono">
@@ -651,14 +718,25 @@ export default function GodownPackingStation() {
 
             {/* Modal Action Footer */}
             <div className="p-5 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setShowProblemModal(true)}
-                className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-rose-100"
-              >
-                <AlertTriangle className="w-4 h-4 text-rose-600" />
-                <span>Report Problem</span>
-              </button>
+              {activeOrder.packing_status === 'problem' ? (
+                <button
+                  type="button"
+                  onClick={() => { setResolveNotes(''); setResolveTargetStatus('packing'); setShowResolveModal(true); }}
+                  className="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100"
+                >
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span>Resolve Problem</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowProblemModal(true)}
+                  className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-rose-100"
+                >
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span>Report Problem</span>
+                </button>
+              )}
 
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -737,6 +815,60 @@ export default function GodownPackingStation() {
                   className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer shadow-xs"
                 >
                   Flag Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Resolve Problem Modal */}
+      {showResolveModal && activeOrder && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl">
+            <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+              <Check className="w-5 h-5 text-emerald-600" />
+              <span>Resolve Problem &bull; #{activeOrder.order_number}</span>
+            </h3>
+
+            <form onSubmit={handleResolveProblem} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-500 font-bold mb-1">Move order back to</label>
+                <select
+                  value={resolveTargetStatus}
+                  onChange={(e) => setResolveTargetStatus(e.target.value as 'packing' | 'packed')}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
+                >
+                  <option value="packing">Continue Packing (checklist stays open)</option>
+                  <option value="packed">Mark Packed &amp; Ready Directly</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-500 font-bold mb-1">Resolution Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="How was this resolved?"
+                  value={resolveNotes}
+                  onChange={(e) => setResolveNotes(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowResolveModal(false)}
+                  className="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resolvingProblem}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {resolvingProblem ? 'Resolving...' : 'Resolve & Continue'}
                 </button>
               </div>
             </form>

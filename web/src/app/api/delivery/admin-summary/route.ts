@@ -61,11 +61,44 @@ export async function GET(req: NextRequest) {
       .map((dr: any) => dr.user_profiles)
       .filter((p: any) => p && p.is_active);
 
+    // 3. Fetch Failed Deliveries eligible for reschedule (the RPC above only
+    // returns the failed *count* — the reschedule action needs the actual list).
+    const targetDate = (statsData as any)?.delivery_date || date;
+    const { data: failedRows } = await supabase
+      .from('deliveries')
+      .select(`
+        id,
+        order_id,
+        failure_reason,
+        updated_at,
+        orders!inner (
+          order_number,
+          customer_name_snapshot,
+          customer_mobile_snapshot,
+          delivery_area_snapshot,
+          delivery_date
+        )
+      `)
+      .eq('status', 'failed')
+      .eq('orders.delivery_date', targetDate);
+
+    const failedDeliveries = (failedRows || []).map((r: any) => ({
+      delivery_id: r.id,
+      order_id: r.order_id,
+      order_number: r.orders?.order_number,
+      customer_name_snapshot: r.orders?.customer_name_snapshot,
+      customer_mobile_snapshot: r.orders?.customer_mobile_snapshot,
+      delivery_area_snapshot: r.orders?.delivery_area_snapshot,
+      failure_reason: r.failure_reason,
+      failed_at: r.updated_at,
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
         ...statsData,
         drivers: drivers || [],
+        failed_deliveries: failedDeliveries,
       },
     });
   } catch (err: unknown) {
