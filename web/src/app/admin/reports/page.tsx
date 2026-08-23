@@ -109,7 +109,7 @@ export default function ReportsHubPage() {
               Analytics &amp; Operations Hub
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-              Real-time financial ledgers, product profitability margins, mandi procurement wastage audits, and Excel exports for TaazaTokra Halol operations.
+              Real-time financial ledgers, product profitability margins, mandi procurement wastage audits, and Excel exports for Taji Tokri Halol operations.
             </p>
           </div>
         </div>

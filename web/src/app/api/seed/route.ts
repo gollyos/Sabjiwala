@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
@@ -9,17 +10,26 @@ function getServiceSupabase() {
   return createSupabaseClient(url, key);
 }
 
+// Timing-safe comparison. crypto.timingSafeEqual throws on unequal-length
+// buffers, so lengths are checked first rather than letting it throw.
+function secretsMatch(received: string, expected: string): boolean {
+  const a = Buffer.from(received);
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 export async function GET(req: NextRequest) {
   try {
-    // Block execution in production unless internal secret header is provided
-    if (process.env.NODE_ENV === 'production') {
-      const authHeader = req.headers.get('x-seed-secret');
-      if (!authHeader || authHeader !== process.env.INTERNAL_SEED_SECRET) {
-        return NextResponse.json(
-          { success: false, error: 'Not available in production environment' },
-          { status: 403 }
-        );
-      }
+    // Always require a valid internal secret header, regardless of NODE_ENV —
+    // a misconfigured NODE_ENV must never be the only thing standing between
+    // this route and the internet.
+    const expectedSecret = process.env.INTERNAL_SEED_SECRET;
+    const authHeader = req.headers.get('x-seed-secret');
+    if (!expectedSecret || !authHeader || !secretsMatch(authHeader, expectedSecret)) {
+      return NextResponse.json(
+        { success: false, error: 'Not available: valid x-seed-secret header required' },
+        { status: 403 }
+      );
     }
 
     const supabase = getServiceSupabase();
@@ -122,12 +132,12 @@ export async function GET(req: NextRequest) {
         },
       },
       domain_structure: {
-        architecture: 'Single Unified Domain (sabjiwala.store)',
-        customer_store: 'sabjiwala.store/',
-        admin_hq: 'sabjiwala.store/admin/dashboard',
-        godown_packing: 'sabjiwala.store/admin/packing',
-        delivery_driver: 'sabjiwala.store/driver',
-        tracking: 'sabjiwala.store/track/[token]',
+        architecture: 'Single Unified Domain (tajitokri.store)',
+        customer_store: 'tajitokri.store/',
+        admin_hq: 'tajitokri.store/admin/dashboard',
+        godown_packing: 'tajitokri.store/admin/packing',
+        delivery_driver: 'tajitokri.store/driver',
+        tracking: 'tajitokri.store/track/[token]',
       },
     });
   } catch (err: unknown) {

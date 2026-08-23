@@ -34,29 +34,49 @@ export interface RazorpayPaymentEntity {
   created_at: number;
 }
 
+// The hardcoded mock fallbacks below exist only so local `next dev` and the
+// standalone test scripts under scripts/ can run without live Razorpay
+// credentials. They must NEVER be reachable in any deployed environment
+// (production, staging, preview) — those values are public (checked into
+// source control), so leaving them reachable anywhere but a developer's own
+// machine would let anyone forge Razorpay webhook signatures. Require a real
+// secret unless we are definitely running locally.
+function isLocalDevOrTestEnv(): boolean {
+  return process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+}
+
 export class RazorpayService {
   private static getKeyId(): string {
     const key = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    if (!key && process.env.NODE_ENV === 'production') {
-      throw new Error('Razorpay key ID is not configured.');
+    if (!key) {
+      if (!isLocalDevOrTestEnv()) {
+        throw new Error('Razorpay key ID is not configured.');
+      }
+      return 'rzp_test_tajitokri_mock';
     }
-    return key || 'rzp_test_sabjiwala_mock';
+    return key;
   }
 
   private static getKeySecret(): string {
     const secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!secret && process.env.NODE_ENV === 'production') {
-      throw new Error('Razorpay key secret is not configured.');
+    if (!secret) {
+      if (!isLocalDevOrTestEnv()) {
+        throw new Error('Razorpay key secret is not configured.');
+      }
+      return 'tajitokri_mock_secret_test_key_123';
     }
-    return secret || 'sabjiwala_mock_secret_test_key_123';
+    return secret;
   }
 
   private static getWebhookSecret(): string {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-    if (!secret && process.env.NODE_ENV === 'production') {
-      throw new Error('Razorpay webhook secret is not configured.');
+    if (!secret) {
+      if (!isLocalDevOrTestEnv()) {
+        throw new Error('Razorpay webhook secret is not configured.');
+      }
+      return 'tajitokri_mock_webhook_secret_456';
     }
-    return secret || 'sabjiwala_mock_webhook_secret_456';
+    return secret;
   }
 
   /**

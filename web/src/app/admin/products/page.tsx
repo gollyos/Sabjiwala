@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/lib/errors';
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { Product, Category, ProductUnit, ProductVariant } from '@/types/sabjiwala';
+import { Product, Category, ProductUnit, ProductVariant } from '@/types/taji-tokri';
 import { AdminNav } from '@/components/AdminNav';
 import { Package, Plus, Edit2, Check, X, Upload, AlertCircle, CheckCircle2, Loader2, Trash2, Eye, EyeOff, Search, Save } from 'lucide-react';
 

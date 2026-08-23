@@ -26,7 +26,11 @@ import {
  */
 
 const ACTIVE_ORDER_STATUSES = ['confirmed', 'in_procurement', 'packed', 'out_for_delivery', 'delivered'];
-const CUTOFF_MINUTE_IST = 19 * 60 + 50; // 7:50 PM
+// Fallback only — the live value is read from app_settings.cutoff_time below
+// (the same key the admin "Save Cutoff Time" control writes to; see
+// migration 20260823000002_fix_order_cutoff_time_consistency.sql) so this
+// report's "before cutoff" label never silently drifts from the real cutoff.
+const DEFAULT_CUTOFF_MINUTE_IST = 19 * 60 + 50; // 7:50 PM
 const IDEMPOTENCY_SETTING_KEY = 'tg_owner_rpt_last';
 
 function secretsMatch(received: string, expected: string | undefined): boolean {
@@ -123,6 +127,21 @@ async function handle(request: NextRequest) {
       .eq('key', IDEMPOTENCY_SETTING_KEY)
       .maybeSingle();
     const lastSent = (settingRow?.value as { delivery_date?: string; sent_at?: string } | null) ?? null;
+
+    // Daily order cutoff — read from the same app_settings key the admin
+    // settings page writes to, so this report stays in sync if the owner
+    // changes the cutoff time.
+    const { data: cutoffRow } = await admin
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'cutoff_time')
+      .maybeSingle();
+    const cutoffTimeStr = (cutoffRow?.value as { time?: string } | null)?.time;
+    let cutoffMinuteIST = DEFAULT_CUTOFF_MINUTE_IST;
+    if (cutoffTimeStr && /^\d{2}:\d{2}/.test(cutoffTimeStr)) {
+      const [cutoffH, cutoffM] = cutoffTimeStr.split(':').map((n) => parseInt(n, 10));
+      cutoffMinuteIST = cutoffH * 60 + cutoffM;
+    }
     if (!force && lastSent?.delivery_date === targetDate) {
       return NextResponse.json({
         success: true,
@@ -192,7 +211,7 @@ async function handle(request: NextRequest) {
     const reportData: DailyReportData = {
       deliveryDate: targetDate,
       generatedAtIST,
-      beforeCutoff: minutesOfDay < CUTOFF_MINUTE_IST,
+      beforeCutoff: minutesOfDay < cutoffMinuteIST,
       totalOrders,
       codOrders,
       onlineOrders,

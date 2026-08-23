@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
@@ -19,7 +20,14 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  const expectedToken = process.env.WHATSAPP_VERIFY_TOKEN || 'sabjiwala_whatsapp_verify_token_2026';
+  const expectedToken = process.env.WHATSAPP_VERIFY_TOKEN;
+
+  // Fail closed: an unset verify token must never fall back to a value that
+  // is public (or guessable) in source control.
+  if (!expectedToken) {
+    console.error('[WhatsApp Webhook] WHATSAPP_VERIFY_TOKEN is not configured — rejecting verification handshake.');
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   if (mode === 'subscribe' && token === expectedToken) {
     return new NextResponse(challenge, { status: 200 });
@@ -29,12 +37,59 @@ export async function GET(req: NextRequest) {
 }
 
 /**
+ * Verifies Meta's X-Hub-Signature-256 header against the raw request body.
+ * Signature = HMAC_SHA256(rawBody, WHATSAPP_APP_SECRET), sent as "sha256=<hex>".
+ */
+function verifyMetaSignature(rawBody: string, signatureHeader: string | null, appSecret: string): boolean {
+  if (!signatureHeader) {
+    return false;
+  }
+
+  const providedHex = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;
+  const expectedHex = crypto.createHmac('sha256', appSecret).update(rawBody).digest('hex');
+
+  try {
+    const expectedBuffer = Buffer.from(expectedHex, 'utf8');
+    const providedBuffer = Buffer.from(providedHex, 'utf8');
+    if (expectedBuffer.length !== providedBuffer.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Meta Webhook Event & Inbound Message Handler (POST)
  */
 export async function POST(req: NextRequest) {
   try {
+    // Read the raw body first — the HMAC must be computed over the exact
+    // bytes Meta signed, not a re-serialized JSON object.
+    const rawBody = await req.text();
+
+    const appSecret = process.env.WHATSAPP_APP_SECRET;
+    if (!appSecret) {
+      // Fail closed and do not leak the missing-config reason to the caller.
+      console.error('[WhatsApp Webhook] WHATSAPP_APP_SECRET is not configured — rejecting all inbound webhook POSTs.');
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const signatureHeader = req.headers.get('x-hub-signature-256');
+    if (!verifyMetaSignature(rawBody, signatureHeader, appSecret)) {
+      console.warn('[WhatsApp Webhook] Signature verification failed for inbound webhook POST.');
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = getServiceSupabase();
-    const body = await req.json().catch(() => ({}));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let body: any;
+    try {
+      body = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      body = {};
+    }
 
     // Fetch config & PWA URL from app_settings
     const { data: configRow } = await supabase
@@ -44,7 +99,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     const config = configRow?.value || {};
-    const pwaBaseUrl = config.pwa_base_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+    const pwaBaseUrl = config.pwa_base_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://tajitokri.com';
     const supportMobile = config.support_mobile || process.env.NEXT_PUBLIC_STORE_PHONE || '';
 
     const entries = body.entry || [];
@@ -89,7 +144,7 @@ export async function POST(req: NextRequest) {
             let replyText = '';
 
             if (textBody.includes('HELP') || textBody.includes('મદદ') || textBody.includes('SUPPORT')) {
-              replyText = `*TaazaTokra Support (તાજાટોકરા સહાયતા)* 🤝\n\nNeed help with your fresh fruits & vegetables order?${supportMobile ? `\n📞 Call/WhatsApp: ${supportMobile}` : ''}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
+              replyText = `*Taji Tokri Support (તાજી ટોકરી સહાયતા)* 🤝\n\nNeed help with your fresh fruits & vegetables order?${supportMobile ? `\n📞 Call/WhatsApp: ${supportMobile}` : ''}\n🌐 Visit: ${pwaBaseUrl}\n\nDelivery hours: 10:00 AM - 1:00 PM daily.`;
             } else if (textBody.includes('ORDER') || textBody.includes('ઓર્ડર') || textBody.includes('BUY') || textBody.includes('SHOP')) {
               replyText = `*Order Fresh Fruits & Vegetables (તાજા ફળો અને શાકભાજી)* 🍎🥦\n\nPlace your next-day morning delivery order on our web app:\n👉 ${pwaBaseUrl}\n\n• Farm-fresh mandi rates\n• 10% OFF with FIRST500\n• 2% Cash on Delivery discount`;
             } else if (textBody.includes('STATUS') || textBody.includes('MY ORDER') || textBody.includes('TRACK') || textBody.includes('મારો ઓર્ડર')) {
@@ -105,7 +160,7 @@ export async function POST(req: NextRequest) {
 
               if (latestOrder && latestOrder.tracking_token) {
                 const trackUrl = `${pwaBaseUrl}/track/${latestOrder.tracking_token}`;
-                replyText = `*Your Latest TaazaTokra Order (તમારો છેલ્લો ઓર્ડર)* 📦\n\n*Order No:* ${latestOrder.order_number}\n*Delivery Date:* ${latestOrder.delivery_date}\n*Status:* ${latestOrder.order_status.toUpperCase()}\n*Payable:* ₹${latestOrder.final_payable_amount}\n\n*Track Details / બિલ જુઓ:* \n${trackUrl}`;
+                replyText = `*Your Latest Taji Tokri Order (તમારો છેલ્લો ઓર્ડર)* 📦\n\n*Order No:* ${latestOrder.order_number}\n*Delivery Date:* ${latestOrder.delivery_date}\n*Status:* ${latestOrder.order_status.toUpperCase()}\n*Payable:* ₹${latestOrder.final_payable_amount}\n\n*Track Details / બિલ જુઓ:* \n${trackUrl}`;
               } else {
                 replyText = `*No Active Orders Found*\n\nWe could not find an order linked to ${senderE164}.\nPlace your order fresh at: ${pwaBaseUrl}`;
               }
@@ -115,7 +170,7 @@ export async function POST(req: NextRequest) {
               replyText = `*Manage Delivery Address (સરનામું બદલો)* 📍\n\nUpdate your Halol delivery location and landmarks:\n👉 ${pwaBaseUrl}/profile`;
             } else {
               // Default friendly guidance
-              replyText = `*TaazaTokra (તાજાટોકરા)* 🌿\n\nWelcome! How can we assist you today?\n\nReply with one of these commands:\n• *ORDER* — Shop fresh fruits & vegetables\n• *STATUS* — Track your current order\n• *REPEAT* — Reorder previous items\n• *HELP* — Customer care support\n\n🌐 Visit: ${pwaBaseUrl}`;
+              replyText = `*Taji Tokri (તાજી ટોકરી)* 🌿\n\nWelcome! How can we assist you today?\n\nReply with one of these commands:\n• *ORDER* — Shop fresh fruits & vegetables\n• *STATUS* — Track your current order\n• *REPEAT* — Reorder previous items\n• *HELP* — Customer care support\n\n🌐 Visit: ${pwaBaseUrl}`;
             }
 
             // Dispatch reply

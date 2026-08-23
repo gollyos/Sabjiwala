@@ -18,7 +18,7 @@ export default function OrderTrackingPage() {
   const token = params?.token as string;
   const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
   const supportUrl = supportPhone
-    ? `https://wa.me/${supportPhone}?text=Hi%20TaazaTokra%20Support,%20I%20need%20help%20with%20my%20order`
+    ? `https://wa.me/${supportPhone}?text=Hi%20Taji Tokri%20Support,%20I%20need%20help%20with%20my%20order`
     : null;
 
   const [loading, setLoading] = useState(true);
@@ -95,10 +95,10 @@ export default function OrderTrackingPage() {
           <div className="pt-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-125 text-white text-xs font-bold transition-all shadow-lg"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>Go to TaazaTokra Store</span>
+              <span>Go to Taji Tokri Store</span>
             </Link>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function OrderTrackingPage() {
         <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-black bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
-              TaazaTokra 🌿
+              Taji Tokri 🌿
             </span>
           </Link>
           {supportUrl && (
@@ -320,7 +320,7 @@ export default function OrderTrackingPage() {
               type="button"
               onClick={handleRepeatOrder}
               disabled={repeating}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-125 text-white text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${repeating ? 'animate-spin' : ''}`} />
               <span>{repeating ? 'Checking Prices...' : 'Repeat Order'}</span>
@@ -365,7 +365,7 @@ export default function OrderTrackingPage() {
                     }
                     router.push('/?open_cart=true');
                   }}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer min-h-[44px]"
+                  className="w-full py-2.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-125 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer min-h-[44px]"
                 >
                   Proceed to Checkout with Today’s Cart →
                 </button>

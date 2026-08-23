@@ -1,6 +1,6 @@
-# Sabjiwala Comprehensive Testing & Verification Matrix
+# Taji Tokri Comprehensive Testing & Verification Matrix
 
-This document outlines the testing strategy, boundary test cases, and completion test matrix for Sabjiwala.
+This document outlines the testing strategy, boundary test cases, and completion test matrix for Taji Tokri.
 
 ---
 

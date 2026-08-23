@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     const config = configRow?.value || {};
-    const pwaBaseUrl = config.pwa_base_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+    const pwaBaseUrl = config.pwa_base_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://tajitokri.com';
 
     const jobId = typeof specificJobId === 'string' ? specificJobId : null;
     const { data: jobs, error: fetchErr } = await supabase.rpc('claim_notification_jobs', {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (fetchErr) {
-      return NextResponse.json({ success: false, error: fetchErr.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(fetchErr) }, { status: 500 });
     }
 
     if (!jobs || jobs.length === 0) {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
           textMessage = formatOwnerOperationalAlert(job.notification_type, job.payload, pwaBaseUrl);
           break;
         default:
-          textMessage = `*Sabjiwala Alert:* ${JSON.stringify(job.payload)}`;
+          textMessage = `*Taji Tokri Alert:* ${JSON.stringify(job.payload)}`;
           break;
       }
 

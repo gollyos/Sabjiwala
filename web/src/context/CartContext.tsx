@@ -6,7 +6,7 @@ import { getErrorMessage } from '@/lib/errors';
 
 
 import React, { createContext, useState, useEffect, useCallback, useRef, useContext } from 'react';
-import { Product, ProductVariant, CartItem, CheckoutQuote } from '@/types/sabjiwala';
+import { Product, ProductVariant, CartItem, CheckoutQuote } from '@/types/taji-tokri';
 import { useAuth } from './AuthContext';
 import { createClient } from '@/lib/supabase/client';
 
@@ -129,13 +129,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('sabjiwala_cart');
+      const saved = localStorage.getItem('tajitokri_cart');
       const parsed: unknown = saved ? JSON.parse(saved) : [];
       if (Array.isArray(parsed)) {
         setCart(parsed as CartItem[]);
       }
     } catch {
-      localStorage.removeItem('sabjiwala_cart');
+      localStorage.removeItem('tajitokri_cart');
     } finally {
       setHasRestoredCart(true);
     }
@@ -144,7 +144,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Sync changes only after the initial saved basket has been restored.
   useEffect(() => {
     if (hasRestoredCart) {
-      localStorage.setItem('sabjiwala_cart', JSON.stringify(cart));
+      localStorage.setItem('tajitokri_cart', JSON.stringify(cart));
     }
   }, [cart, hasRestoredCart]);
 
@@ -360,13 +360,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Case A: Cash on Delivery (Immediate confirmation)
       if (paymentMethod === 'cod') {
         checkoutKeyRef.current = null;
-        // Trigger n8n webhook immediately in background
+        // Trigger the order-confirmation notification server-side, in the
+        // background. This calls an authenticated, ownership-scoped route
+        // (not the staff-only /api/automation/n8n-trigger endpoint, which
+        // rejects regular customers with 403) so the n8n webhook actually
+        // fires for real checkouts. The automation_jobs outbox is the
+        // reliability backstop if this best-effort call fails.
         if (orderResult?.order_id) {
-          fetch('/api/automation/n8n-trigger', {
+          fetch('/api/orders/notify-confirmation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ order_id: orderResult.order_id }),
-          }).catch((err) => console.error('Failed to trigger n8n order webhook:', err));
+          }).catch((err) => console.error('Failed to trigger order confirmation webhook:', err));
         }
 
         clearCart();
@@ -402,7 +407,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           key: rzpData.key_id,
           amount: rzpData.amount_paise,
           currency: 'INR',
-          name: 'TaazaTokra Halol',
+          name: 'Taji Tokri Halol',
           description: `Order ${orderResult.order_number} • Fresh Fruits & Vegetables`,
           order_id: rzpData.razorpay_order_id,
           prefill: rzpData.customer_prefill,
@@ -435,14 +440,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   delivery_slot: verifyData.data.delivery_slot || '10:00 AM – 01:00 PM',
                   is_before_cutoff: verifyData.data.is_before_cutoff,
                 };
-                // Trigger n8n webhook immediately in background
-                if (orderResult?.order_id) {
-                  fetch('/api/automation/n8n-trigger', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order_id: orderResult.order_id }),
-                  }).catch((err) => console.error('Failed to trigger n8n order webhook:', err));
-                }
+                // The order-confirmation webhook is dispatched server-side
+                // by /api/payments/verify-signature right after it confirms
+                // the payment capture above, so no client-side trigger call
+                // is needed here.
 
                 clearCart();
                 setCartDrawerOpen(false);

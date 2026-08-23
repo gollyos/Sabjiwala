@@ -117,10 +117,10 @@ export async function POST(req: NextRequest) {
         if (webhookRecordId) {
           await supabase
             .from('payment_webhook_events')
-            .update({ processed_status: 'failed', processing_error: rpcErr.message })
+            .update({ processed_status: 'failed', processing_error: getErrorMessage(rpcErr) })
             .eq('id', webhookRecordId);
         }
-        return NextResponse.json({ received: true, error: rpcErr.message }, { status: 500 });
+        return NextResponse.json({ received: true, error: getErrorMessage(rpcErr) }, { status: 500 });
       }
 
 

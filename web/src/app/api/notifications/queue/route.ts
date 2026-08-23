@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     const { data: jobs, count, error } = await query;
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     // Counts by status

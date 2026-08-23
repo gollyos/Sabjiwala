@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, AddressInput } from '@/context/AuthContext';
 import { User, Phone, ShieldCheck, ArrowRight, MapPin, LogOut, Plus, Home, Briefcase, Building, Loader2, Trash2, Edit2, CheckCircle2, AlertCircle, Package, Calendar, Clock, ChevronRight, ShoppingBag } from 'lucide-react';
-import { CustomerAddress } from '@/types/sabjiwala';
+import { CustomerAddress } from '@/types/taji-tokri';
 import { createClient } from '@/lib/supabase/client';
 
 interface CustomerOrderSummary {
@@ -155,7 +155,7 @@ export default function ProfilePage() {
         </div>
         <button
           onClick={() => openAuthModal()}
-          className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/25 inline-flex items-center space-x-2 transition-all cursor-pointer"
+          className="px-8 py-4 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/25 inline-flex items-center space-x-2 transition-all cursor-pointer"
         >
           <span>Sign In with Phone OTP</span>
           <ArrowRight className="w-5 h-5" />
@@ -197,6 +197,12 @@ export default function ProfilePage() {
       return;
     }
 
+    const trimmedPincode = pincode.trim() || '389350';
+    if (!/^[0-9]{6}$/.test(trimmedPincode)) {
+      setAddressError('Please enter a valid 6-digit pincode.');
+      return;
+    }
+
     setAddressSaving(true);
     setAddressError(null);
 
@@ -210,7 +216,7 @@ export default function ProfilePage() {
       city: 'Halol',
       district: 'Panchmahal',
       state: 'Gujarat',
-      pincode: pincode.trim() || '389350',
+      pincode: trimmedPincode,
       isDefault,
     };
 
@@ -267,14 +273,15 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       
       {/* Profile Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
-        <div className="flex items-center space-x-4">
+      <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
+        <div className="absolute -right-10 -top-14 h-48 w-48 rounded-full bg-[#f6a94a]/15 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="relative flex items-center space-x-4">
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-extrabold text-2xl text-white shadow-inner">
             {customer.full_name.charAt(0).toUpperCase()}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold">{customer.full_name}</h2>
+              <h2 className="font-display text-2xl font-bold">{customer.full_name}</h2>
               {customer.is_verified && (
                 <ShieldCheck className="w-5 h-5 text-emerald-300" />
               )}
@@ -287,7 +294,7 @@ export default function ProfilePage() {
         </div>
 
         {verifiedSequence && (
-          <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center sm:text-right">
+          <div className="relative p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center sm:text-right">
             <div className="text-xs font-bold text-amber-300 uppercase tracking-wider">
               Verified Customer Sequence
             </div>
@@ -530,7 +537,7 @@ export default function ProfilePage() {
                     </div>
                     <button
                       onClick={openAddAddressForm}
-                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-4 py-2.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-2xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add New Address</span>
@@ -561,7 +568,7 @@ export default function ProfilePage() {
                                   {addr.address_type} Address
                                 </span>
                                 {isAddrDefault && (
-                                  <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                  <span className="bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                                     Default
                                   </span>
                                 )}
@@ -646,7 +653,7 @@ export default function ProfilePage() {
                         onClick={() => setAddrType(t)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer ${
                           addrType === t
-                            ? 'bg-emerald-600 text-white shadow-xs'
+                            ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-xs'
                             : 'bg-white text-slate-600 border border-slate-200'
                         }`}
                       >
@@ -737,8 +744,11 @@ export default function ProfilePage() {
                         <input
                           type="text"
                           value={pincode}
-                          onChange={(e) => setPincode(e.target.value)}
+                          onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                           placeholder="389350"
+                          pattern="[0-9]{6}"
+                          maxLength={6}
+                          inputMode="numeric"
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                       </div>
@@ -769,7 +779,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={addressSaving}
-                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-6 py-2.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       {addressSaving ? (
                         <>
@@ -865,7 +875,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={profileSaving}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full py-3.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {profileSaving ? (
                     <>

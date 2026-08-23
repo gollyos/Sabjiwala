@@ -86,7 +86,7 @@ const formatDisplayDate = (isoDate: string): string => {
 export function buildOwnerDailyReportHtml(data: DailyReportData): string {
   const lines: string[] = [];
 
-  lines.push('🥬 <b>Sabjiwala — Kal ki Delivery Report</b>');
+  lines.push('🥬 <b>Taji Tokri — Kal ki Delivery Report</b>');
   lines.push(`📅 Delivery: <b>${escapeHtml(formatDisplayDate(data.deliveryDate))}</b> • Report: ${escapeHtml(data.generatedAtIST)} IST`);
   lines.push('');
 

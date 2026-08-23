@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Product, ProductVariant, Category } from '@/types/sabjiwala';
+import { Product, ProductVariant, Category } from '@/types/taji-tokri';
 import { useCart } from '@/context/CartContext';
 import { Clock, MapPin, Tag, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw } from 'lucide-react';
 import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
@@ -36,7 +36,7 @@ const FAQS_DATA = [
   },
   {
     qGu: 'જો કોઈ શાકભાજી કે ફળ ખરાબ નીકળે તો શું કરવું? (Quality Guarantee)',
-    qEn: 'What is TaazaTokra’s quality and replacement policy?',
+    qEn: 'What is Taji Tokri’s quality and replacement policy?',
     aGu: 'ડિલિવરી વખતે માલ ચકાસો. કોઈ વસ્તુ યોગ્ય ન લાગે તો તે ડિલિવરી પાર્ટનરને પરત આપી શકો છો; ટીમ તમારા પ્રશ્નનું યોગ્ય સમાધાન કરશે.',
     aEn: 'Inspect your produce at delivery. If an item is not acceptable, return it with the delivery partner and the team will resolve the affected item.',
   },
@@ -268,44 +268,48 @@ export default function HomePage() {
 
   return (
     <div className="pb-28 sm:pb-16 bg-[#fbfcf7] dark:bg-[#07140f] min-h-screen text-slate-900 dark:text-slate-100">
-      <section className="relative overflow-hidden border-b border-emerald-100/80 bg-[linear-gradient(135deg,#f2fbf4_0%,#fffaf0_55%,#eef8f0_100%)] dark:border-emerald-900 dark:bg-[linear-gradient(135deg,#0b2418_0%,#122118_55%,#07140f_100%)]">
-        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-amber-300/20 blur-3xl" aria-hidden="true" />
-        <div className="absolute -bottom-28 left-1/3 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-7 sm:px-6 sm:py-12 lg:grid-cols-[1fr_22rem] lg:items-center lg:px-8 lg:py-16">
+      <section className="relative overflow-hidden border-b border-emerald-100/80 bg-[linear-gradient(160deg,#0e3d27_0%,#0f7a45_38%,#f6a94a_78%,#fdfaf2_100%)] dark:border-emerald-900 dark:bg-[linear-gradient(160deg,#071c12_0%,#0c3823_45%,#3c2a10_85%,#07140f_100%)]">
+        <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full bg-[#e0453a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-[#f6a94a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-14 lg:grid-cols-[1fr_22rem] lg:items-center lg:px-8 lg:py-20">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-xs font-extrabold text-emerald-800 shadow-xs backdrop-blur dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-3 py-1.5 text-xs font-extrabold text-white shadow-xs backdrop-blur">
               <Leaf className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Halol’s Fresh Produce Service</span>
+              <span>Halol&rsquo;s Fresh Produce Service</span>
             </div>
-            <h1 className="text-3xl font-black leading-[1.08] tracking-[-0.035em] text-[#153c2a] dark:text-white sm:text-5xl lg:text-6xl">
+            <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white text-wrap-balance sm:text-6xl lg:text-7xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
               Market-Fresh Produce,
-              <span className="block text-emerald-700 dark:text-emerald-400">Delivered Across Halol.</span>
+              <span className="block text-[#ffe1ad]">Delivered Across Halol.</span>
             </h1>
-            <p className="mt-3 text-lg font-bold leading-relaxed text-emerald-900 dark:text-emerald-200 sm:text-xl" lang="gu">
+            <p className="font-display mt-4 text-lg font-semibold leading-relaxed text-emerald-50 sm:text-xl" lang="gu">
               તાજા ફળ, તાજું શાક — સીધું તમારા ઘર સુધી.
             </p>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/90 sm:text-base">
               Order before 7:50&nbsp;PM. We procure against demand, pack the next morning, and deliver across Halol between 10&nbsp;AM–1&nbsp;PM. Pay by cash or UPI at your doorstep.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#catalog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-emerald-800/15 transition-[background-color,transform] hover:bg-emerald-800 active:scale-[0.98]">
-                Shop Today’s Fresh Picks
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href="#catalog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgb(224_69_58/0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                Shop Today&rsquo;s Fresh Picks
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
-              <Link href="/delivery-areas/halol" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-emerald-200 bg-white/80 px-5 py-3 text-sm font-extrabold text-emerald-800 transition-colors hover:border-emerald-400 hover:bg-white dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200">
+              <Link href="/delivery-areas/halol" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/50 bg-white/10 px-5 py-3 text-sm font-extrabold text-white backdrop-blur transition-colors hover:bg-white/20">
                 Check Your Delivery Area
               </Link>
             </div>
           </div>
 
-          <aside className="hidden rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_24px_80px_rgb(26_82_51/0.14)] backdrop-blur lg:block dark:border-emerald-800/70 dark:bg-[#0b1b14]/90" aria-label="Next delivery details">
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400">Next Delivery</p>
-            <p className="mt-2 text-3xl font-black tabular-nums text-slate-950 dark:text-white">{deliverySchedule.deliveryDateStr}</p>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Delivery window · 10&nbsp;AM–1&nbsp;PM</p>
-            <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
-              <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-emerald-700" aria-hidden="true" /><span>7:50&nbsp;PM daily order cutoff</span></div>
-              <div className="flex items-center gap-3"><Tag className="h-4 w-4 text-emerald-700" aria-hidden="true" /><span>Free delivery from ₹200</span></div>
-              <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-emerald-700" aria-hidden="true" /><span>Halol &amp; Baska GIDC</span></div>
+          <aside className="hidden overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-[0_24px_80px_rgb(15_30_20/0.35)] backdrop-blur lg:block dark:border-emerald-800/70 dark:bg-[#0b1b14]/95" aria-label="Next delivery details">
+            <div className="h-1.5 w-full bg-[linear-gradient(90deg,#0f7a45_0%,#ee8a2f_50%,#e0453a_100%)]" aria-hidden="true" />
+            <div className="p-5">
+              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400">Next Delivery</p>
+              <p className="font-display mt-2 text-4xl font-extrabold tabular-nums text-slate-950 dark:text-white">{deliverySchedule.deliveryDateStr}</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Delivery window · 10&nbsp;AM–1&nbsp;PM</p>
+              <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
+                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60"><Clock className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" /></span><span>7:50&nbsp;PM daily order cutoff</span></div>
+                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/40"><Tag className="h-3.5 w-3.5 text-[#ee8a2f]" aria-hidden="true" /></span><span>Free delivery from ₹200</span></div>
+                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40"><MapPin className="h-3.5 w-3.5 text-[#e0453a]" aria-hidden="true" /></span><span>Halol &amp; Baska GIDC</span></div>
+              </div>
             </div>
           </aside>
         </div>
@@ -317,7 +321,7 @@ export default function HomePage() {
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400">Today’s Catalog</p>
-              <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Choose Fresh. We’ll Handle the Morning.</h2>
+              <h2 className="font-display mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">Choose Fresh. We&rsquo;ll Handle the Morning.</h2>
             </div>
             {!loading && <p className="hidden text-sm font-semibold text-slate-500 sm:block">{filteredProducts.length} items available</p>}
           </div>
@@ -343,7 +347,7 @@ export default function HomePage() {
             aria-pressed={activeModule === 'vegetables'}
             className={`min-h-10 py-2 px-1 rounded-xl font-extrabold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1 ${
               activeModule === 'vegetables'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-xs'
                 : 'text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white'
             }`}
           >
@@ -357,8 +361,8 @@ export default function HomePage() {
             aria-pressed={activeModule === 'fruits'}
             className={`min-h-10 py-2 px-1 rounded-xl font-extrabold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1 ${
               activeModule === 'fruits'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-amber-500 dark:hover:text-white'
+                ? 'bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] text-white shadow-xs'
+                : 'text-slate-700 dark:text-slate-300 hover:text-[#ee8a2f] dark:hover:text-white'
             }`}
           >
             <Apple className="w-3.5 h-3.5 shrink-0" />
@@ -417,7 +421,7 @@ export default function HomePage() {
             aria-pressed={selectedCategory === 'all'}
             className={`min-h-10 px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
               selectedCategory === 'all'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-xs'
                 : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-white'
             }`}
           >
@@ -432,7 +436,7 @@ export default function HomePage() {
               aria-pressed={selectedCategory === cat.id}
               className={`min-h-10 px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
                 selectedCategory === cat.id
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-white'
               }`}
             >
@@ -483,15 +487,17 @@ export default function HomePage() {
 
         {/* 🌟 SECTION 1: TRUST HIGHLIGHTS (Local APMC & Zero Plastic) */}
         <section className="pt-8 sm:pt-12">
-          <div className="bg-[#123d29] text-white rounded-[2rem] p-6 sm:p-8 border border-emerald-800/60 shadow-xl relative overflow-hidden">
+          <div className="bg-[#0d3020] text-white rounded-[2rem] p-6 sm:p-8 border border-emerald-800/60 shadow-xl relative overflow-hidden">
+            <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-[#ee8a2f]/10 blur-3xl pointer-events-none" aria-hidden="true" />
+            <div className="absolute -left-10 -bottom-16 h-56 w-56 rounded-full bg-[#e0453a]/10 blur-3xl pointer-events-none" aria-hidden="true" />
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              
+
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                   <Leaf className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-emerald-50">Procured Against Real Orders</h3>
+                  <h3 className="font-display font-bold text-base text-emerald-50">Procured Against Real Orders</h3>
                   <p className="text-sm text-emerald-100/75 mt-1 leading-relaxed">
                     We close orders at 7:50&nbsp;PM and source overnight from Halol APMC, helping reduce storage time and unnecessary waste.
                   </p>
@@ -499,11 +505,11 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#ee8a2f]/20 border border-[#ee8a2f]/30 flex items-center justify-center text-[#f6a94a] shrink-0">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-emerald-50">One Clear Delivery Window</h3>
+                  <h3 className="font-display font-bold text-base text-emerald-50">One Clear Delivery Window</h3>
                   <p className="text-sm text-emerald-100/75 mt-1 leading-relaxed">
                     Your basket is packed in the morning and delivered from 10&nbsp;AM–1&nbsp;PM, with order updates sent on WhatsApp.
                   </p>
@@ -511,11 +517,11 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#e0453a]/20 border border-[#e0453a]/30 flex items-center justify-center text-[#f28075] shrink-0">
                   <RotateCcw className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-emerald-50">Quality Checked at the Door</h3>
+                  <h3 className="font-display font-bold text-base text-emerald-50">Quality Checked at the Door</h3>
                   <p className="text-sm text-emerald-100/75 mt-1 leading-relaxed">
                     Inspect your produce during delivery. If an item is not acceptable, return it with the delivery partner for resolution.
                   </p>
@@ -535,8 +541,8 @@ export default function HomePage() {
                 <HelpCircle className="w-3.5 h-3.5" />
                 <span>વારંવાર પૂછાતા પ્રશ્નો (FAQs)</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                TaazaTokra Halol વિશે વધુ જાણો
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Taji Tokri Halol વિશે વધુ જાણો
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 હાલોલમાં તાજા ફળો અને શાકભાજીના ઓર્ડર અને ડિલિવરી અંગે સામાન્ય પ્રશ્નોના જવાબો.
@@ -600,7 +606,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="text-[11px] text-slate-400">
-            © {new Date().getFullYear()} TaazaTokra (તાજાટોકરા) • Fresh Fruits &amp; Vegetables Delivered Daily in Halol, Gujarat.
+            © {new Date().getFullYear()} Taji Tokri (તાજી ટોકરી) • Fresh Fruits &amp; Vegetables Delivered Daily in Halol, Gujarat.
           </p>
         </footer>
 

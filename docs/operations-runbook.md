@@ -1,6 +1,6 @@
-# Sabjiwala Daily Operations Runbook (માલિક અને સ્ટાફ માટે રોજિંદી માર્ગદર્શિકા)
+# Taji Tokri Daily Operations Runbook (માલિક અને સ્ટાફ માટે રોજિંદી માર્ગદર્શિકા)
 
-This document describes the daily operational lifecycle of Sabjiwala in Halol, Panchmahal.
+This document describes the daily operational lifecycle of Taji Tokri in Halol, Panchmahal.
 
 ```mermaid
 sequenceDiagram
@@ -58,7 +58,7 @@ sequenceDiagram
 
 ### SOP 1: Phone / WhatsApp Manual Customer Order Entry
 When an elderly customer calls or messages support to place an order:
-1. Open the Storefront PWA (`https://sabjiwala.store`).
+1. Open the Storefront PWA (`https://tajitokri.store`).
 2. Add the requested vegetables to the cart (ensure subtotal $\ge$ ₹200).
 3. Enter the customer's mobile number for verification and enter their delivery address in Halol.
 4. Review the server quote (FIRST500 + 2% COD discount auto-applied) and confirm the order.

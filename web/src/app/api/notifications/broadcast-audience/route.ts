@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
     const { data: customers, error } = await query;
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     const formatted = (customers || []).map((c) => ({
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, error: err.message || 'Internal server error' },
+      { success: false, error: getErrorMessage(err, 'Internal server error') },
       { status: 500 }
     );
   }

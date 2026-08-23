@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { MapPin, Clock, ShieldCheck, ShoppingBag, ArrowRight } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 export const metadata: Metadata = {
-  title: 'Fresh Fruits & Vegetables Delivery in Halol | TaazaTokra (તાજાટોકરા)',
-  description: 'TaazaTokra delivers fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies in the 10 AM–1 PM delivery window.',
+  title: 'Fresh Fruits & Vegetables Delivery in Halol | Taji Tokri (તાજી ટોકરી)',
+  description: 'Taji Tokri delivers fresh fruits and vegetables across Halol Town, Baska GIDC, Pavagadh Bypass, and surrounding colonies in the 10 AM–1 PM delivery window.',
   keywords: [
     'fresh fruits Halol',
     'fresh vegetables Halol',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     'online vegetables Halol',
     'Baska GIDC vegetable delivery',
     'Pavagadh fruits delivery',
-    'TaazaTokra Halol delivery areas',
+    'Taji Tokri Halol delivery areas',
   ],
 };
 
@@ -40,11 +40,11 @@ export default function HalolDeliveryAreaPage() {
           <div className="flex justify-center">
             <BrandLogo size="lg" showGujarati={true} showTagline={true} />
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white pt-2">
+          <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white pt-2">
             Fresh Fruits &amp; Vegetables Delivery in Halol
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            TaazaTokra (તાજાટોકરા) delivers handpicked fruits and farm-fresh vegetables across Halol, Panchmahal, Gujarat.
+            Taji Tokri (તાજી ટોકરી) delivers handpicked fruits and farm-fresh vegetables across Halol, Panchmahal, Gujarat.
           </p>
         </div>
 
@@ -54,27 +54,27 @@ export default function HalolDeliveryAreaPage() {
             <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
-            <div className="font-extrabold text-sm text-slate-900 dark:text-white">Delivery Window</div>
+            <div className="font-display font-bold text-sm text-slate-900 dark:text-white">Delivery Window</div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Every day from <strong>10:00 AM to 1:00 PM</strong>. Orders placed before 7:50 PM are scheduled for next-day delivery.
             </p>
           </div>
 
           <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-[#ee8a2f]/15 text-[#ee8a2f] flex items-center justify-center">
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <div className="font-extrabold text-sm text-slate-900 dark:text-white">Minimum Order</div>
+            <div className="font-display font-bold text-sm text-slate-900 dark:text-white">Minimum Order</div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Free delivery on minimum merchandise subtotal of <strong>₹200</strong> with Cash on Delivery (COD).
             </p>
           </div>
 
           <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-[#e0453a]/15 text-[#e0453a] flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <div className="font-extrabold text-sm text-slate-900 dark:text-white">Quality Guarantee</div>
+            <div className="font-display font-bold text-sm text-slate-900 dark:text-white">Quality Guarantee</div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               100% replacement and instant refund if any vegetable or fruit does not meet your expectations.
             </p>
@@ -85,7 +85,7 @@ export default function HalolDeliveryAreaPage() {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl space-y-4">
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+            <h2 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               Areas &amp; Localities Served in Halol (ડિલિવરી વિસ્તારો)
             </h2>
           </div>
@@ -109,23 +109,24 @@ export default function HalolDeliveryAreaPage() {
         </div>
 
         {/* How It Works */}
-        <div className="bg-emerald-950 text-white p-6 sm:p-8 rounded-3xl space-y-4 border border-emerald-800/60">
-          <h2 className="text-lg sm:text-xl font-black text-emerald-100">
-            How TaazaTokra Delivery Works (ઓર્ડર અને ડિલિવરી પ્રોસેસ)
+        <div className="relative overflow-hidden bg-[#0d3020] text-white p-6 sm:p-8 rounded-3xl space-y-4 border border-emerald-800/60">
+          <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-[#ee8a2f]/10 blur-3xl pointer-events-none" aria-hidden="true" />
+          <h2 className="relative font-display text-lg sm:text-xl font-bold text-emerald-100">
+            How Taji Tokri Delivery Works (ઓર્ડર અને ડિલિવરી પ્રોસેસ)
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div className="space-y-1">
-              <div className="text-amber-300 font-mono font-black text-sm">Step 1</div>
+              <div className="text-[#f6a94a] font-mono font-black text-sm">Step 1</div>
               <div className="font-bold text-white">Shop Online (ઓર્ડર કરો)</div>
-              <p className="text-emerald-200/80 text-[11px]">Select your fruits and vegetables on TaazaTokra and confirm via OTP.</p>
+              <p className="text-emerald-200/80 text-[11px]">Select your fruits and vegetables on Taji Tokri and confirm via OTP.</p>
             </div>
             <div className="space-y-1">
-              <div className="text-amber-300 font-mono font-black text-sm">Step 2</div>
+              <div className="text-[#f6a94a] font-mono font-black text-sm">Step 2</div>
               <div className="font-bold text-white">Midnight Mandi Sourcing</div>
               <p className="text-emerald-200/80 text-[11px]">Our team procures fresh grade-A produce directly from APMC mandi.</p>
             </div>
             <div className="space-y-1">
-              <div className="text-amber-300 font-mono font-black text-sm">Step 3</div>
+              <div className="text-[#f6a94a] font-mono font-black text-sm">Step 3</div>
               <div className="font-bold text-white">Doorstep Delivery</div>
               <p className="text-emerald-200/80 text-[11px]">Delivered fresh with Cash on Delivery and WhatsApp live status updates.</p>
             </div>
@@ -136,7 +137,7 @@ export default function HalolDeliveryAreaPage() {
         <div className="text-center pt-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/30 text-sm transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/30 text-sm transition-all cursor-pointer"
           >
             <span>Start Shopping Fresh Fruits &amp; Vegetables (ઓર્ડર કરો)</span>
             <ArrowRight className="w-4 h-4" />

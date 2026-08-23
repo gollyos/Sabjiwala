@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
       const testPayload = {
         event: 'TEST_EVENT',
         timestamp: new Date().toISOString(),
-        source: 'taazatokra_settings_test',
-        message: '✅ TaazaTokra & n8n webhook connection verified successfully!',
+        source: 'tajitokri_settings_test',
+        message: '✅ Taji Tokri & n8n webhook connection verified successfully!',
         sample_order: {
           order_number: 'SBJ-SAMPLE-2026',
           customer_name: 'Test Customer (ટેસ્ટ ગ્રાહક)',

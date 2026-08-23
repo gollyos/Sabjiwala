@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'TaazaTokra (તાજાટોકરા) - Fresh Fruits & Vegetables Delivery in Halol';
+export const alt = 'Taji Tokri (તાજી ટોકરી) - Fresh Fruits & Vegetables Delivery in Halol';
 export const size = {
   width: 1200,
   height: 630,
@@ -44,11 +44,11 @@ export default function OpenGraphImage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', fontSize: '38px', fontWeight: 900, letterSpacing: '-1px' }}>
-                <span style={{ color: '#ffffff' }}>Taaza</span>
-                <span style={{ color: '#34d399' }}>Tokra</span>
+                <span style={{ color: '#ffffff' }}>Taji</span>
+                <span style={{ color: '#34d399' }}>Tokri</span>
               </div>
               <div style={{ display: 'flex', fontSize: '20px', color: '#a7f3d0', fontWeight: 600 }}>
-                તાજાટોકરા • Halol, Gujarat
+                તાજી ટોકરી • Halol, Gujarat
               </div>
             </div>
           </div>

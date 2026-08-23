@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, X, Gift } from 'lucide-react';
-import { CampaignSettings } from '@/types/sabjiwala';
+import { CampaignSettings } from '@/types/taji-tokri';
 
 interface TimeLeft {
   days: number;

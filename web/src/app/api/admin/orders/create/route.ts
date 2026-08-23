@@ -84,6 +84,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Area/Locality in Halol is required' }, { status: 400 });
     }
 
+    const cleanPincode = String(pincode || '').trim();
+    if (!/^[0-9]{6}$/.test(cleanPincode)) {
+      return NextResponse.json({ success: false, error: 'Please enter a valid 6-digit pincode' }, { status: 400 });
+    }
+
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ success: false, error: 'Please add at least one item to the order' }, { status: 400 });
     }
@@ -126,7 +131,7 @@ export async function POST(req: NextRequest) {
 
       if (newCustErr || !newCustomer) {
         return NextResponse.json(
-          { success: false, error: `Failed to create customer: ${newCustErr?.message || 'Unknown error'}` },
+          { success: false, error: `Failed to create customer: ${newCustErr ? getErrorMessage(newCustErr) : 'Unknown error'}` },
           { status: 500 }
         );
       }
@@ -146,7 +151,7 @@ export async function POST(req: NextRequest) {
         city: 'Halol',
         district: 'Panchmahal',
         state: 'Gujarat',
-        pincode: pincode.trim() || '389350',
+        pincode: cleanPincode,
         is_default: true,
       })
       .select('*')
@@ -154,7 +159,7 @@ export async function POST(req: NextRequest) {
 
     if (addrErr || !newAddress) {
       return NextResponse.json(
-        { success: false, error: `Failed to save delivery address: ${addrErr?.message || 'Unknown error'}` },
+        { success: false, error: `Failed to save delivery address: ${addrErr ? getErrorMessage(addrErr) : 'Unknown error'}` },
         { status: 500 }
       );
     }
@@ -187,7 +192,7 @@ export async function POST(req: NextRequest) {
 
     if (varErr || !variantsData || variantsData.length === 0) {
       return NextResponse.json(
-        { success: false, error: `Failed to load product details: ${varErr?.message || 'Variants not found'}` },
+        { success: false, error: `Failed to load product details: ${varErr ? getErrorMessage(varErr) : 'Variants not found'}` },
         { status: 400 }
       );
     }
@@ -317,7 +322,7 @@ export async function POST(req: NextRequest) {
     if (orderErr || !insertedOrder) {
       console.error('Error inserting master order:', orderErr);
       return NextResponse.json(
-        { success: false, error: `Failed to create order: ${orderErr?.message || 'Database error'}` },
+        { success: false, error: `Failed to create order: ${orderErr ? getErrorMessage(orderErr) : 'Database error'}` },
         { status: 500 }
       );
     }
@@ -333,7 +338,7 @@ export async function POST(req: NextRequest) {
     if (itemsErr) {
       console.error('Error inserting order items:', itemsErr);
       return NextResponse.json(
-        { success: false, error: `Order master created but failed to attach items: ${itemsErr.message}` },
+        { success: false, error: `Order master created but failed to attach items: ${getErrorMessage(itemsErr)}` },
         { status: 500 }
       );
     }

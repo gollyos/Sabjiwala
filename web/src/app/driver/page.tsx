@@ -342,7 +342,7 @@ export default function DriverMobileScreen() {
           <div>
             <h1 className="text-xl font-black text-white tracking-tight">Driver Access Required</h1>
             <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-              This portal is restricted to active TaazaTokra delivery partners. Please log in with your verified driver phone number.
+              This portal is restricted to active Taji Tokri delivery partners. Please log in with your verified driver phone number.
             </p>
           </div>
           <Link
@@ -369,7 +369,7 @@ export default function DriverMobileScreen() {
           <div className="flex items-center space-x-2">
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
             <h1 className="text-base font-extrabold text-white">
-              TaazaTokra Driver &bull; <span className="text-emerald-400">{driverName}</span>
+              Taji Tokri Driver &bull; <span className="text-emerald-400">{driverName}</span>
             </h1>
           </div>
 

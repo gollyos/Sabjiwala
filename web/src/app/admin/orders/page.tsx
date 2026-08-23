@@ -19,11 +19,13 @@ import { createClient } from '@/lib/supabase/client';
 import { todayIST, toISTDateString } from '@/lib/istDate';
 
 type OrderTab = 'all' | 'new' | 'confirmed' | 'packing' | 'out_for_delivery' | 'delivered' | 'issues';
+type DatePreset = 'today' | 'tomorrow' | 'this_week' | 'this_month' | '7days' | 'custom';
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState<OrderTab>('all');
   const [startDate, setStartDate] = useState(() => todayIST());
   const [endDate, setEndDate] = useState(() => todayIST());
+  const [activePreset, setActivePreset] = useState<DatePreset>('today');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
@@ -103,9 +105,11 @@ export default function AdminOrdersPage() {
     };
   }, [fetchOrders]);
 
-  const handleDatePreset = (preset: 'today' | 'tomorrow' | 'this_week' | 'this_month' | '7days') => {
+  const handleDatePreset = (preset: Exclude<DatePreset, 'custom'>) => {
     const now = new Date();
     const format = (d: Date) => toISTDateString(d);
+
+    setActivePreset(preset);
 
     if (preset === 'today') {
       const today = format(now);
@@ -154,74 +158,94 @@ export default function AdminOrdersPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
         
         {/* Top Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-slate-200 p-5 rounded-3xl shadow-xs">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Orders (ઓર્ડર્સ)
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono">
-                {totalCount} Total
-              </span>
-              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                Live Realtime
-              </span>
+        <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-xs space-y-4">
+
+          {/* Row 1: Title & Live Stats */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="font-display text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                  Orders (ઓર્ડર્સ)
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono">
+                  {totalCount} Total
+                </span>
+                <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                  Live Realtime
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Showing live active order ledger for Halol deliveries
+              </p>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Showing live active order ledger for Halol deliveries
-            </p>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setAddOrderModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 active:scale-98 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-md shadow-emerald-900/15 cursor-pointer whitespace-nowrap"
+                title="Add Phone / Manual Order directly"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Phone Order (ઓર્ડર ઉમેરો)</span>
+              </button>
+
+              <a
+                href={`/api/reports/export?type=orders&start_date=${startDate}&end_date=${endDate}`}
+                download
+                className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-200 cursor-pointer"
+                title="Download orders in Excel/CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-600" />
+                <span>Excel</span>
+              </a>
+
+              <button
+                onClick={fetchOrders}
+                disabled={loading}
+                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer shadow-2xs"
+                title="Refresh orders"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+              </button>
+            </div>
           </div>
 
-          {/* Quick Date Presets & Custom Dates & Export */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Row 2: Date Range Controls */}
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+              Date Range
+            </span>
+
             <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl text-xs font-bold gap-0.5">
-              <button
-                onClick={() => handleDatePreset('today')}
-                className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
-                  startDate === endDate && startDate === todayIST()
-                    ? 'bg-white text-emerald-700 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => handleDatePreset('tomorrow')}
-                className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
-                  startDate === endDate && startDate !== todayIST()
-                    ? 'bg-white text-emerald-700 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Tomorrow
-              </button>
-              <button
-                onClick={() => handleDatePreset('this_week')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-              >
-                Week (અઠવાડિયું)
-              </button>
-              <button
-                onClick={() => handleDatePreset('this_month')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-              >
-                Month (મહિનો)
-              </button>
-              <button
-                onClick={() => handleDatePreset('7days')}
-                className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-              >
-                7 Days
-              </button>
+              {([
+                { key: 'today', label: 'Today' },
+                { key: 'tomorrow', label: 'Tomorrow' },
+                { key: 'this_week', label: 'Week (અઠવાડિયું)' },
+                { key: 'this_month', label: 'Month (મહિનો)' },
+                { key: '7days', label: '7 Days' },
+              ] as { key: Exclude<DatePreset, 'custom'>; label: string }[]).map((preset) => (
+                <button
+                  key={preset.key}
+                  onClick={() => handleDatePreset(preset.key)}
+                  aria-pressed={activePreset === preset.key}
+                  className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                    activePreset === preset.key
+                      ? 'bg-white text-emerald-700 shadow-2xs ring-1 ring-emerald-200'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
             </div>
 
             {/* Custom Date Pickers */}
-            <div className="flex items-center gap-1 text-xs">
+            <div className={`flex items-center gap-1 text-xs px-1.5 py-1 rounded-2xl transition-colors ${activePreset === 'custom' ? 'bg-emerald-50 ring-1 ring-emerald-200' : ''}`}>
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => { setStartDate(e.target.value); setActivePreset('custom'); }}
                 className="bg-slate-50 text-slate-900 rounded-xl px-2 py-1.5 border border-slate-200 text-xs font-mono focus:bg-white focus:outline-none"
                 title="Start Date"
               />
@@ -229,39 +253,11 @@ export default function AdminOrdersPage() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => { setEndDate(e.target.value); setActivePreset('custom'); }}
                 className="bg-slate-50 text-slate-900 rounded-xl px-2 py-1.5 border border-slate-200 text-xs font-mono focus:bg-white focus:outline-none"
                 title="End Date"
               />
             </div>
-
-            <button
-              onClick={() => setAddOrderModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              title="Add Phone / Manual Order directly"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ Add Phone Order (ઓર્ડર ઉમેરો)</span>
-            </button>
-
-            <a
-              href={`/api/reports/export?type=orders&start_date=${startDate}&end_date=${endDate}`}
-              download
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-200 cursor-pointer"
-              title="Download orders in Excel/CSV"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-600" />
-              <span>Excel</span>
-            </a>
-
-            <button
-              onClick={fetchOrders}
-              disabled={loading}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer shadow-2xs"
-              title="Refresh orders"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-            </button>
           </div>
         </div>
 
@@ -550,7 +546,7 @@ export default function AdminOrdersPage() {
 
             <ThermalBagSticker
               payload={{
-                header: 'SABJIWALA HALOL',
+                header: 'TAJI TOKRI HALOL',
                 order_id: printStickerOrder.id,
                 order_number: printStickerOrder.order_number,
                 order_date: printStickerOrder.created_at,
@@ -577,7 +573,7 @@ export default function AdminOrdersPage() {
                 final_payable_amount: Number(printStickerOrder.final_payable_amount || 0),
                 collect_cash_text: `₹${Number(printStickerOrder.final_payable_amount || 0).toFixed(0)} COD`,
                 qr_token: printStickerOrder.qr_access_token || printStickerOrder.id,
-                qr_url: `https://sabjiwala.in/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
+                qr_url: `https://tajitokri.in/b/${printStickerOrder.qr_access_token || printStickerOrder.id}`,
                 printed_at: new Date().toISOString(),
                 items_summary: (printStickerOrder.items || []).map((i: any) => ({
                   name_en: i.name_en || i.product_name_en || '',

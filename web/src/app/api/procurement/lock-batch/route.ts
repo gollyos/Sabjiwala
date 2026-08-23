@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     if (lockErr) {
       console.error('Error locking procurement batch:', lockErr);
       return NextResponse.json(
-        { success: false, error: `Batch lock failed: ${lockErr.message}` },
+        { success: false, error: `Batch lock failed: ${getErrorMessage(lockErr)}` },
         { status: 500 }
       );
     }

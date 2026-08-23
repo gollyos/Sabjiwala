@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { getStaffSession, hasAnyRole } from '@/lib/staffAuth';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -14,6 +15,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getStaffSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+    if (!hasAnyRole(session, 'owner', 'manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Only owner or manager can view procurement batch details' }, { status: 403 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing batch id' }, { status: 400 });

@@ -13,7 +13,7 @@ export default function GlobalError({
       <body className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6 text-center font-sans antialiased">
         <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 shadow-xs space-y-6">
           <div className="text-3xl font-black text-emerald-600 tracking-tight">
-            TaazaTokra (તાજાટોકરા)
+            Taji Tokri (તાજી ટોકરી)
           </div>
 
           <div className="space-y-2">

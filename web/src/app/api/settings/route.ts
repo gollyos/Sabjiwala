@@ -38,7 +38,7 @@ export async function GET() {
       .select('key, value, description, updated_at, updated_by');
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     const settingsMap: Record<string, unknown> = {};
@@ -150,7 +150,7 @@ export async function PUT(req: NextRequest) {
     });
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 400 });
     }
 
     // If updating launch_campaign, also sync promotions table with service client

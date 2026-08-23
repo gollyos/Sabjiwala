@@ -6,7 +6,7 @@ import { getErrorMessage } from '@/lib/errors';
 
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { Customer, CustomerAddress, CustomerProfileState } from '@/types/sabjiwala';
+import { Customer, CustomerAddress, CustomerProfileState } from '@/types/taji-tokri';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 

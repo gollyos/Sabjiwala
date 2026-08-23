@@ -49,13 +49,13 @@ export default async function BagLookupPage({
           </div>
           <h2 className="text-xl font-bold">Invalid or Expired Bag QR</h2>
           <p className="text-xs text-slate-400">
-            This QR code token was not recognized in the TaazaTokra warehouse system.
+            This QR code token was not recognized in the Taji Tokri warehouse system.
           </p>
           <Link
             href="/"
             className="inline-block px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl"
           >
-            Go to TaazaTokra Home
+            Go to Taji Tokri Home
           </Link>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default async function BagLookupPage({
             <Package className="w-6 h-6" />
           </div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-700/50">
-            Verified TaazaTokra Package
+            Verified Taji Tokri Package
           </span>
           <h1 className="text-2xl font-black font-mono tracking-tight mt-1">
             {bag.bag_barcode}

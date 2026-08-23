@@ -16,6 +16,6 @@ export async function POST() {
 
 export async function DELETE() {
   const response = NextResponse.json({ success: true, message: 'Legacy session cleared.' });
-  response.cookies.delete('taazatokra_admin_session');
+  response.cookies.delete('tajitokri_admin_session');
   return response;
 }

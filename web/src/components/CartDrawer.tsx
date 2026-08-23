@@ -68,11 +68,11 @@ export function CartDrawer() {
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/70">
             <div className="flex items-center space-x-2.5">
-              <div className="p-2 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-xl">
+              <div className="p-2 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white rounded-xl shadow-sm">
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
                   Your Basket (તમારું કાર્ટ)
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -221,7 +221,7 @@ export function CartDrawer() {
                             type="button"
                             onClick={() => updateQuantity(item.variant_id, item.quantity + 1)}
                             aria-label="Increase item"
-                            className="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shadow-2xs cursor-pointer active:scale-95"
+                            className="w-7 h-7 rounded-lg bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white flex items-center justify-center font-bold text-xs shadow-2xs cursor-pointer active:scale-95"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -363,7 +363,7 @@ export function CartDrawer() {
                 type="button"
                 onClick={handleCheckoutClick}
                 disabled={!minimumOrderMet || isPlacingOrder || isLoadingQuote || hasUnavailableItems}
-                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-sm rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-between transition-all cursor-pointer"
+                className="w-full py-3.5 px-4 bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] hover:brightness-110 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 text-white font-extrabold text-sm rounded-2xl shadow-[0_10px_28px_rgb(224_69_58/0.35)] flex items-center justify-between transition-all cursor-pointer"
               >
                 <span className="truncate pr-2">
                   {isPlacingOrder 

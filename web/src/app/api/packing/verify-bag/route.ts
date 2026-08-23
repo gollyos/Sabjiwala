@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { getStaffSession, hasAnyRole } from '@/lib/staffAuth';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -11,8 +12,16 @@ function getServiceSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getStaffSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+    if (!hasAnyRole(session, 'owner', 'manager', 'packing')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Only packing or administrative staff can verify packing bags' }, { status: 403 });
+    }
+
     const body = await req.json();
-    const { order_id, scanned_barcode_or_token, staff_user_id } = body;
+    const { order_id, scanned_barcode_or_token } = body;
 
     if (!order_id || !scanned_barcode_or_token) {
       return NextResponse.json(
@@ -25,7 +34,8 @@ export async function POST(req: NextRequest) {
     const { data: result, error } = await supabase.rpc('verify_scanned_packing_bag', {
       p_order_id: order_id,
       p_scanned_barcode_or_token: scanned_barcode_or_token,
-      p_staff_user_id: staff_user_id || null,
+      // Audit trail actor always comes from the verified session, never the request body.
+      p_staff_user_id: session.userId,
     });
 
     if (error) {

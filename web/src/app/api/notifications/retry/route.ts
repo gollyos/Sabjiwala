@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         .select('id');
 
       if (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
       }
 
       return NextResponse.json({
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     return NextResponse.json({

@@ -38,7 +38,7 @@ export async function GET() {
       .order('created_at', { ascending: true });
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     const formattedStaff = (staffList || []).map((staff: {
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 400 });
     }
 
     return NextResponse.json(data);
@@ -166,7 +166,7 @@ export async function PUT(req: NextRequest) {
     });
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 400 });
     }
 
     return NextResponse.json(data);

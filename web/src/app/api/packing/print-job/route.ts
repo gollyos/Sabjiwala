@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (queueErr) {
-      return NextResponse.json({ success: false, error: queueErr.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(queueErr) }, { status: 500 });
     }
 
     // 3. Fetch Order Snapshot with Financials
@@ -110,10 +110,10 @@ export async function POST(req: NextRequest) {
     const stickers = await Promise.all(
       targetBags.map(async (bag) => {
         const barcodeSvg = generateCode128Svg(bag.bag_barcode, { height: 40, barWidth: 2, showText: true });
-        const qrSvg = await generateQrCodeSvg(`https://sabjiwala.in/b/${bag.qr_token}`, { width: 80, margin: 0 });
+        const qrSvg = await generateQrCodeSvg(`https://tajitokri.in/b/${bag.qr_token}`, { width: 80, margin: 0 });
 
         return {
-          header: 'SABJIWALA',
+          header: 'TAJI TOKRI',
           order_id: order.id,
           order_number: order.order_number,
           order_date: order.created_at || order.placed_at,
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
           final_payable_amount: Number(order.final_payable_amount || 0),
           collect_cash_text: `COLLECT ₹${Number(order.final_payable_amount).toFixed(2)}`,
           qr_token: bag.qr_token,
-          qr_url: `https://sabjiwala.in/b/${bag.qr_token}`,
+          qr_url: `https://tajitokri.in/b/${bag.qr_token}`,
           items_summary: itemsSummary,
           is_reprint: Boolean(is_reprint),
           reprint_reason: reprint_reason || undefined,

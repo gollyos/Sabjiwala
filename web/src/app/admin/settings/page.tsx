@@ -22,13 +22,13 @@ export default function AdminSettingsPage() {
     webhook_url: '',
     is_active: true,
     admin_alert_phone: '',
-    admin_alert_email: 'orders@taazatokra.com',
+    admin_alert_email: 'orders@tajitokri.com',
   });
 
   // Form states for different tabs
   const [businessProfile, setBusinessProfile] = useState({
-    business_name: 'TaazaTokra',
-    business_name_gu: 'તાજાટોકરા',
+    business_name: 'Taji Tokri',
+    business_name_gu: 'તાજી ટોકરી',
     support_mobile: '',
     whatsapp_number: '',
     business_address: 'Shop No. 4, APMC Market Road, Halol, Panchmahal, Gujarat - 389350',
@@ -382,17 +382,17 @@ export default function AdminSettingsPage() {
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
                 <label className="text-slate-700 font-bold uppercase text-[10px] flex items-center justify-between">
                   <span>n8n Webhook Production URL</span>
-                  <span className="text-amber-600 font-mono text-[10px]">POST /webhook/taazatokra-orders</span>
+                  <span className="text-amber-600 font-mono text-[10px]">POST /webhook/tajitokri-orders</span>
                 </label>
                 <input
                   type="url"
-                  placeholder="https://your-n8n-domain.com/webhook/taazatokra-new-order"
+                  placeholder="https://your-n8n-domain.com/webhook/tajitokri-new-order"
                   value={n8nConfig.webhook_url}
                   onChange={(e) => setN8nConfig({ ...n8nConfig, webhook_url: e.target.value })}
                   className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder:text-slate-400 focus:border-emerald-500 focus:outline-hidden"
                 />
                 <p className="text-[11px] text-slate-500">
-                  Paste the Webhook URL from your n8n workflow. Whenever an order is confirmed, TaazaTokra immediately posts the full structured order payload to this URL.
+                  Paste the Webhook URL from your n8n workflow. Whenever an order is confirmed, Taji Tokri immediately posts the full structured order payload to this URL.
                 </p>
               </div>
 
@@ -427,7 +427,7 @@ export default function AdminSettingsPage() {
                   <span>How the Automated Flow Works (ઓટોમેશન કેવી રીતે કામ કરે છે)</span>
                 </div>
                 <ol className="list-decimal list-inside space-y-1 text-amber-950 text-[11px] leading-relaxed">
-                  <li><strong>Customer Books Order:</strong> TaazaTokra records the order securely in Supabase and prepares customer, date, month, week #, and COD details.</li>
+                  <li><strong>Customer Books Order:</strong> Taji Tokri records the order securely in Supabase and prepares customer, date, month, week #, and COD details.</li>
                   <li><strong>n8n Webhook Triggers:</strong> n8n receives the JSON payload instantaneously.</li>
                   <li><strong>WhatsApp to Customer:</strong> n8n automatically sends a rich order confirmation message with items breakdown and bill link to the customer&apos;s WhatsApp.</li>
                   <li><strong>Admin Alert:</strong> n8n sends a quick alert notification to the store owner&apos;s WhatsApp/Email.</li>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth, AddressInput } from '@/context/AuthContext';
-import { CustomerAddress } from '@/types/sabjiwala';
+import { CustomerAddress } from '@/types/taji-tokri';
 import { X, Phone, ShieldCheck, MapPin, Award, LogOut, Plus, Home, Briefcase, Building, Loader2, Trash2, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function CustomerProfileModal() {
@@ -79,6 +79,12 @@ export function CustomerProfileModal() {
       return;
     }
 
+    const trimmedPincode = pincode.trim() || '389350';
+    if (!/^[0-9]{6}$/.test(trimmedPincode)) {
+      setAddressError('Please enter a valid 6-digit pincode.');
+      return;
+    }
+
     setAddressSaving(true);
     setAddressError(null);
 
@@ -92,7 +98,7 @@ export function CustomerProfileModal() {
       city: 'Halol',
       district: 'Panchmahal',
       state: 'Gujarat',
-      pincode: pincode.trim() || '389350',
+      pincode: trimmedPincode,
       isDefault,
     };
 
@@ -150,13 +156,14 @@ export function CustomerProfileModal() {
       <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 dark:border-slate-800 animate-scaleUp flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 px-6 py-5 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3">
+        <div className="relative bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] px-6 py-5 text-white flex items-center justify-between shrink-0 overflow-hidden">
+          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#f6a94a]/20 blur-2xl pointer-events-none" aria-hidden="true" />
+          <div className="relative flex items-center space-x-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl text-white shadow-inner">
               {customer.full_name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h3 className="font-bold text-lg leading-tight flex items-center gap-2">
+              <h3 className="font-display font-bold text-lg leading-tight flex items-center gap-2">
                 <span>{customer.full_name}</span>
                 {customer.is_verified && (
                   <ShieldCheck className="w-4 h-4 text-emerald-300" />
@@ -208,7 +215,7 @@ export function CustomerProfileModal() {
           {verifiedSequence && (
             <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/10 to-amber-500/10 border border-amber-300/80 dark:border-amber-500/30 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md">
+                <div className="w-10 h-10 rounded-xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] text-white flex items-center justify-center font-bold shadow-md">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
@@ -221,7 +228,7 @@ export function CustomerProfileModal() {
                 </div>
               </div>
               {verifiedSequence <= 500 && (
-                <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-sm">
+                <span className="px-2.5 py-1 bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] text-white text-xs font-bold rounded-full shadow-sm">
                   10% OFF with FIRST500
                 </span>
               )}
@@ -241,7 +248,7 @@ export function CustomerProfileModal() {
                     </h4>
                     <button
                       onClick={openAddAddressForm}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                      className="px-3 py-1.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add New Address</span>
@@ -276,7 +283,7 @@ export function CustomerProfileModal() {
                                   {addr.address_type}
                                 </span>
                                 {isAddrDefault && (
-                                  <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                  <span className="bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                                     Default
                                   </span>
                                 )}
@@ -361,7 +368,7 @@ export function CustomerProfileModal() {
                         onClick={() => setAddrType(t)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all min-h-[36px] cursor-pointer ${
                           addrType === t
-                            ? 'bg-emerald-600 text-white shadow-xs'
+                            ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-xs'
                             : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                         }`}
                       >
@@ -452,8 +459,11 @@ export function CustomerProfileModal() {
                         <input
                           type="text"
                           value={pincode}
-                          onChange={(e) => setPincode(e.target.value)}
+                          onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                           placeholder="389350"
+                          pattern="[0-9]{6}"
+                          maxLength={6}
+                          inputMode="numeric"
                           className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[44px]"
                         />
                       </div>
@@ -484,7 +494,7 @@ export function CustomerProfileModal() {
                     <button
                       type="submit"
                       disabled={addressSaving}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer min-h-[44px]"
+                      className="px-5 py-2.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer min-h-[44px]"
                     >
                       {addressSaving ? (
                         <>
@@ -580,7 +590,7 @@ export function CustomerProfileModal() {
               <button
                 type="submit"
                 disabled={profileSaving}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer min-h-[48px]"
+                className="w-full py-3.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white text-xs font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer min-h-[48px]"
               >
                 {profileSaving ? (
                   <>
@@ -599,7 +609,7 @@ export function CustomerProfileModal() {
         {/* Footer Logout */}
         <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="text-xs text-slate-400">
-            Halol Delivery System • TaazaTokra (તાજાટોકરા)
+            Halol Delivery System • Taji Tokri (તાજી ટોકરી)
           </div>
           <button
             onClick={signOut}

@@ -83,7 +83,7 @@ export function MobileBottomNav() {
               <ShoppingBag className="w-5 h-5" />
             </div>
             {totalItemCount > 0 && (
-              <span className="absolute -top-1 -right-1.5 px-1.5 py-0.2 bg-emerald-600 text-white rounded-full text-[9px] font-black font-mono shadow-xs animate-in zoom-in">
+              <span className="absolute -top-1 -right-1.5 px-1.5 py-0.2 bg-[#ee8a2f] text-white rounded-full text-[9px] font-black font-mono shadow-xs animate-in zoom-in">
                 {totalItemCount}
               </span>
             )}

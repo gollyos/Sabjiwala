@@ -1,6 +1,6 @@
-# TaazaTokra Web Application
+# Taji Tokri Web Application
 
-Production web frontend and API engine for **TaazaTokra (તાજાટોકરા)** — Fresh Fruits & Vegetables Delivery in Halol, Gujarat.
+Production web frontend and API engine for **Taji Tokri (તાજી ટોકરી)** — Fresh Fruits & Vegetables Delivery in Halol, Gujarat.
 
 ## Technology Stack
 - **Framework**: Next.js 16 (App Router with TypeScript)

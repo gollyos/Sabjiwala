@@ -212,7 +212,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 mx-auto flex items-center justify-center mb-3 shadow-xs">
               <Leaf className="w-6 h-6 text-emerald-100" />
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight">TaazaTokra Admin HQ</h1>
+            <h1 className="text-xl font-extrabold tracking-tight">Taji Tokri Admin HQ</h1>
             <p className="text-xs text-emerald-100 font-medium mt-1">
               સુરક્ષિત સ્ટાફ અને માલિક કંટ્રોલ પોર્ટલ
             </p>

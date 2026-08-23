@@ -1,10 +1,10 @@
 {
-  "name": "Sabjiwala - Workflow 7: Promotional Scheme & Offer Broadcast Engine",
+  "name": "Taji Tokri - Workflow 7: Promotional Scheme & Offer Broadcast Engine",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "sabjiwala-scheme-broadcast",
+        "path": "tajitokri-scheme-broadcast",
         "options": {}
       },
       "name": "Webhook: Trigger Scheme Broadcast",
@@ -30,7 +30,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Prepare campaign parameters from Webhook or Default Morning Schedule\nconst input = $input.first()?.json || {};\nconst body = input.body || {};\n\nconst campaignTitle = body.title || \"TaazaTokra: Aaj Ki Taaza Mandi Deals!\";\nconst discountCode = body.discount_code || \"TAAZA50\";\nconst discountText = body.discount_text || \"Flat ₹50 OFF on your order\";\nconst customMessage = body.custom_message || null;\nconst targetSegment = body.target_segment || \"all\"; // 'all' | 'inactive_7_days' | 'repeat_buyers'\n\nreturn [{\n  json: {\n    campaignTitle,\n    discountCode,\n    discountText,\n    customMessage,\n    targetSegment,\n    timestamp: new Date().toISOString()\n  }\n}];"
+        "jsCode": "// Prepare campaign parameters from Webhook or Default Morning Schedule\nconst input = $input.first()?.json || {};\nconst body = input.body || {};\n\nconst campaignTitle = body.title || \"Taji Tokri: Aaj Ki Taaza Mandi Deals!\";\nconst discountCode = body.discount_code || \"TAAZA50\";\nconst discountText = body.discount_text || \"Flat ₹50 OFF on your order\";\nconst customMessage = body.custom_message || null;\nconst targetSegment = body.target_segment || \"all\"; // 'all' | 'inactive_7_days' | 'repeat_buyers'\n\nreturn [{\n  json: {\n    campaignTitle,\n    discountCode,\n    discountText,\n    customMessage,\n    targetSegment,\n    timestamp: new Date().toISOString()\n  }\n}];"
       },
       "name": "Code: Initialize Campaign Context",
       "type": "n8n-nodes-base.code",
@@ -40,13 +40,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/broadcast-audience",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/notifications/broadcast-audience",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "x-internal-secret",
-              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+              "value": "={{ $env.TAJI TOKRI_INTERNAL_SECRET }}"
             },
             {
               "name": "Content-Type",
@@ -65,7 +65,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const audience = $input.first()?.json?.customers || [];\nconst campaign = $('Code: Initialize Campaign Context').first().json;\n\n// Format customized messages per customer\nreturn audience.map(cust => {\n  const name = cust.name || 'Customer';\n  const mobile = String(cust.mobile || '').replace(/[^0-9]/g, '').slice(-10);\n  \n  let message = campaign.customMessage;\n  if (!message) {\n    message = `TaazaTokra: Namaste ${name}! 🥦 Aaj khet se taaza sabziyan aayi hain. Use code ${campaign.discountCode} to get ${campaign.discountText}! Order now: https://taazatokra.com`;\n  }\n  \n  return {\n    json: {\n      customer_id: cust.id,\n      name,\n      mobile,\n      message,\n      campaign_id: campaign.campaignTitle\n    }\n  };\n}).filter(item => item.json.mobile.length === 10);"
+        "jsCode": "const audience = $input.first()?.json?.customers || [];\nconst campaign = $('Code: Initialize Campaign Context').first().json;\n\n// Format customized messages per customer\nreturn audience.map(cust => {\n  const name = cust.name || 'Customer';\n  const mobile = String(cust.mobile || '').replace(/[^0-9]/g, '').slice(-10);\n  \n  let message = campaign.customMessage;\n  if (!message) {\n    message = `Taji Tokri: Namaste ${name}! 🥦 Aaj khet se taaza sabziyan aayi hain. Use code ${campaign.discountCode} to get ${campaign.discountText}! Order now: https://tajitokri.com`;\n  }\n  \n  return {\n    json: {\n      customer_id: cust.id,\n      name,\n      mobile,\n      message,\n      campaign_id: campaign.campaignTitle\n    }\n  };\n}).filter(item => item.json.mobile.length === 10);"
       },
       "name": "Code: Format SMS & WhatsApp Messages",
       "type": "n8n-nodes-base.code",

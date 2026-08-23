@@ -23,11 +23,12 @@ export async function GET() {
     const dbLatencyMs = Date.now() - startTime;
 
     if (dbErr) {
+      console.error('Health check database error:', dbErr);
       return NextResponse.json(
         {
           status: 'degraded',
           release_version: 'v1.0.0',
-          database: { connected: false, error: dbErr.message },
+          database: { connected: false, error: 'database unavailable' },
           timestamp: new Date().toISOString(),
         },
         { status: 503 }
@@ -48,7 +49,7 @@ export async function GET() {
     return NextResponse.json({
       status: 'healthy',
       release_version: 'v1.0.0',
-      service_name: 'Sabjiwala Fresh Vegetable Delivery API',
+      service_name: 'Taji Tokri Fresh Vegetable Delivery API',
       service_area: 'Halol, Panchmahal, Gujarat (389350)',
       timezone: 'Asia/Kolkata (IST, UTC+05:30)',
       delivery_window: '10:00 AM - 1:00 PM Daily',

@@ -3,7 +3,7 @@
 import { getErrorMessage } from '@/lib/errors';
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Product, SellingPriceHistory } from '@/types/sabjiwala';
+import { Product, SellingPriceHistory } from '@/types/taji-tokri';
 import { AdminNav } from '@/components/AdminNav';
 import { Tag, Save, History, CheckCircle2, AlertCircle, Plus, Minus, Search } from 'lucide-react';
 

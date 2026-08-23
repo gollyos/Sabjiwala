@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'TaazaTokra - Fresh Fruits & Vegetables Delivery (તાજાટોકરા)',
-    short_name: 'TaazaTokra',
+    name: 'Taji Tokri - Fresh Fruits & Vegetables Delivery (તાજી ટોકરી)',
+    short_name: 'Taji Tokri',
     description: 'Fresh fruits and vegetables delivered in Halol. Taaza Phal, Taazi Sabzi — Seedha Ghar Tak.',
     start_url: '/',
     display: 'standalone',
@@ -14,33 +14,39 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: 'gu-IN',
     icons: [
       {
-        src: '/icon',
+        src: '/icon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon',
+        src: '/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
         src: '/icon.svg',
-        sizes: '512x512',
+        sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
       },
       {
-        src: '/apple-icon',
+        src: '/apple-touch-icon.png',
         sizes: '180x180',
         type: 'image/png',
-      },
-      {
-        src: '/favicon.svg',
-        sizes: '512x512',
-        type: 'image/svg+xml',
-        purpose: 'maskable',
       },
       {
         src: '/favicon.ico',

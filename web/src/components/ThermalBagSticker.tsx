@@ -98,7 +98,7 @@ export default function ThermalBagSticker({
         {/* Top Header & Store Info */}
         <div className="text-center border-b-2 border-black pb-2 mb-2">
           <div className="text-xl font-black tracking-widest uppercase font-mono leading-none">
-            SABJIWALA
+            TAJI TOKRI
           </div>
           <div className="text-xs font-extrabold text-gray-900 mt-0.5" lang="gu">
             સબ્જીવાલા (Halol Fresh)
@@ -262,7 +262,7 @@ export default function ThermalBagSticker({
         </div>
 
         <div className="text-center text-[9px] text-gray-600 mt-1 font-sans">
-          Scan QR for digital tracking &amp; live receipt • <strong>www.sabjiwala.in</strong>
+          Scan QR for digital tracking &amp; live receipt • <strong>www.tajitokri.in</strong>
         </div>
         <div className="text-center text-[8px] font-bold text-gray-500 mt-0.5">
           તાજા શાકભાજી અને ફળો માટે આભાર! Thank you for supporting local farmers!

@@ -1,13 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbfcf7;
-  --foreground: #142019;
-  --brand: #08783f;
-  --brand-strong: #075c34;
+  --background: #fdfaf2;
+  --foreground: #16231b;
+  --brand: #0f7a45;
+  --brand-strong: #0a5c35;
   --brand-soft: #e9f7ee;
   --accent: #f4a62a;
+  --tomato: #e0453a;
+  --tomato-strong: #c53228;
+  --carrot: #ee8a2f;
   color-scheme: light;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-display-gu), var(--font-gujarati), sans-serif;
+}
+:lang(gu).font-display, [lang="gu"] .font-display {
+  font-family: var(--font-display-gu), var(--font-display), var(--font-gujarati), sans-serif;
 }
 
 

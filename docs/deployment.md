@@ -1,4 +1,4 @@
-# Sabjiwala Production Deployment Guide
+# Taji Tokri Production Deployment Guide
 
 ## 1. Hosting & Infrastructure Architecture
 
@@ -6,7 +6,7 @@
 - **Authoritative Database & Auth:** PostgreSQL hosted on **Supabase** (`Asia/Kolkata` region).
 - **Automation & Orchestration:** **n8n** (Self-hosted or Cloud) for WhatsApp Meta triggers and scheduled jobs.
 - **Messaging Service:** **Meta WhatsApp Cloud API** (`v20.0`).
-- **Primary Production Domain:** `https://sabjiwala.store`
+- **Primary Production Domain:** `https://tajitokri.store`
 
 ---
 
@@ -55,8 +55,8 @@ NEXT_PUBLIC_STORE_PHONE=+910000000000
    - Build Command: `npm run build`
    - Output Directory: `.next`
 3. **Domain Configuration:**
-   - Add Apex Domain: `sabjiwala.store` (A Record $\rightarrow$ `76.76.21.21`)
-   - Add Subdomain: `www.sabjiwala.store` (CNAME $\rightarrow$ `cname.vercel-dns.com`)
+   - Add Apex Domain: `tajitokri.store` (A Record $\rightarrow$ `76.76.21.21`)
+   - Add Subdomain: `www.tajitokri.store` (CNAME $\rightarrow$ `cname.vercel-dns.com`)
    - Ensure SSL certificate issuance status is **Active (HTTPS)**.
 
 ---
@@ -64,10 +64,10 @@ NEXT_PUBLIC_STORE_PHONE=+910000000000
 ## 4. Supabase Production Hardening
 
 1. **Authentication Settings:**
-   - Site URL: `https://sabjiwala.store`
+   - Site URL: `https://tajitokri.store`
    - Additional Redirect URLs:
-     - `https://sabjiwala.store/**`
-     - `https://www.sabjiwala.store/**`
+     - `https://tajitokri.store/**`
+     - `https://www.tajitokri.store/**`
 2. **Database Extensions:**
    - Verify `pgcrypto` and `uuid-ossp` are enabled.
 3. **Storage Bucket Policies:**
@@ -86,7 +86,7 @@ Invoke both endpoints on a one-minute schedule using n8n, a trusted cron service
 ## 6. Post-Deployment Smoke Test
 
 Immediately verify in production:
-1. `GET https://sabjiwala.store/api/health` returns `{"status": "healthy", "release_version": "v1.0.0"}`.
+1. `GET https://tajitokri.store/api/health` returns `{"status": "healthy", "release_version": "v1.0.0"}`.
 2. Storefront homepage loads fresh vegetables in under 1 second.
 3. Cart correctly enforces ₹200 minimum merchandise subtotal before checkout.
 4. Admin portal (`/admin/dashboard`) loads with authenticated Owner role.

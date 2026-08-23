@@ -1,8 +1,8 @@
-# Sabjiwala Disaster Recovery & Backup Procedures
+# Taji Tokri Disaster Recovery & Backup Procedures
 
 ## 1. Overview & Resilience Architecture
 
-Sabjiwala operates as a fresh vegetable delivery platform serving the Halol, Panchmahal region. PostgreSQL (hosted on Supabase) is the single source of truth for catalog pricing, orders, procurement batches, packing bags, delivery logs, cash reconciliation, and audit logs.
+Taji Tokri operates as a fresh vegetable delivery platform serving the Halol, Panchmahal region. PostgreSQL (hosted on Supabase) is the single source of truth for catalog pricing, orders, procurement batches, packing bags, delivery logs, cash reconciliation, and audit logs.
 
 ```mermaid
 flowchart TD
@@ -36,8 +36,14 @@ Run from a secure terminal with the production database connection string:
 pg_dump "postgresql://postgres:[DB_PASSWORD]@db.jaotajpowcgzxgpcezvi.supabase.co:5432/postgres" \
   --schema=public \
   --format=custom \
-  --file="sabjiwala_backup_$(date +%Y%m%d_%H%M%S).dump"
+  --file="tajitokri_backup_$(date +%Y%m%d_%H%M%S).dump"
 ```
+
+---
+
+### C. Self-Hosted Deployment (Oracle Cloud VM via Coolify)
+
+If the production stack is instead running on the self-hosted Oracle Cloud VM (see `docs/oracle-cloud-zero-cost-deployment.md`) rather than Supabase Managed Postgres, the automated backup path above does not apply — backups are configured manually through Coolify's scheduled backup feature (Step 9 of that guide) and must be written to off-box storage (Cloudflare R2 or an S3-compatible bucket), never to local disk, since a single VM failure or compromise would otherwise take out the database and its only backup together. To restore: trigger a Coolify restore from the latest R2/S3 backup via the Coolify dashboard, or, if Coolify's UI restore is unavailable, run a manual `pg_restore` against the latest `.dump` file pulled from the R2/S3 bucket.
 
 ---
 

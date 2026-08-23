@@ -1,10 +1,10 @@
 {
-  "name": "Sabjiwala - Workflow 1: Customer Order Confirmation",
+  "name": "Taji Tokri - Workflow 1: Customer Order Confirmation",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "sabjiwala-order-confirmed",
+        "path": "tajitokri-order-confirmed",
         "options": {}
       },
       "name": "Webhook: Order Confirmed",
@@ -15,13 +15,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/notifications/process",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "x-internal-secret",
-              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+              "value": "={{ $env.TAJI TOKRI_INTERNAL_SECRET }}"
             },
             {
               "name": "Content-Type",

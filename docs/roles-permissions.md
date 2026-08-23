@@ -1,6 +1,6 @@
-# Sabjiwala Roles & Permissions Matrix
+# Taji Tokri Roles & Permissions Matrix
 
-This document defines the authoritative access levels and security boundaries across all user roles in Sabjiwala.
+This document defines the authoritative access levels and security boundaries across all user roles in Taji Tokri.
 
 ---
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, Boxes, Layers, Truck, BarChart3, Settings, Tag, Users, Bell, Store, ChevronDown, Menu, X, LogOut, IndianRupee } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -25,16 +26,16 @@ export function AdminNav() {
     { name: 'Dashboard', nameGu: 'ડેશબોર્ડ', href: '/admin/dashboard', icon: Home, roles: ['owner', 'manager'] },
     { name: 'Orders', nameGu: 'ઓર્ડર્સ', href: '/admin/orders', icon: ShoppingBag, roles: ['owner', 'manager'] },
     { name: 'Mandi Rates', nameGu: 'મંડી ભાવ', href: '/admin/mandi-rates', icon: IndianRupee, roles: ['owner', 'manager'] },
-    { name: 'Mandi Purchases', nameGu: 'ખરીદી', href: '/admin/procurement', icon: Boxes, roles: ['owner', 'manager'] },
     { name: 'Pricing', nameGu: 'ભાવ નક્કી', href: '/admin/pricing', icon: Tag, roles: ['owner', 'manager'] },
-    { name: 'Packing', nameGu: 'પેકિંગ', href: '/admin/packing', icon: Layers, roles: ['owner', 'manager', 'packing'] },
-    { name: 'Delivery', nameGu: 'ડિલિવરી', href: '/admin/delivery', icon: Truck, roles: ['owner', 'manager'] },
+    { name: 'Catalog', nameGu: 'પ્રોડક્ટ્સ', href: '/admin/products', icon: Boxes, roles: ['owner', 'manager'] },
     { name: 'Reports', nameGu: 'રિપોર્ટ્સ', href: '/admin/reports', icon: BarChart3, roles: ['owner', 'manager'] },
   ];
   const primaryNav = primaryItems.filter((item) => role && item.roles.includes(role));
 
   const secondaryItems: NavItem[] = [
-    { name: 'Products Catalog', href: '/admin/products', icon: ShoppingBag, roles: ['owner', 'manager'] },
+    { name: 'Mandi Purchases', href: '/admin/procurement', icon: Boxes, roles: ['owner', 'manager'] },
+    { name: 'Packing', href: '/admin/packing', icon: Layers, roles: ['owner', 'manager', 'packing'] },
+    { name: 'Delivery', href: '/admin/delivery', icon: Truck, roles: ['owner', 'manager'] },
     { name: 'Staff Management', href: '/admin/staff', icon: Users, roles: ['owner'] },
     { name: 'Notifications & Alerts', href: '/admin/notifications', icon: Bell, roles: ['owner', 'manager'] },
     { name: 'System Settings', href: '/admin/settings', icon: Settings, roles: ['owner', 'manager'] },
@@ -54,26 +55,26 @@ export function AdminNav() {
         <div className="flex items-center justify-between h-16">
           
           {/* Left: Brand / Storefront Link */}
-          <div className="flex items-center space-x-3">
-            <Link href="/admin/dashboard" className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-xs font-black text-sm">
-                TT
+          <div className="flex items-center space-x-3 shrink-0">
+            <Link href="/admin/dashboard" className="flex items-center space-x-2.5 shrink-0">
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 shadow-xs ring-1 ring-emerald-200">
+                <Image src="/logo.png" alt="Taji Tokri" width={36} height={36} className="w-full h-full object-cover" priority />
               </div>
-              <div>
-                <span className="font-extrabold text-sm text-slate-900 tracking-tight block leading-tight">
-                  TaazaTokra <span className="text-emerald-600 font-bold">Admin HQ</span>
+              <div className="hidden sm:block min-w-0">
+                <span className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-1 leading-tight whitespace-nowrap">
+                  Taji Tokri <span className="text-emerald-600 font-bold">Admin HQ</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap block">
                   Halol Central Control
                 </span>
               </div>
             </Link>
 
-            <span className="text-slate-200">|</span>
+            <span className="hidden lg:inline text-slate-200">|</span>
 
             <Link
               href="/"
-              className="hidden lg:inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+              className="hidden lg:inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors whitespace-nowrap shrink-0"
               title="Return to Customer Storefront"
             >
               <Store className="w-3.5 h-3.5 text-slate-500" />

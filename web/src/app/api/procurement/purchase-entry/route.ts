@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         .single();
       if (pItemErr || !newPItem?.id) {
         return NextResponse.json(
-          { success: false, error: pItemErr?.message || 'Failed to create procurement item for this purchase.' },
+          { success: false, error: pItemErr ? getErrorMessage(pItemErr) : 'Failed to create procurement item for this purchase.' },
           { status: 500 }
         );
       }
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     if (insertErr) {
       console.error('Error inserting purchase line:', insertErr);
-      return NextResponse.json({ success: false, error: insertErr.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(insertErr) }, { status: 500 });
     }
 
     // 4. Recalculate item + batch totals from the purchase lines (mirrors

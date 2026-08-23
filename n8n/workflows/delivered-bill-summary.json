@@ -1,10 +1,10 @@
 {
-  "name": "Sabjiwala - Workflow 4: Order Delivered & Bill Summary",
+  "name": "Taji Tokri - Workflow 4: Order Delivered & Bill Summary",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "sabjiwala-order-delivered",
+        "path": "tajitokri-order-delivered",
         "options": {}
       },
       "name": "Webhook: Order Delivered Event",
@@ -15,13 +15,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/notifications/process",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "x-internal-secret",
-              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+              "value": "={{ $env.TAJI TOKRI_INTERNAL_SECRET }}"
             },
             {
               "name": "Content-Type",

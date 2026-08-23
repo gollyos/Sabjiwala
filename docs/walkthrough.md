@@ -1,8 +1,8 @@
-# Sabjiwala Phone OTP Authentication & Customer Onboarding Walkthrough
+# Taji Tokri Phone OTP Authentication & Customer Onboarding Walkthrough
 
 ## Summary of Implementation
 
-We have implemented customer phone OTP authentication, automatic profile synchronization, and single-entry onboarding for **Sabjiwala (Halol, Panchmahal)**:
+We have implemented customer phone OTP authentication, automatic profile synchronization, and single-entry onboarding for **Taji Tokri (Halol, Panchmahal)**:
 
 ### 1. Database & Security Layer (Supabase)
 - **RPC `get_current_customer_profile`**: 

@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { todayIST } from '@/lib/istDate';
+import { getStaffSession, hasAnyRole } from '@/lib/staffAuth';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -22,6 +23,14 @@ function escapeCsv(val: unknown): string {
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await getStaffSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+    if (!hasAnyRole(session, 'owner', 'manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Insufficient privileges for executive financial reports' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const requestedType = searchParams.get('type') || 'orders';
     const validTypes = new Set(['orders', 'products', 'customers', 'suppliers', 'procurement', 'delivery', 'sales']);
@@ -35,7 +44,7 @@ export async function GET(req: NextRequest) {
     const supabase = getServiceSupabase();
     let csvHeader = '';
     let csvRows: string[] = [];
-    const filename = `taazatokra_${type}_${startDate}_to_${endDate}.csv`;
+    const filename = `tajitokri_${type}_${startDate}_to_${endDate}.csv`;
 
     if (type === 'orders') {
       const { data } = await supabase.rpc('get_detailed_orders_report', {

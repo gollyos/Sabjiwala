@@ -1,4 +1,4 @@
-# TaazaTokra (તાજાટોકરા) — Fresh Fruits & Vegetables Delivery Platform
+# Taji Tokri (તાજી ટોકરી) — Fresh Fruits & Vegetables Delivery Platform
 
 > **Taaza Phal, Taazi Sabzi — Seedha Ghar Tak.**  
 > *તાજા ફળ, તાજું શાક — સીધું તમારા ઘર સુધી.*  
@@ -7,7 +7,7 @@
 ---
 
 ## 🌟 Overview
-**TaazaTokra** is a production-ready, full-stack fresh agricultural produce e-commerce and logistics management platform engineered for morning doorstep deliveries in Halol, Gujarat.
+**Taji Tokri** is a production-ready, full-stack fresh agricultural produce e-commerce and logistics management platform engineered for morning doorstep deliveries in Halol, Gujarat.
 
 The system connects consumer ordering, midnight APMC Mandi procurement, godown packing, driver delivery routes, real-time reporting, and automated WhatsApp communication via n8n.
 
@@ -72,10 +72,10 @@ Create `web/.env.local` with the following variables:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-NEXT_PUBLIC_SITE_URL=https://taazatokra.com
+NEXT_PUBLIC_SITE_URL=https://tajitokri.com
 WHATSAPP_ACCESS_TOKEN=your-meta-access-token
 WHATSAPP_PHONE_NUMBER_ID=your-phone-id
-WHATSAPP_VERIFY_TOKEN=taazatokra_whatsapp_verify_token_2026
+WHATSAPP_VERIFY_TOKEN=tajitokri_whatsapp_verify_token_2026
 ```
 
 ### 3. Run Locally
@@ -111,4 +111,4 @@ npx tsx scripts/test-production-readiness.ts
 ---
 
 ## 📄 License
-Proprietary — All rights reserved for **TaazaTokra (તાજાટોકરા)**, Halol, Gujarat.
+Proprietary — All rights reserved for **Taji Tokri (તાજી ટોકરી)**, Halol, Gujarat.

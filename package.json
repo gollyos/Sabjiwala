@@ -1,8 +1,8 @@
 {
-  "name": "sabjiwala-root",
+  "name": "taji-tokri-root",
   "version": "1.0.0",
   "private": true,
-  "description": "Sabjiwala - Fresh Vegetables Direct From Mandi (Halol)",
+  "description": "Taji Tokri - Fresh Vegetables Direct From Mandi (Halol)",
   "scripts": {
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",

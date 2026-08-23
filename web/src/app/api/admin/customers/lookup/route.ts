@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       .maybeSingle();
 
     if (custError) {
-      return NextResponse.json({ success: false, error: custError.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(custError) }, { status: 500 });
     }
 
     if (!customer) {

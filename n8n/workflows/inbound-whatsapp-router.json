@@ -1,5 +1,5 @@
 {
-  "name": "Sabjiwala - Workflow 6: Inbound WhatsApp Customer Router",
+  "name": "Taji Tokri - Workflow 6: Inbound WhatsApp Customer Router",
   "nodes": [
     {
       "parameters": {
@@ -15,7 +15,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/webhooks/whatsapp",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/webhooks/whatsapp",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -29,7 +29,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}"
       },
-      "name": "HTTP: Sabjiwala Inbound Webhook Router",
+      "name": "HTTP: Taji Tokri Inbound Webhook Router",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [350, 300]
@@ -56,14 +56,14 @@
       "main": [
         [
           {
-            "node": "HTTP: Sabjiwala Inbound Webhook Router",
+            "node": "HTTP: Taji Tokri Inbound Webhook Router",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP: Sabjiwala Inbound Webhook Router": {
+    "HTTP: Taji Tokri Inbound Webhook Router": {
       "main": [
         [
           {

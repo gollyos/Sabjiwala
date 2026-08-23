@@ -2,7 +2,7 @@ import { getErrorMessage } from '@/lib/errors';
 
 
 /**
- * TaazaTokra WhatsApp Business & Message Rendering Service
+ * Taji Tokri WhatsApp Business & Message Rendering Service
  * Handles bilingual (English / Gujarati) formatting and Meta Cloud API integration.
  */
 
@@ -75,7 +75,7 @@ export function formatBilingualOrderConfirmed(payload: WhatsAppPayload, pwaBaseU
 
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_id}`;
 
-  return `*TaazaTokra (તાજાટોકરા)* ✅
+  return `*Taji Tokri (તાજી ટોકરી)* ✅
 *Order Confirmed / ઓર્ડર કન્ફર્મ થયેલ છે*
 
 *Order No:* ${payload.order_number}
@@ -97,7 +97,7 @@ _Need help? Reply HELP or call ${payload.support_mobile || 'Support'}_`;
 export function formatBilingualOutForDelivery(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*TaazaTokra 🚚 Out for Delivery*
+  return `*Taji Tokri 🚚 Out for Delivery*
 *તમારો ઓર્ડર ડિલિવરી માટે નીકળી ગયો છે*
 
 *Order No:* ${payload.order_number}
@@ -114,15 +114,15 @@ ${trackingLink}`;
 export function formatBilingualOrderDelivered(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*TaazaTokra ✅ Order Delivered*
+  return `*Taji Tokri ✅ Order Delivered*
 *ઓર્ડર સફળતાપૂર્વક પહોંચાડવામાં આવ્યો છે*
 
 *Order No:* ${payload.order_number}
 *Amount Collected:* ₹${payload.amount_collected}
 ${Number(payload.cash_paid || 0) > 0 ? `(Cash: ₹${payload.cash_paid}) ` : ''}${Number(payload.upi_paid || 0) > 0 ? `(UPI: ₹${payload.upi_paid})` : ''}
 
-Thank you for choosing TaazaTokra for fresh fruits & vegetables!
-તાજા ફળો અને શાકભાજી માટે તાજાટોકરા પસંદ કરવા બદલ આભાર.
+Thank you for choosing Taji Tokri for fresh fruits & vegetables!
+તાજા ફળો અને શાકભાજી માટે તાજી ટોકરી પસંદ કરવા બદલ આભાર.
 
 *Receipt & Repeat Order / બિલ અને ફરી ઓર્ડર:*
 ${trackingLink}
@@ -133,7 +133,7 @@ _Any quality issue? Reply HELP within 2 hours._`;
 export function formatBilingualDeliveryFailed(payload: WhatsAppPayload, pwaBaseUrl: string): string {
   const trackingLink = `${pwaBaseUrl}/track/${payload.tracking_token || payload.order_number}`;
 
-  return `*TaazaTokra ⚠️ Delivery Update*
+  return `*Taji Tokri ⚠️ Delivery Update*
 *ડિલિવરી અપૂર્ણ રહી છે*
 
 *Order No:* ${payload.order_number}
@@ -156,7 +156,7 @@ export function formatOwnerProcurementReport(payload: WhatsAppPayload, pwaBaseUr
     ? `\n+ ${payload.more_products_count} more products` 
     : '';
 
-  return `*TAAZATOKRA — 8 PM PROCUREMENT REQUIREMENT* 📋
+  return `*TAJI TOKRI — 8 PM PROCUREMENT REQUIREMENT* 📋
 *Halol Mandi Morning Purchase List*
 
 *Delivery Date:* ${payload.delivery_date}
@@ -175,7 +175,7 @@ ${pwaBaseUrl}/admin/procurement`;
 
 export function formatOwnerOperationalAlert(type: string, payload: WhatsAppPayload, pwaBaseUrl: string): string {
   if (type === 'PACKING_PROBLEM') {
-    return `*⚠️ TAAZATOKRA GODOWN ALERT: PACKING PROBLEM*
+    return `*⚠️ TAJI TOKRI GODOWN ALERT: PACKING PROBLEM*
 
 *Order:* ${payload.order_number}
 *Customer:* ${payload.customer_name} (${payload.customer_mobile})
@@ -187,7 +187,7 @@ ${pwaBaseUrl}/admin/packing`;
   }
 
   if (type === 'COD_DISCREPANCY') {
-    return `*🚨 TAAZATOKRA CASH ALERT: COD DISCREPANCY*
+    return `*🚨 TAJI TOKRI CASH ALERT: COD DISCREPANCY*
 
 *Driver:* ${payload.driver_name}
 *Date:* ${payload.delivery_date}
@@ -202,7 +202,7 @@ ${pwaBaseUrl}/admin/reports/delivery`;
   }
 
   if (type === 'DELIVERY_FAILED') {
-    return `*⚠️ TAAZATOKRA ALERT: DELIVERY FAILED*
+    return `*⚠️ TAJI TOKRI ALERT: DELIVERY FAILED*
 
 *Order:* ${payload.order_number}
 *Customer:* ${payload.customer_name} (${payload.customer_mobile})
@@ -213,7 +213,7 @@ ${pwaBaseUrl}/admin/reports/delivery`;
 ${pwaBaseUrl}/admin/reports/delivery`;
   }
 
-  return `*TAAZATOKRA OPERATIONAL ALERT:* ${JSON.stringify(payload)}`;
+  return `*TAJI TOKRI OPERATIONAL ALERT:* ${JSON.stringify(payload)}`;
 }
 
 /**

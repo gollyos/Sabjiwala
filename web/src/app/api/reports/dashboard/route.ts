@@ -146,7 +146,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (analErr) {
-      return NextResponse.json({ success: false, error: analErr.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(analErr) }, { status: 500 });
     }
 
     // 2. Daily Executive Summary for today or end_date

@@ -22,7 +22,7 @@ export function OrderSuccessModal() {
     : 'Halol';
 
   const waText = encodeURIComponent(
-    `*TaazaTokra Halol - Order Confirmation (ઓર્ડર વિગતો)* 🍎🥦\n\n` +
+    `*Taji Tokri Halol - Order Confirmation (ઓર્ડર વિગતો)* 🍎🥦\n\n` +
     `*Order No:* ${orderSuccessData.order_number}\n` +
     `*Customer:* ${customer?.full_name || 'Customer'}\n` +
     `*Delivery Date:* ${deliveryDateStr}\n` +
@@ -37,8 +37,11 @@ export function OrderSuccessModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 dark:bg-black/80 backdrop-blur-xs animate-fade-in">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 dark:border-slate-800 animate-scale-up text-center p-6 sm:p-8">
-        
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 dark:border-slate-800 animate-scale-up text-center">
+        <div className="h-1.5 w-full bg-[linear-gradient(90deg,#0f7a45_0%,#ee8a2f_50%,#e0453a_100%)]" aria-hidden="true" />
+        <div className="absolute -right-10 -top-6 h-40 w-40 rounded-full bg-[#f6a94a]/10 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="p-6 sm:p-8">
+
         <button
           onClick={closeOrderSuccessModal}
           aria-label="Close order success modal"
@@ -47,11 +50,11 @@ export function OrderSuccessModal() {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="w-20 h-20 rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4 shadow-inner ring-8 ring-emerald-50 dark:ring-emerald-950/30">
+        <div className="w-20 h-20 rounded-3xl bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/20 ring-8 ring-emerald-50 dark:ring-emerald-950/30">
           <CheckCircle2 className="w-12 h-12" />
         </div>
 
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+        <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white mb-1">
           {isOnline ? 'Payment Successful!' : 'Order Confirmed!'}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
@@ -112,8 +115,8 @@ export function OrderSuccessModal() {
           </div>
 
           {orderSuccessData.first_order_discount > 0 && (
-            <div className="p-2 rounded-xl bg-emerald-100/80 dark:bg-emerald-900/50 text-[11px] font-semibold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-300" />
+            <div className="p-2 rounded-xl bg-[linear-gradient(135deg,#fef3e2_0%,#fde3e0_100%)] dark:bg-[linear-gradient(135deg,#3a2812_0%,#3a1815_100%)] text-[11px] font-semibold text-[#a2540f] dark:text-[#f6a94a] flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-[#ee8a2f]" />
               <span>You saved ₹{orderSuccessData.first_order_discount.toFixed(2)} with FIRST500 offer!</span>
             </div>
           )}
@@ -146,7 +149,7 @@ export function OrderSuccessModal() {
           <Link
             href="/profile"
             onClick={closeOrderSuccessModal}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all cursor-pointer text-xs min-h-[44px]"
+            className="w-full py-3 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 text-white font-bold rounded-2xl shadow-lg shadow-emerald-900/20 flex items-center justify-center space-x-2 transition-all cursor-pointer text-xs min-h-[44px]"
           >
             <span>View in My Orders (મારા ઓર્ડર)</span>
             <ArrowRight className="w-4 h-4" />
@@ -160,6 +163,7 @@ export function OrderSuccessModal() {
           </button>
         </div>
 
+        </div>
       </div>
     </div>
   );

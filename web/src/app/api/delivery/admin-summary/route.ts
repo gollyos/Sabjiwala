@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (statsErr) {
-      return NextResponse.json({ success: false, error: statsErr.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: getErrorMessage(statsErr) }, { status: 500 });
     }
 
     // 2. Fetch Active Drivers with delivery role for assignment dropdown

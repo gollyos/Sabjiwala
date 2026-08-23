@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_sabjiwala_mock';
+    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_tajitokri_mock';
 
     return NextResponse.json({
       success: true,
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       customer_prefill: {
         name: customerData.full_name,
         contact: customerData.mobile,
-        email: customerData.email || `${customerData.mobile.replace(/\D/g, '')}@sabjiwala.app`,
+        email: customerData.email || `${customerData.mobile.replace(/\D/g, '')}@tajitokri.app`,
       },
     });
   } catch (err: unknown) {

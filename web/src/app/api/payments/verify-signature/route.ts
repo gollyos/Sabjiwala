@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { RazorpayService } from '@/lib/razorpay';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { dispatchN8nOrderWebhook } from '@/lib/n8n';
 
 export async function POST(req: NextRequest) {
   try {
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
     if (confirmErr || !confirmation) {
       console.error('Database confirmation error:', confirmErr);
       return NextResponse.json(
-        { success: false, error: `Order confirmation failed: ${confirmErr?.message}` },
+        { success: false, error: `Order confirmation failed: ${getErrorMessage(confirmErr)}` },
         { status: 500 }
       );
     }
@@ -131,6 +132,23 @@ export async function POST(req: NextRequest) {
       .from('payment_gateway_attempts')
       .update({ status: 'captured', updated_at: new Date().toISOString() })
       .eq('id', attempt.id);
+
+    // Dispatch the order-confirmation webhook server-side now that payment
+    // is confirmed and ownership has already been verified above. This
+    // replaces a browser-side call to the staff-only
+    // /api/automation/n8n-trigger endpoint, which returned 403 for every
+    // real customer and silently swallowed the failure. Best-effort: a
+    // dispatch failure here must not fail the payment confirmation response
+    // — the automation_jobs outbox (DB trigger + /api/workers/automation)
+    // is the reliability backstop.
+    try {
+      const dispatchResult = await dispatchN8nOrderWebhook(order.id, 'ORDER_CREATED');
+      if (!dispatchResult.success) {
+        console.warn('[n8n] Order confirmation webhook dispatch failed after payment capture:', dispatchResult.error);
+      }
+    } catch (dispatchErr) {
+      console.warn('[n8n] Order confirmation webhook dispatch threw after payment capture:', dispatchErr);
+    }
 
     return NextResponse.json({
       success: true,

@@ -203,15 +203,16 @@ export function AuthModal() {
     <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
-        {/* Header Ribbon (Clean Brand Emerald) */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 sm:px-6 py-4 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3">
+        {/* Header Ribbon */}
+        <div className="relative bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] px-5 sm:px-6 py-4 text-white flex items-center justify-between shrink-0 overflow-hidden">
+          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#f6a94a]/20 blur-2xl pointer-events-none" aria-hidden="true" />
+          <div className="relative flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-xs border border-white/20">
               <Leaf className="w-5 h-5 text-emerald-200" />
             </div>
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg leading-tight text-white">
-                {step === 'phone' && 'Welcome to TaazaTokra (તાજાટોકરા)'}
+              <h3 className="font-display font-bold text-base sm:text-lg leading-tight text-white">
+                {step === 'phone' && 'Welcome to Taji Tokri (તાજી ટોકરી)'}
                 {step === 'otp' && 'Verify Phone (મોબાઇલ ચકાસણી)'}
                 {step === 'onboarding' && 'Delivery Profile (સરનામું)'}
                 {step === 'success' && 'Welcome Back!'}
@@ -235,7 +236,7 @@ export function AuthModal() {
 
         {/* First 500 Promo Badge */}
         <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200/60 dark:border-amber-800/40 px-5 sm:px-6 py-2 flex items-center space-x-2 text-amber-900 dark:text-amber-300 text-xs font-medium shrink-0">
-          <span className="bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-black text-[9px] tracking-wider uppercase shadow-2xs">
+          <span className="bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] text-white px-2 py-0.5 rounded-full font-black text-[9px] tracking-wider uppercase shadow-2xs">
             Offer
           </span>
           <span className="text-[11px] font-semibold truncate">First 500 Halol customers get <strong>10% OFF</strong> with FIRST500!</span>
@@ -284,7 +285,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading || mobile.length !== 10}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-black text-sm rounded-2xl shadow-xs shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 active:scale-98 disabled:bg-slate-200 disabled:bg-none dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-black text-sm rounded-2xl shadow-md shadow-emerald-900/20 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -354,7 +355,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading || otp.join('').length !== 6}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-black text-sm rounded-2xl shadow-xs shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 active:scale-98 disabled:bg-slate-200 disabled:bg-none dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-black text-sm rounded-2xl shadow-md shadow-emerald-900/20 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -446,7 +447,7 @@ export function AuthModal() {
                         onClick={() => setAddressType(t)}
                         className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all cursor-pointer ${
                           addressType === t
-                            ? 'bg-emerald-600 text-white shadow-2xs'
+                            ? 'bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] text-white shadow-2xs'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                         }`}
                       >
@@ -520,7 +521,7 @@ export function AuthModal() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-98 disabled:bg-slate-200 dark:disabled:bg-slate-800 text-white font-black text-xs rounded-2xl shadow-xs shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer mt-2"
+                className="w-full py-3 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] hover:brightness-110 active:scale-98 disabled:bg-slate-200 disabled:bg-none dark:disabled:bg-slate-800 text-white font-black text-xs rounded-2xl shadow-md shadow-emerald-900/20 flex items-center justify-center space-x-2 transition-all cursor-pointer mt-2"
               >
                 {loading ? (
                   <>
@@ -540,10 +541,10 @@ export function AuthModal() {
           {/* STEP 4: Success Greeting */}
           {step === 'success' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400 shadow-inner animate-bounce">
+              <div className="w-14 h-14 bg-[linear-gradient(135deg,#0f7a45_0%,#0a5c35_100%)] rounded-full flex items-center justify-center mx-auto text-white shadow-lg shadow-emerald-900/20 ring-8 ring-emerald-50 dark:ring-emerald-950/30 animate-bounce">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-lg font-extrabold text-slate-900 dark:text-white">
+              <h4 className="font-display text-lg font-bold text-slate-900 dark:text-white">
                 {customer?.full_name ? `Welcome, ${customer.full_name}!` : 'Login Successful!'}
               </h4>
               {verifiedSeq && verifiedSeq <= 500 && (

@@ -217,14 +217,14 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
       order.delivery_pincode_snapshot || '389350',
     ].filter(Boolean).join(', ');
 
-    const pwaBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taazatokra.com';
+    const pwaBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tajitokri.com';
     const trackingUrl = `${pwaBaseUrl}/track/${order.tracking_token || order.id}`;
     const adminOrderUrl = `${pwaBaseUrl}/admin/orders`;
 
     const payload: N8nOrderPayload = {
       event: eventType,
       timestamp: new Date().toISOString(),
-      source: 'taazatokra_ecommerce_engine',
+      source: 'tajitokri_ecommerce_engine',
       order: {
         id: order.id,
         order_number: order.order_number,
@@ -283,7 +283,7 @@ export async function dispatchN8nOrderWebhook(orderId: string, eventType: N8nOrd
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'TaazaTokra-Automation-Engine/1.0',
+        'User-Agent': 'Taji Tokri-Automation-Engine/1.0',
       },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(8000), // 8s timeout

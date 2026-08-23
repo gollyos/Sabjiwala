@@ -1,5 +1,5 @@
 {
-  "name": "Sabjiwala - Workflow 2: 8 PM Owner Procurement Report",
+  "name": "Taji Tokri - Workflow 2: 8 PM Owner Procurement Report",
   "nodes": [
     {
       "parameters": {
@@ -20,7 +20,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "sabjiwala-batch-locked",
+        "path": "tajitokri-batch-locked",
         "options": {}
       },
       "name": "Webhook: Batch Locked Event",
@@ -31,13 +31,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/procurement/lock-batch",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/procurement/lock-batch",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "x-procurement-secret",
-              "value": "={{ $env.SABJIWALA_PROCUREMENT_SECRET || 'sabjiwala_procurement_lock_token_halol_2026' }}"
+              "value": "={{ $env.TAJI TOKRI_PROCUREMENT_SECRET || 'tajitokri_procurement_lock_token_halol_2026' }}"
             },
             {
               "name": "Content-Type",
@@ -54,13 +54,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SABJIWALA_API_BASE_URL || 'https://sabjiwala.store' }}/api/notifications/process",
+        "url": "={{ $env.TAJI TOKRI_API_BASE_URL || 'https://tajitokri.store' }}/api/notifications/process",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "x-internal-secret",
-              "value": "={{ $env.SABJIWALA_INTERNAL_SECRET }}"
+              "value": "={{ $env.TAJI TOKRI_INTERNAL_SECRET }}"
             },
             {
               "name": "Content-Type",

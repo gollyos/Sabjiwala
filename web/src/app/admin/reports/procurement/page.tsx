@@ -64,7 +64,7 @@ export default function ProcurementReportingPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `taazatokra_procurement_${startDate}_to_${endDate}.csv`;
+      a.download = `tajitokri_procurement_${startDate}_to_${endDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

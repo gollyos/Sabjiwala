@@ -355,7 +355,7 @@ export function AdminAddOrderModal({ isOpen, onClose, onOrderCreated }: AdminAdd
         society_street_name: societyStreet.trim(),
         landmark: landmark.trim(),
         area_locality: finalArea,
-        pincode: pincode.trim() || '389350',
+        pincode: /^[0-9]{6}$/.test(pincode.trim()) ? pincode.trim() : '389350',
         delivery_date: deliveryDate,
         delivery_slot_start: deliverySlot === 'morning' ? '06:00:00' : '16:00:00',
         delivery_slot_end: deliverySlot === 'morning' ? '10:00:00' : '20:00:00',
@@ -520,7 +520,7 @@ export function AdminAddOrderModal({ isOpen, onClose, onOrderCreated }: AdminAdd
                 </div>
                 <ThermalBagSticker
                   payload={{
-                    header: 'SABJIWALA HALOL',
+                    header: 'TAJI TOKRI HALOL',
                     order_id: createdOrderData.order_id,
                     order_number: createdOrderData.order_number,
                     order_date: new Date().toISOString(),
@@ -540,7 +540,7 @@ export function AdminAddOrderModal({ isOpen, onClose, onOrderCreated }: AdminAdd
                     final_payable_amount: Number(createdOrderData.final_payable_amount || 0),
                     collect_cash_text: paymentMethod === 'cod' ? `₹${Number(createdOrderData.final_payable_amount || 0).toFixed(0)} COD` : 'PRE-PAID',
                     qr_token: createdOrderData.order_id,
-                    qr_url: `https://sabjiwala.in/b/${createdOrderData.order_id}`,
+                    qr_url: `https://tajitokri.in/b/${createdOrderData.order_id}`,
                     printed_at: new Date().toISOString(),
                     items_summary: cartItems.map((i) => ({
                       name_en: i.product_name_en,

@@ -1,6 +1,6 @@
-# Sabjiwala n8n Automation Workflows & Setup Guide
+# Taji Tokri n8n Automation Workflows & Setup Guide
 
-This directory contains version-controlled workflow definitions for orchestrating **WhatsApp Business notifications**, **8 PM Mandi Procurement batch locking**, and **Owner Operational alerts** for Sabjiwala.
+This directory contains version-controlled workflow definitions for orchestrating **WhatsApp Business notifications**, **8 PM Mandi Procurement batch locking**, and **Owner Operational alerts** for Taji Tokri.
 
 ---
 
@@ -22,19 +22,19 @@ This directory contains version-controlled workflow definitions for orchestratin
 Configure the following environment variables in your self-hosted or cloud n8n instance:
 
 ```env
-# Sabjiwala Webhook & API Gateway Base URL
-SABJIWALA_API_BASE_URL=https://sabjiwala.store
+# Taji Tokri Webhook & API Gateway Base URL
+TAJI TOKRI_API_BASE_URL=https://tajitokri.store
 
 # Internal Worker / Webhook Secret Token
-SABJIWALA_INTERNAL_SECRET=sabjiwala_worker_secret_2026
+TAJI TOKRI_INTERNAL_SECRET=tajitokri_worker_secret_2026
 
 # Procurement 8 PM Batch Lock Token
-SABJIWALA_PROCUREMENT_SECRET=sabjiwala_procurement_lock_token_halol_2026
+TAJI TOKRI_PROCUREMENT_SECRET=tajitokri_procurement_lock_token_halol_2026
 
 # Meta WhatsApp Cloud API Credentials
-WHATSAPP_PHONE_NUMBER_ID=sabjiwala_phone_id_halol
+WHATSAPP_PHONE_NUMBER_ID=tajitokri_phone_id_halol
 WHATSAPP_ACCESS_TOKEN=EAABxxxxxxxxxxxxxxxxxxxx
-WHATSAPP_VERIFY_TOKEN=sabjiwala_whatsapp_verify_token_2026
+WHATSAPP_VERIFY_TOKEN=tajitokri_whatsapp_verify_token_2026
 ```
 
 ---
@@ -44,5 +44,5 @@ WHATSAPP_VERIFY_TOKEN=sabjiwala_whatsapp_verify_token_2026
 1. Open your n8n Dashboard.
 2. Click **Add Workflow** $\rightarrow$ **Import from File...**
 3. Select the respective `.json` file from `n8n/workflows/`.
-4. Verify HTTP Request credential parameters match your `SABJIWALA_INTERNAL_SECRET`.
+4. Verify HTTP Request credential parameters match your `TAJI TOKRI_INTERNAL_SECRET`.
 5. Toggle the workflow to **Active**.

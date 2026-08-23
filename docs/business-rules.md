@@ -1,4 +1,4 @@
-# Sabjiwala – Production Business Rules & Operational Specifications
+# Taji Tokri – Production Business Rules & Operational Specifications
 
 **Document Version:** 1.0.0  
 **Status:** Approved Architecture Baseline  
@@ -9,7 +9,7 @@
 
 ## 1. Overview & Multi-Channel Ingestion Model
 
-Sabjiwala operates a direct farm/mandi-to-doorstep fresh vegetable supply chain. All customer touchpoints feed into a **single, unified database**:
+Taji Tokri operates a direct farm/mandi-to-doorstep fresh vegetable supply chain. All customer touchpoints feed into a **single, unified database**:
 
 ```mermaid
 flowchart TD

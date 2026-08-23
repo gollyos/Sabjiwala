@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { todayIST } from '@/lib/istDate';
+import { getStaffSession, hasAnyRole } from '@/lib/staffAuth';
 
 function getServiceSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,6 +13,14 @@ function getServiceSupabase() {
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await getStaffSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+    if (!hasAnyRole(session, 'owner', 'manager')) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Insufficient privileges for executive financial reports' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const startDate = searchParams.get('start_date') || todayIST();
     const endDate = searchParams.get('end_date') || todayIST();
