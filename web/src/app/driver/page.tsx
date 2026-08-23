@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Navigation, Truck, CheckCircle2, Phone, MapPin, Check, X, RefreshCw, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -81,9 +81,6 @@ export default function DriverMobileScreen() {
 
   // Active delivery stop modal
   const [activeDelivery, setActiveDelivery] = useState<DriverDelivery | null>(null);
-  const [scannedBagCode, setScannedBagCode] = useState<string>('');
-  const [scanStatusMsg, setScanStatusMsg] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const scanInputRef = useRef<HTMLInputElement>(null);
 
   // COD Collection form state
   const [collectionMethod, setCollectionMethod] = useState<'cash' | 'upi_delivery'>('cash');
@@ -191,11 +188,9 @@ export default function DriverMobileScreen() {
   // Open Stop
   const handleOpenStop = (del: DriverDelivery) => {
     setActiveDelivery(del);
-    setScanStatusMsg(null);
     setCollectionMethod(del.payment_collection_method || 'cash');
     setCollectedAmount(String(del.cod_amount_expected));
     setMismatchReason('');
-    setTimeout(() => scanInputRef.current?.focus(), 150);
   };
 
   // Start Run
@@ -215,36 +210,6 @@ export default function DriverMobileScreen() {
       if (json.success) {
         setActionMessage({ text: '🚀 Delivery Run Started! Orders are Out for Delivery.', type: 'success' });
         loadDriverDeliveries();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Scan Bag
-  const handleScanBag = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeDelivery || !scannedBagCode.trim()) return;
-
-    const code = scannedBagCode.trim();
-    setScannedBagCode('');
-
-    try {
-      const res = await fetch('/api/delivery/scan-bag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          delivery_id: activeDelivery.delivery_id,
-          scanned_code: code,
-        }),
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        setScanStatusMsg({ text: `✅ Bag ${json.verified_bag_sequence}/${json.total_bags} verified!`, type: 'success' });
-        loadDriverDeliveries();
-      } else {
-        setScanStatusMsg({ text: `❌ ${json.message || json.error}`, type: 'error' });
       }
     } catch (err) {
       console.error(err);
@@ -591,29 +556,6 @@ export default function DriverMobileScreen() {
                 />
               </div>
             </div>
-
-            {/* Bag Scan Barcode Check */}
-            <form onSubmit={handleScanBag} className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
-              <span className="text-slate-400 text-[10px] uppercase font-bold">Bag Scan Verification ({activeDelivery.total_bags_count} Bags)</span>
-              <div className="flex gap-2">
-                <input
-                  ref={scanInputRef}
-                  type="text"
-                  placeholder="Scan bag barcode..."
-                  value={scannedBagCode}
-                  onChange={(e) => setScannedBagCode(e.target.value)}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono min-h-[44px]"
-                />
-                <button type="submit" className="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl cursor-pointer min-h-[44px]">
-                  Scan
-                </button>
-              </div>
-              {scanStatusMsg && (
-                <div className={`text-[11px] font-bold ${scanStatusMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {scanStatusMsg.text}
-                </div>
-              )}
-            </form>
 
             {/* Actions: Confirm Delivery & Report Issue */}
             <div className="flex flex-col gap-2 pt-2">

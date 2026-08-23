@@ -80,7 +80,15 @@ interface DashboardStats {
 export default function GodownPackingStation() {
   const [selectedDate, setSelectedDate] = useState<string>(() => todayIST());
   const [statusFilter, setStatusFilter] = useState<'all' | 'waiting' | 'packing' | 'problem' | 'ready'>('waiting');
+  // searchInput updates instantly as the admin types; searchTerm (debounced)
+  // is what actually triggers the queue refetch, so typing doesn't fire a
+  // network request + heavy DB query on every keystroke.
+  const [searchInput, setSearchInput] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  useEffect(() => {
+    const t = setTimeout(() => setSearchTerm(searchInput), 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
   const staffName = 'Godown Worker 1';
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -98,7 +106,6 @@ export default function GodownPackingStation() {
   const [problemType, setProblemType] = useState<string>('item_shortage');
   const [problemNotes, setProblemNotes] = useState<string>('');
 
-  const scanInputRef = useRef<HTMLInputElement>(null);
   // Read the open order inside fetch callbacks without listing it in the
   // callback deps — otherwise every refresh creates a new activeOrder object,
   // re-triggers the effect, and refetches in an endless loop.
@@ -164,7 +171,6 @@ export default function GodownPackingStation() {
           packed_by_name: staffName,
         });
         await loadQueueData();
-        setTimeout(() => scanInputRef.current?.focus(), 150);
       } else if (json.error_code === 'ORDER_LOCKED_BY_OTHER') {
         if (confirm(`${json.message}\n\nDo you want to override and take over packing this order?`)) {
           handleOpenPacking(order, true);
@@ -177,6 +183,15 @@ export default function GodownPackingStation() {
       alert('Error opening packing station');
     }
   };
+
+  // Apply a partial update to one order everywhere it's held in state (the open
+  // modal + its card in the background queue) without refetching the whole
+  // queue+stats payload — that full reload was firing on every single item
+  // tap/bag +/- click and was the main source of lag while packing an order.
+  const patchOrder = useCallback((orderId: string, patch: Partial<QueueOrder>) => {
+    setActiveOrder((prev) => (prev && prev.order_id === orderId ? { ...prev, ...patch } : prev));
+    setQueue((prev) => prev.map((o) => (o.order_id === orderId ? { ...o, ...patch } : o)));
+  }, []);
 
   // Toggle item packed check
   const handleToggleItemCheck = async (item: QueueItem) => {
@@ -197,14 +212,12 @@ export default function GodownPackingStation() {
 
       const json = await res.json();
       if (json.success) {
-        setActiveOrder({
-          ...activeOrder,
+        patchOrder(activeOrder.order_id, {
           items: activeOrder.items.map((it) =>
             it.id === item.id ? { ...it, is_confirmed: newConfirmed, packed_quantity: newQty } : it
           ),
           confirmed_items_count: activeOrder.confirmed_items_count + (newConfirmed ? 1 : -1),
         });
-        loadQueueData();
       }
     } catch (err) {
       console.error('Error toggling item check:', err);
@@ -227,8 +240,8 @@ export default function GodownPackingStation() {
 
       const json = await res.json();
       if (json.success) {
+        patchOrder(activeOrder.order_id, { total_bags_count: count });
         setActionMessage({ text: `Set bag count to ${count} for order ${activeOrder.order_number}.`, type: 'success' });
-        loadQueueData();
       } else {
         alert(json.message || json.error || 'Failed to update bag count');
       }
@@ -272,10 +285,13 @@ export default function GodownPackingStation() {
   const handleQuickPackAndReady = async () => {
     if (!activeOrder) return;
     try {
-      // 1. Confirm all unconfirmed items
-      for (const item of activeOrder.items) {
-        if (!item.is_confirmed) {
-          await fetch('/api/packing/item-check', {
+      // 1. Confirm all unconfirmed items — fired in parallel, not one-by-one,
+      // since awaiting each item sequentially added a full round-trip of lag
+      // per item on orders with many line items.
+      const unconfirmed = activeOrder.items.filter((item) => !item.is_confirmed);
+      await Promise.all(
+        unconfirmed.map((item) =>
+          fetch('/api/packing/item-check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -283,9 +299,9 @@ export default function GodownPackingStation() {
               packed_quantity: item.quantity,
               is_confirmed: true,
             }),
-          });
-        }
-      }
+          })
+        )
+      );
 
       // 2. Mark ready for delivery
       const res = await fetch('/api/packing/ready', {
@@ -448,8 +464,8 @@ export default function GodownPackingStation() {
             <input
               type="text"
               placeholder="Filter order # or customer..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full sm:w-64 bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:bg-white focus:outline-none"
             />
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
