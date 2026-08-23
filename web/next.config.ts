@@ -44,7 +44,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // 'standalone' output is required by the Dockerfile (Oracle Cloud self-host
+  // deployment), but it breaks Vercel's own build post-processing step
+  // (onBuildComplete can't find .next/next-server.js.nft.json because
+  // standalone mode restructures the build output). Vercel sets VERCEL=1
+  // during its builds, so skip 'standalone' there and let Vercel use its own
+  // serverless output format.
+  ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
