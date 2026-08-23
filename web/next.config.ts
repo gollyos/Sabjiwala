@@ -32,7 +32,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://checkout.razorpay.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
+      "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.supabase.co",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com",
       "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
       "object-src 'none'",
@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'images.pexels.com' },
       { protocol: 'https', hostname: '**.supabase.co' },
       { protocol: 'http', hostname: 'localhost' },
     ],
