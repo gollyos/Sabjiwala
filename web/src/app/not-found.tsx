@@ -44,7 +44,7 @@ export default function NotFound() {
           </Link>
 
           <a
-            href="https://wa.me/917698186694?text=Halo%20Taji Tokri%20Support"
+            href="https://wa.me/919974283542?text=Halo%20Taji Tokri%20Support"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl text-xs transition-all cursor-pointer border border-emerald-200"

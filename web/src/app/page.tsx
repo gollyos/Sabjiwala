@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Product, ProductVariant, Category } from '@/types/taji-tokri';
 import { useCart } from '@/context/CartContext';
-import { Clock, MapPin, Tag, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw } from 'lucide-react';
+import { Clock, MapPin, Tag, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw, Phone, MessageCircle } from 'lucide-react';
 import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 import { ProductCard } from '@/components/ProductCard';
+import { BrandLogo } from '@/components/ui/BrandLogo';
+
+const STORE_PHONE = process.env.NEXT_PUBLIC_STORE_PHONE || '';
+const STORE_PHONE_DISPLAY = STORE_PHONE ? STORE_PHONE.replace('+91', '+91 ') : '';
 // Frequently Asked Questions for Google SEO & Customer Guidance
 const FAQS_DATA = [
   {
@@ -593,8 +597,33 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 🌿 CLEAN FOOTER: Halol Coverage & Timings */}
-        <footer className="pt-8 pb-16 text-center space-y-3 border-t border-slate-200/80 dark:border-slate-800/80">
+        {/* 🌿 CLEAN FOOTER: Brand, Contact & Halol Coverage */}
+        <footer className="pt-10 pb-16 text-center space-y-5 border-t border-slate-200/80 dark:border-slate-800/80">
+          <div className="flex justify-center">
+            <BrandLogo size="lg" showGujarati={true} showTagline={true} asLink={false} />
+          </div>
+
+          {STORE_PHONE && (
+            <div className="flex flex-wrap items-center justify-center gap-2.5">
+              <a
+                href={`tel:${STORE_PHONE}`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>{STORE_PHONE_DISPLAY} (Call)</span>
+              </a>
+              <a
+                href={`https://wa.me/${STORE_PHONE.replace(/\D/g, '')}?text=Halo%20Taji%20Tokri%20Support`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs hover:bg-emerald-700 transition-colors"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp સહાય (Help Desk)</span>
+              </a>
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             <span className="flex items-center gap-1 font-semibold">
               <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
