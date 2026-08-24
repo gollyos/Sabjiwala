@@ -297,18 +297,25 @@ export default function HomePage() {
         <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full bg-[#e0453a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-[#f6a94a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[22rem_1fr] lg:items-center lg:gap-12 lg:px-8 lg:py-20">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[24rem_1fr] lg:items-center lg:gap-12 lg:px-8 lg:py-20">
           {/* LEFT: the brand — big logo mark + name, the first thing anyone sees */}
           <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
             <div className="absolute -inset-x-10 -inset-y-6 rounded-full bg-white/10 blur-3xl pointer-events-none lg:-inset-x-16" aria-hidden="true" />
-            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full ring-4 ring-white/70 shadow-2xl sm:h-44 sm:w-44 lg:h-56 lg:w-56 xl:h-64 xl:w-64">
-              <Image src="/logo.png" alt="Taji Tokri" width={256} height={256} className="h-full w-full object-cover" priority />
+            <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full ring-4 ring-white/70 shadow-2xl sm:h-44 sm:w-44 lg:h-56 lg:w-56 xl:h-64 xl:w-64">
+              <Image
+                src="/logo.png"
+                alt="Taji Tokri"
+                width={256}
+                height={256}
+                sizes="(min-width: 1280px) 256px, (min-width: 1024px) 224px, (min-width: 640px) 176px, 112px"
+                className="h-full w-full object-cover"
+                priority
+              />
             </div>
-            <p className="relative font-display mt-4 text-5xl font-black leading-[0.9] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              <span className="block">Taji</span>
-              <span className="block">Tokri</span>
+            <p className="relative font-display mt-4 whitespace-nowrap text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Taji Tokri
             </p>
-            <p lang="gu" className="relative font-display mt-1.5 text-3xl font-bold text-[#ffe1ad] sm:text-4xl lg:text-5xl">તાજી ટોકરી</p>
+            <p lang="gu" className="relative font-display mt-1.5 whitespace-nowrap text-3xl font-bold text-[#ffe1ad] sm:text-4xl lg:text-5xl">તાજી ટોકરી</p>
           </div>
 
           {/* RIGHT: the pitch — core concept, farm-to-home journey, rotating marketing line, USPs, CTAs */}
@@ -342,12 +349,12 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#catalog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgb(224_69_58/0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a href="#catalog" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgb(224_69_58/0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98] sm:w-auto">
                 Shop Today&rsquo;s Fresh Picks
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
-              <Link href="/delivery-areas/halol" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/50 bg-white/10 px-5 py-3 text-sm font-extrabold text-white backdrop-blur transition-colors hover:bg-white/20">
+              <Link href="/delivery-areas/halol" className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/50 bg-white/10 px-5 py-3 text-sm font-extrabold text-white backdrop-blur transition-colors hover:bg-white/20 sm:w-auto">
                 Check Your Delivery Area
               </Link>
             </div>
