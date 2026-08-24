@@ -1,28 +1,30 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Product, ProductVariant, Category } from '@/types/taji-tokri';
 import { useCart } from '@/context/CartContext';
-import { Clock, MapPin, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw, Phone, MessageCircle, Sprout, IndianRupee, Home } from 'lucide-react';
-import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
+import { Clock, MapPin, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw, Phone, MessageCircle, Sprout, IndianRupee } from 'lucide-react';
 import { ProductCard } from '@/components/ProductCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { TypewriterText } from '@/components/ui/TypewriterText';
+import { SlideRotator } from '@/components/ui/SlideRotator';
+import { JourneyStepper } from '@/components/ui/JourneyStepper';
 
-// Rotating headline phrases for the hero — core reasons to buy from Taji Tokri,
+// Rotating marketing pitches for the hero — broader reasons to buy from Taji Tokri
+// (the farm-to-home concept itself is already stated in the static headline),
 // cycled in English, Gujarati & Hindi so every local customer understands them.
-const HERO_TYPED_PHRASES = [
-  'Cheaper Than Market Price.',
-  'બજાર કરતાં સસ્તા ભાવ!',
-  'बाज़ार से भी सस्ता भाव!',
+const HERO_SLIDE_PHRASES = [
+  'Cheaper Than Local Market Price.',
+  'બજાર કરતાં સસ્તા ભાવ.',
+  'बाज़ार से भी सस्ता भाव.',
   '100% Free Home Delivery.',
-  '100% મફત હોમ ડિલિવરી!',
-  '100% फ्री होम डिलीवरी!',
-  'Farm to Home, Fresh Daily.',
-  'ખેતરથી સીધું તમારા ઘરે!',
-  'खेत से सीधे आपके घर तक!',
+  '100% મફત હોમ ડિલિવરી.',
+  '100% फ्री होम डिलीवरी.',
+  "Halol's Own Trusted Brand.",
+  'હાલોલનો પોતાનો ભરોસાપાત્ર બ્રાન્ડ.',
+  'आपके शहर का अपना भरोसेमंद ब्रांड.',
 ];
 
 const HERO_USPS = [
@@ -289,48 +291,58 @@ export default function HomePage() {
     return categories;
   }, [categories, activeModule]);
 
-  const deliverySchedule = getDeliveryScheduleInfo();
-
   return (
     <div className="pb-28 sm:pb-16 bg-[#fbfcf7] dark:bg-[#07140f] min-h-screen text-slate-900 dark:text-slate-100">
       <section className="relative overflow-hidden border-b border-emerald-100/80 bg-[linear-gradient(160deg,#0e3d27_0%,#0f7a45_38%,#f6a94a_78%,#fdfaf2_100%)] dark:border-emerald-900 dark:bg-[linear-gradient(160deg,#071c12_0%,#0c3823_45%,#3c2a10_85%,#07140f_100%)]">
         <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full bg-[#e0453a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-[#f6a94a]/25 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-14 lg:grid-cols-[1fr_22rem] lg:items-center lg:px-8 lg:py-20">
-          <div className="max-w-3xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#ffe1ad]/50 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-white shadow-xs backdrop-blur">
-              <Home className="h-3.5 w-3.5 text-[#ffe1ad]" aria-hidden="true" />
-              <span>Halol&rsquo;s Own Fresh-Produce Brand, Not a Chain</span>
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[22rem_1fr] lg:items-center lg:gap-12 lg:px-8 lg:py-20">
+          {/* LEFT: the brand — big logo mark + name, the first thing anyone sees */}
+          <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
+            <div className="absolute -inset-x-10 -inset-y-6 rounded-full bg-white/10 blur-3xl pointer-events-none lg:-inset-x-16" aria-hidden="true" />
+            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full ring-4 ring-white/70 shadow-2xl sm:h-44 sm:w-44 lg:h-56 lg:w-56 xl:h-64 xl:w-64">
+              <Image src="/logo.png" alt="Taji Tokri" width={256} height={256} className="h-full w-full object-cover" priority />
             </div>
-            <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white text-wrap-balance sm:text-6xl lg:text-7xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
-              Farm-Fresh Produce,
+            <p className="relative font-display mt-4 text-5xl font-black leading-[0.9] tracking-tight text-white sm:text-6xl lg:text-7xl">
+              <span className="block">Taji</span>
+              <span className="block">Tokri</span>
+            </p>
+            <p lang="gu" className="relative font-display mt-1.5 text-3xl font-bold text-[#ffe1ad] sm:text-4xl lg:text-5xl">તાજી ટોકરી</p>
+          </div>
+
+          {/* RIGHT: the pitch — core concept, farm-to-home journey, rotating marketing line, USPs, CTAs */}
+          <div className="max-w-2xl">
+            <h1 lang="gu" className="font-display text-2xl font-extrabold leading-[1.25] tracking-[-0.01em] text-white text-wrap-balance sm:text-4xl lg:text-5xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
+              દરરોજ તાજું અને બિલકુલ ફ્રેશ, સીધું ખેતરથી સીધા તમારા ઘર સુધી.
             </h1>
-            <p className="font-display mt-1.5 min-h-[2.3em] text-xl font-extrabold leading-tight text-[#ffe1ad] sm:min-h-[1.4em] sm:text-3xl lg:text-4xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
-              <TypewriterText phrases={HERO_TYPED_PHRASES} />
-            </p>
-            <p className="font-display mt-4 text-lg font-semibold leading-relaxed text-emerald-50 sm:text-xl" lang="gu">
-              બજાર કરતાં સસ્તું, ઘરે બેઠાં મફત ડિલિવરી — સીધું ખેતરથી તમારા ઘર સુધી.
-            </p>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-50/80 sm:text-base">
-              Order before 7:50&nbsp;PM, get it by 10&nbsp;AM–1&nbsp;PM tomorrow. Cash or UPI at your door.
+            <p className="mt-2 text-sm font-semibold text-emerald-50/90 sm:text-base">
+              Fresh every day, straight from the farm to your door.
             </p>
 
-            {/* USP strip — bilingual (Gujarati + English), visible on both mobile & desktop */}
-            <div className="mt-5 flex flex-wrap gap-2.5">
+            {/* Farm-to-home journey — auto-looping, like our delivery tracking */}
+            <JourneyStepper className="mt-5 max-w-md sm:max-w-lg" />
+
+            {/* Rotating marketing slide — premium, continuous, not just about produce */}
+            <p className="mt-5 min-h-[1.5em] text-lg font-extrabold leading-tight text-[#ffe1ad] sm:text-xl lg:text-2xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
+              <SlideRotator phrases={HERO_SLIDE_PHRASES} />
+            </p>
+
+            {/* USP strip — bilingual (Gujarati + English), stretched into one even row */}
+            <div className="mt-4 grid grid-cols-3 gap-2">
               {HERO_USPS.map(({ icon: Icon, labelGu, labelEn }) => (
                 <span
                   key={labelEn}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-extrabold text-white backdrop-blur sm:text-base"
+                  className="flex flex-col items-center justify-center gap-1 rounded-full border border-white/30 bg-white/10 px-2 py-2 text-center text-white backdrop-blur sm:flex-row sm:gap-1.5 sm:px-3 sm:py-1.5"
                 >
-                  <Icon className="h-4 w-4 shrink-0 text-[#ffe1ad] sm:h-5 sm:w-5" aria-hidden="true" />
-                  <span lang="gu">{labelGu}</span>
-                  <span className="font-normal text-white/80">({labelEn})</span>
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-[#ffe1ad] sm:h-4 sm:w-4" aria-hidden="true" />
+                  <span lang="gu" className="text-[10px] font-extrabold leading-tight sm:text-sm">{labelGu}</span>
+                  <span className="hidden font-normal text-white/80 sm:inline sm:text-sm">({labelEn})</span>
                 </span>
               ))}
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <a href="#catalog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgb(224_69_58/0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 Shop Today&rsquo;s Fresh Picks
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -340,8 +352,8 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Compact delivery snapshot — mobile & tablet only (desktop gets the full card aside) */}
-            <div className="mt-6 grid grid-cols-3 gap-2 lg:hidden">
+            {/* Compact delivery snapshot — replaces the old "Next Delivery" card with simple inline text */}
+            <div className="mt-5 grid grid-cols-3 gap-2">
               <div className="rounded-2xl border border-white/25 bg-white/10 px-2.5 py-2.5 text-center backdrop-blur">
                 <Clock className="mx-auto h-4 w-4 text-[#ffe1ad]" aria-hidden="true" />
                 <p className="mt-1 text-[11px] font-bold leading-tight text-white">7:50&nbsp;PM cutoff</p>
@@ -356,20 +368,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
-          <aside className="hidden overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-[0_24px_80px_rgb(15_30_20/0.35)] backdrop-blur lg:block dark:border-emerald-800/70 dark:bg-[#0b1b14]/95" aria-label="Next delivery details">
-            <div className="h-1.5 w-full bg-[linear-gradient(90deg,#0f7a45_0%,#ee8a2f_50%,#e0453a_100%)]" aria-hidden="true" />
-            <div className="p-5">
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400">Next Delivery</p>
-              <p className="font-display mt-2 text-4xl font-extrabold tabular-nums text-slate-950 dark:text-white">{deliverySchedule.deliveryDateStr}</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Delivery window · 10&nbsp;AM–1&nbsp;PM</p>
-              <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
-                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60"><IndianRupee className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" /></span><span>Priced below local market rates</span></div>
-                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/40"><Truck className="h-3.5 w-3.5 text-[#ee8a2f]" aria-hidden="true" /></span><span>Free delivery from ₹200</span></div>
-                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40"><MapPin className="h-3.5 w-3.5 text-[#e0453a]" aria-hidden="true" /></span><span>Halol &amp; Baska GIDC</span></div>
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
 

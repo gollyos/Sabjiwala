@@ -20,6 +20,19 @@
   font-family: var(--font-display-gu), var(--font-display), var(--font-gujarati), sans-serif;
 }
 
+@keyframes hero-slide-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-hero-slide-in {
+  animation: hero-slide-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-slide-in {
+    animation-duration: 0.01ms;
+  }
+}
+
 
 html {
   -webkit-tap-highlight-color: transparent;
