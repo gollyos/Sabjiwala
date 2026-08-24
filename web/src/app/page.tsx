@@ -5,10 +5,31 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Product, ProductVariant, Category } from '@/types/taji-tokri';
 import { useCart } from '@/context/CartContext';
-import { Clock, MapPin, Tag, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw, Phone, MessageCircle } from 'lucide-react';
+import { Clock, MapPin, ArrowRight, Leaf, Search, X, Apple, Salad, ChevronDown, HelpCircle, Truck, RotateCcw, Phone, MessageCircle, Sprout, IndianRupee, Home } from 'lucide-react';
 import { getDeliveryScheduleInfo } from '@/lib/deliveryHelper';
 import { ProductCard } from '@/components/ProductCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { TypewriterText } from '@/components/ui/TypewriterText';
+
+// Rotating headline phrases for the hero — core reasons to buy from Taji Tokri,
+// cycled in English, Gujarati & Hindi so every local customer understands them.
+const HERO_TYPED_PHRASES = [
+  'Cheaper Than Market Price.',
+  'બજાર કરતાં સસ્તા ભાવ!',
+  'बाज़ार से भी सस्ता भाव!',
+  '100% Free Home Delivery.',
+  '100% મફત હોમ ડિલિવરી!',
+  '100% फ्री होम डिलीवरी!',
+  'Farm to Home, Fresh Daily.',
+  'ખેતરથી સીધું તમારા ઘરે!',
+  'खेत से सीधे आपके घर तक!',
+];
+
+const HERO_USPS = [
+  { icon: IndianRupee, labelGu: 'સસ્તા ભાવ', labelEn: 'Cheaper Than Market' },
+  { icon: Truck, labelGu: 'મફત ડિલિવરી', labelEn: 'Free Home Delivery' },
+  { icon: Sprout, labelGu: 'ખેતરથી તાજું', labelEn: 'Farm to Home Fresh' },
+];
 
 const STORE_PHONE = process.env.NEXT_PUBLIC_STORE_PHONE || '';
 const STORE_PHONE_DISPLAY = STORE_PHONE ? STORE_PHONE.replace('+91', '+91 ') : '';
@@ -278,20 +299,37 @@ export default function HomePage() {
         <div className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-14 lg:grid-cols-[1fr_22rem] lg:items-center lg:px-8 lg:py-20">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-3 py-1.5 text-xs font-extrabold text-white shadow-xs backdrop-blur">
-              <Leaf className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Halol&rsquo;s Fresh Produce Service</span>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#ffe1ad]/50 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-white shadow-xs backdrop-blur">
+              <Home className="h-3.5 w-3.5 text-[#ffe1ad]" aria-hidden="true" />
+              <span>Halol&rsquo;s Own Fresh-Produce Brand, Not a Chain</span>
             </div>
             <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white text-wrap-balance sm:text-6xl lg:text-7xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
-              Market-Fresh Produce,
-              <span className="block text-[#ffe1ad]">Delivered Across Halol.</span>
+              Farm-Fresh Produce,
             </h1>
+            <p className="font-display mt-1.5 min-h-[2.3em] text-xl font-extrabold leading-tight text-[#ffe1ad] sm:min-h-[1.4em] sm:text-3xl lg:text-4xl [text-shadow:0_2px_24px_rgb(0_0_0/0.18)]">
+              <TypewriterText phrases={HERO_TYPED_PHRASES} />
+            </p>
             <p className="font-display mt-4 text-lg font-semibold leading-relaxed text-emerald-50 sm:text-xl" lang="gu">
-              તાજા ફળ, તાજું શાક — સીધું તમારા ઘર સુધી.
+              બજાર કરતાં સસ્તું, ઘરે બેઠાં મફત ડિલિવરી — સીધું ખેતરથી તમારા ઘર સુધી.
             </p>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/90 sm:text-base">
-              Order before 7:50&nbsp;PM. We procure against demand, pack the next morning, and deliver across Halol between 10&nbsp;AM–1&nbsp;PM. Pay by cash or UPI at your doorstep.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-50/80 sm:text-base">
+              Order before 7:50&nbsp;PM, get it by 10&nbsp;AM–1&nbsp;PM tomorrow. Cash or UPI at your door.
             </p>
+
+            {/* USP strip — bilingual (Gujarati + English), visible on both mobile & desktop */}
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {HERO_USPS.map(({ icon: Icon, labelGu, labelEn }) => (
+                <span
+                  key={labelEn}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-extrabold text-white backdrop-blur sm:text-base"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-[#ffe1ad] sm:h-5 sm:w-5" aria-hidden="true" />
+                  <span lang="gu">{labelGu}</span>
+                  <span className="font-normal text-white/80">({labelEn})</span>
+                </span>
+              ))}
+            </div>
+
             <div className="mt-7 flex flex-wrap gap-3">
               <a href="#catalog" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ee8a2f_0%,#e0453a_100%)] px-6 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgb(224_69_58/0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 Shop Today&rsquo;s Fresh Picks
@@ -300,6 +338,22 @@ export default function HomePage() {
               <Link href="/delivery-areas/halol" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/50 bg-white/10 px-5 py-3 text-sm font-extrabold text-white backdrop-blur transition-colors hover:bg-white/20">
                 Check Your Delivery Area
               </Link>
+            </div>
+
+            {/* Compact delivery snapshot — mobile & tablet only (desktop gets the full card aside) */}
+            <div className="mt-6 grid grid-cols-3 gap-2 lg:hidden">
+              <div className="rounded-2xl border border-white/25 bg-white/10 px-2.5 py-2.5 text-center backdrop-blur">
+                <Clock className="mx-auto h-4 w-4 text-[#ffe1ad]" aria-hidden="true" />
+                <p className="mt-1 text-[11px] font-bold leading-tight text-white">7:50&nbsp;PM cutoff</p>
+              </div>
+              <div className="rounded-2xl border border-white/25 bg-white/10 px-2.5 py-2.5 text-center backdrop-blur">
+                <IndianRupee className="mx-auto h-4 w-4 text-[#ffe1ad]" aria-hidden="true" />
+                <p className="mt-1 text-[11px] font-bold leading-tight text-white">Free above ₹200</p>
+              </div>
+              <div className="rounded-2xl border border-white/25 bg-white/10 px-2.5 py-2.5 text-center backdrop-blur">
+                <MapPin className="mx-auto h-4 w-4 text-[#ffe1ad]" aria-hidden="true" />
+                <p className="mt-1 text-[11px] font-bold leading-tight text-white">Halol &amp; Baska</p>
+              </div>
             </div>
           </div>
 
@@ -310,8 +364,8 @@ export default function HomePage() {
               <p className="font-display mt-2 text-4xl font-extrabold tabular-nums text-slate-950 dark:text-white">{deliverySchedule.deliveryDateStr}</p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Delivery window · 10&nbsp;AM–1&nbsp;PM</p>
               <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
-                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60"><Clock className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" /></span><span>7:50&nbsp;PM daily order cutoff</span></div>
-                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/40"><Tag className="h-3.5 w-3.5 text-[#ee8a2f]" aria-hidden="true" /></span><span>Free delivery from ₹200</span></div>
+                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60"><IndianRupee className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" /></span><span>Priced below local market rates</span></div>
+                <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/40"><Truck className="h-3.5 w-3.5 text-[#ee8a2f]" aria-hidden="true" /></span><span>Free delivery from ₹200</span></div>
                 <div className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40"><MapPin className="h-3.5 w-3.5 text-[#e0453a]" aria-hidden="true" /></span><span>Halol &amp; Baska GIDC</span></div>
               </div>
             </div>

@@ -20,18 +20,18 @@ export function BrandLogo({
 }: BrandLogoProps) {
   const sizeClasses = {
     sm: {
-      icon: 'w-7 h-7 text-xs',
-      iconPx: 28,
-      title: 'text-sm font-black',
-      tagline: 'text-[9px]',
-      gu: 'text-[9px] px-1 py-0.2',
-    },
-    md: {
       icon: 'w-9 h-9 text-sm',
       iconPx: 36,
-      title: 'text-base sm:text-lg font-black',
-      tagline: 'text-[10px] sm:text-xs',
-      gu: 'text-[10px] sm:text-xs px-1.5 py-0.5',
+      title: 'text-lg font-black',
+      tagline: 'text-[10px]',
+      gu: 'text-[10px] px-1 py-0.2',
+    },
+    md: {
+      icon: 'w-11 h-11 sm:w-12 sm:h-12 text-base',
+      iconPx: 48,
+      title: 'text-xl sm:text-2xl font-black',
+      tagline: 'text-xs sm:text-sm',
+      gu: 'text-xs sm:text-sm px-1.5 py-0.5',
     },
     lg: {
       icon: 'w-12 h-12 text-base',
