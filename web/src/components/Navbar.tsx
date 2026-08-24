@@ -32,7 +32,7 @@ export function Navbar() {
       <PromoCountdownBanner />
 
       {/* Main Navbar */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2 flex items-center justify-between gap-2 sm:gap-4">
 
         {/* Brand & Location */}
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
