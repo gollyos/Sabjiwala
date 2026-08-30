@@ -12,7 +12,7 @@ import { OrderSuccessModal } from '@/components/OrderSuccessModal';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tajitokri.com';
-const storePhone = process.env.NEXT_PUBLIC_STORE_PHONE || '+917069131300';
+const storePhone = '+917069131300';
 
 const manrope = Manrope({
   subsets: ['latin'],
