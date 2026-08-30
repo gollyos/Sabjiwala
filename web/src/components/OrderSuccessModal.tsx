@@ -13,7 +13,7 @@ export function OrderSuccessModal() {
   const isOnline = orderSuccessData.payment_method?.includes('online');
 
   // Construct direct WhatsApp message link
-  const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
+  const supportPhone = (process.env.NEXT_PUBLIC_STORE_PHONE || '+917069131300').replace(/\D/g, '');
   const deliveryDateStr = orderSuccessData.delivery_date
     ? new Date(orderSuccessData.delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
     : 'Tomorrow';

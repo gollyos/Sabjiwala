@@ -33,7 +33,7 @@ const HERO_USPS = [
   { icon: Sprout, labelGu: 'ખેતરથી તાજું', labelEn: 'Farm to Home Fresh' },
 ];
 
-const STORE_PHONE = process.env.NEXT_PUBLIC_STORE_PHONE || '';
+const STORE_PHONE = process.env.NEXT_PUBLIC_STORE_PHONE || '+917069131300';
 const STORE_PHONE_DISPLAY = STORE_PHONE ? STORE_PHONE.replace('+91', '+91 ') : '';
 // Frequently Asked Questions for Google SEO & Customer Guidance
 const FAQS_DATA = [

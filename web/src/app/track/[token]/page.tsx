@@ -16,7 +16,7 @@ export default function OrderTrackingPage() {
   const router = useRouter();
   const { mergeCartItems } = useCart();
   const token = params?.token as string;
-  const supportPhone = process.env.NEXT_PUBLIC_STORE_PHONE?.replace(/\D/g, '');
+  const supportPhone = (process.env.NEXT_PUBLIC_STORE_PHONE || '+917069131300').replace(/\D/g, '');
   const supportUrl = supportPhone
     ? `https://wa.me/${supportPhone}?text=Hi%20Taji Tokri%20Support,%20I%20need%20help%20with%20my%20order`
     : null;
